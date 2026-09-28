@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Connection } from "@agentfactory/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
-import { SKILL_EXCLUDE_PATTERN } from "../skill-paths";
+import { SKILL_EXCLUDE_PATTERNS } from "../skill-paths";
 import { platformGitEnv } from "../platform-git";
 
 const resolveScmConnectionMock = vi.fn();
@@ -292,7 +292,7 @@ describe("cloneIntoSandbox", () => {
     await cloneIntoSandbox(sandbox, "sandbox-1", target);
 
     const script = captured[2];
-    expect(script).toContain(SKILL_EXCLUDE_PATTERN);
+    for (const pattern of SKILL_EXCLUDE_PATTERNS) expect(script).toContain(pattern);
   });
 
   it("throws when the clone fails", async () => {

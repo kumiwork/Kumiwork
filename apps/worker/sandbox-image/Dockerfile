@@ -22,10 +22,10 @@ RUN corepack enable \
 
 WORKDIR /agent
 COPY package.json ./
-RUN npm install
-COPY run-turn-claude.ts ./
-COPY tool-results.ts ./
-COPY generate-repo-map.ts ./
+RUN npm install && npm cache clean --force
+COPY markers.ts remember-tool.ts tool-results.ts ./
+COPY run-turn-claude.ts generate-repo-map.ts ./
+COPY codex-events.ts remember-mcp.ts run-turn-codex.ts ./
 
 # Non-root: reuse the `node` user node:22-slim already ships (uid 1000) — the worker's
 # DockerSandboxProvider never grants this user privileges to escalate.

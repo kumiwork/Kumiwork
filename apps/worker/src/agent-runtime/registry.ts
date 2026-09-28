@@ -1,11 +1,9 @@
 import type { RuntimeKind } from "@agentfactory/core";
 import { claudeCodeRuntime } from "./claude-code-runtime";
+import { codexRuntime } from "./codex-runtime";
 import type { AgentRuntime } from "./types";
 
-// Exported (rather than a private module constant) so registry.test.ts can register a stub
-// second runtime to exercise multi-runtime dispatch — production code never pushes to this
-// beyond the fixed list below; there is exactly one real adapter until a second one ships.
-export const runtimes: AgentRuntime[] = [claudeCodeRuntime]; // future: push a second adapter here
+export const runtimes: AgentRuntime[] = [claudeCodeRuntime, codexRuntime];
 
 export function getDefaultAgentRuntime(): AgentRuntime {
   return runtimes[0]!;
