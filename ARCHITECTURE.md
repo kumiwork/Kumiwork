@@ -7,11 +7,12 @@
 > `content_blobs`, and the context-retrieval tables (`team_context_items`, `context_chunks`,
 > `task_context_items`, `task_context_chunks`, `run_context_retrievals`, `repo_maps`, `codebase_settings`) — see §2.7.
 > `apps/worker` is a real BullMQ/Redis consumer that provisions a `DockerSandboxProvider`
-> container per session and runs the Claude Agent SDK **inside** it
-> (`apps/worker/sandbox-image/run-turn.ts`) with `permissionMode: "bypassPermissions"` — i.e. the
-> SandboxProvider port (§4) is real, but there is no `AgentRuntime` port/adapter yet (§1) and no
+> container per session and runs the agent SDK **inside** it with full tool access — the Claude Agent SDK
+> (`apps/worker/sandbox-image/run-turn-claude.ts`, `permissionMode: "bypassPermissions"`) or the OpenAI Codex SDK
+> (`run-turn-codex.ts`), picked by the selected model's provider. The SandboxProvider (§4) and `AgentRuntime` (§1)
+> ports are real, but there is no
 > policy engine gating tool calls, no budget/`usage_records` enforcement, and only a stub
-> `resolveCredentials` (the platform key, kept out of sandboxes behind a model proxy, §9) — those are M1's
+> `resolveCredentials` (one platform key per provider, kept out of sandboxes behind a model proxy, §9) — those are M1's
 > unfinished half, tracked in §6. `skills` and `connections` are real and DB-backed, not mock:
 > skills are materialized into the sandbox and loaded via the SDK's `skills` option; GitHub is a
 > real GitHub App (`ScmProvider`, clone → `agent/<task-ref>-<title-slug>-<token>` branch → draft PR); Jira is a real
@@ -49,7 +50,7 @@ Five ports carry this design, one per "we might swap this later" in the requirem
 
 | Port | Adapters | Swap it because |
 |---|---|---|
-| `AgentRuntime` (§1) | `ClaudeCodeRuntime` → others | the SDK-agnostic requirement |
+| `AgentRuntime` (§1) | `ClaudeCodeRuntime`, `CodexRuntime` → others | the SDK-agnostic requirement |
 | `SandboxProvider` (§4) | `DockerSandboxProvider` → Fly/E2B/gVisor | Docker isn't a security boundary at multi-tenant scale |
 | `RunDriver` (§4) | `BullMqRunDriver` → `TemporalRunDriver` | durable orchestration at M5 |
 | `ScmProvider` (§5) | GitHub → Bitbucket/GitLab | "maybe other interfaces like Bitbucket" |
@@ -91,9 +92,12 @@ type RunEvent =
 ```
 
 **Adapters**
-- `ClaudeCodeRuntime` — first and only implementation. Claude Agent SDK in headless/streaming mode inside a sandbox.
+- `ClaudeCodeRuntime` — Claude Agent SDK in headless/streaming mode inside a sandbox. Runs every `anthropic` model.
   Maps our skills → its skill mechanism, our MCP specs → its MCP config, our `ToolPolicy` → its permission modes,
   and its permission callback → our `permission_request` event.
+- `CodexRuntime` — OpenAI Codex SDK inside the same sandbox image. Runs every `openai` model. Skills go to
+  `.agents/skills`, the `remember` tool is a stdio MCP server, and Codex items are translated into our runtime
+  events (`sandbox-image/codex-events.ts`). It declares no `repoMap`, so repo maps stay on Claude.
 - Later: `OpenAIAgentsRuntime`, `PlainLLMRuntime` (no filesystem — `capabilities().supportsFilesystem = false`,
   so the orchestrator skips workspace provisioning).
 
@@ -105,12 +109,15 @@ type RunEvent =
 4. Acceptance test for the abstraction: a second adapter must be addable without touching `sessions`, `agents`, or
    any API route. Building a thin second adapter in M6 is the proof, not an afterthought.
 
-**Current state: the port itself isn't built yet.** `apps/worker/src/agent-runtime.ts` calls the Claude Agent SDK
-directly (inside the sandbox, via `apps/worker/sandbox-image/run-turn.ts`) rather than through an `AgentRuntime`
-interface — there is no `ClaudeCodeRuntime` class, no `capabilities()`, and the `RunInput.tools`/`budget` fields
-aren't enforced (§6). What *is* real and behind a port today is `SandboxProvider` (§4): the worker provisions a
-Docker container per session and execs the SDK call into it. Introducing the literal `AgentRuntime` interface above
-is still open work, not a rename of something that already exists.
+**Current state: the port is real, the policy half is not.** `apps/worker/src/agent-runtime/` holds the
+`AgentRuntime` interface (`types.ts`, with `capabilities()`, `runTurn()` and an optional `repoMap`), the two
+adapters, and `registry.ts`. The model decides the runtime: `MODEL_CATALOG` entries carry a `provider`
+(`ModelSpec.family`), and `runtimeForModel` in `packages/core/src/models.ts` maps it to a `RuntimeKind`. The worker
+asks a `ModelSelector` (`model-selection.ts`, today the task override or the agent default) for the model, then runs
+the matching runtime; a future automatic selector can pick any provider without touching the rest. A resume is only
+attempted when the previous run used the same sandbox and the same runtime (`resume-candidate.ts`), and escalation
+ladders are per provider, so a run never switches provider mid-session. What is still missing: `RunInput` has no
+`tools`/`budget` fields and nothing enforces `ToolPolicy` (§6).
 
 ---
 
@@ -423,7 +430,7 @@ per-trusted-org host is honest and sufficient.
 - Workspace = clone at `baseRef` → work on `agent/<task-ref>-<title-slug>-<token>` branch → push → PR. Resume re-clones the branch;
   disk is disposable.
 - GitHub secrets are injected as **short-lived, run-scoped tokens** (App installation tokens), never long-lived
-  PATs — real today. The Anthropic API key never enters a sandbox: the agent reaches the model through the
+  PATs — real today. Provider API keys never enter a sandbox: the agent reaches the model through the
   host-side model proxy with a short-lived run token (see "How the worker and the sandbox communicate" below, and
   §9). `resolveCredentials` behind that proxy is still a stub returning the platform key.
 - Every event is persisted *and* published — the browser streams live, and a refresh replays from Postgres (Telegram
@@ -468,7 +475,7 @@ container: nothing inside the container listens on a port, and its main process 
 │   token → real key                   │               │   (ANTHROPIC_BASE_URL/_API_KEY)      │
 └────────┬─────────────────────────────┘               └──────────────────────────────────────┘
          ▼
-   api.anthropic.com (/v1/messages only)
+   api.anthropic.com (/v1/messages only), api.openai.com (/v1/responses only)
 ```
 
 **Who does what in a run.** The worker decides and orchestrates; the sandbox executes. The table follows one run
@@ -485,7 +492,7 @@ job in order. "Host" means the worker process; "sandbox" means inside the sessio
 | 7 | Get the repo map (cached, or generated by the SDK in the sandbox through the proxy) | Host decides; generation runs in the sandbox | `repo-map.ts`, `ClaudeCodeRuntime.repoMap` → `sandbox-image/generate-repo-map.ts` |
 | 8 | Retrieve context and compose the system prompt | Host | `context-retrieval.ts`, `prompt-composition.ts` (`composeSystemPrompt`) |
 | 9 | Issue a run token for the model proxy | Host | `sandbox-model-access.ts` (`issueSandboxModelCredential`), `run-credentials.ts` |
-| 10 | Start the turn: exec the turn script with `SYSTEM_PROMPT`, `USER_TEXT`, `MODEL_ID`, `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY` (the run token), etc. | Host starts it; the script runs in the sandbox | `agent-runtime/claude-code-runtime.ts` (`runTurn`) → `sandbox-image/run-turn-claude.ts` |
+| 10 | Start the turn: exec the turn script with `SYSTEM_PROMPT`, `USER_TEXT`, `MODEL_ID`, `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY` (the run token), etc. | Host starts it; the script runs in the sandbox | `agent-runtime/claude-code-runtime.ts` (`runTurn`) → `sandbox-image/run-turn-claude.ts`, or `codex-runtime.ts` (`MODEL_BASE_URL`, `MODEL_TOKEN`) → `run-turn-codex.ts` for OpenAI models |
 | 11 | Agent loop: the SDK calls the model, runs tools (read/edit files, bash) in `/workspace`, repeats until done | Sandbox | `run-turn-claude.ts` (`query()`, `bypassPermissions`, the `remember` MCP tool) |
 | 12 | Every model request leaves the sandbox for the proxy, which checks the token, swaps in the key and forwards | Host | `model-proxy.ts`, `resolveCredentials` in `sandbox-model-access.ts` |
 | 13 | While the agent works, the script prints `__EVENT__` lines; the host reads them live and stores them as events | Sandbox writes; host parses and persists | `run-turn-claude.ts` → `demux()` in `docker-sandbox-provider.ts` → `agent-runtime/marker-protocol.ts` (`readAgentTurnOutput`) → `onEvent` in `worker.ts` (`createEvent`; `memory_write` goes to `writeMemoryEntry`, encrypted) |
@@ -576,8 +583,9 @@ receiver and no `triggers` table (§2.6); Jira sync currently happens by the pla
 
 ## 6. Autonomy, safety, cost
 
-**Status: the design constraint below is not yet enforced.** `apps/worker/sandbox-image/run-turn.ts` runs the SDK
-with `permissionMode: "bypassPermissions"` and no `canUseTool` gate — `scm-provider.ts:214` states outright that
+**Status: the design constraint below is not yet enforced.** `apps/worker/sandbox-image/run-turn-claude.ts` runs the SDK
+with `permissionMode: "bypassPermissions"` and no `canUseTool` gate (`run-turn-codex.ts` likewise runs Codex with
+`danger-full-access` and `approvalPolicy: "never"`) — `scm-provider.ts:214` states outright that
 "the agent has full unrestricted tool access." `agents.toolPolicy` exists as a schema column
 (`{defaultDecision: "deny", rules: []}` in seed data) but nothing reads it to gate a tool call. The
 `policy_decision` `RunEvent` variant exists in `packages/core/src/events.ts` but is never emitted. This section
@@ -657,7 +665,7 @@ Milestones are sequential build phases, referred to elsewhere in this doc as M0�
 | # | Phase | Deliverable | Proves | Status |
 |---|---|---|---|---|
 | M0 | Foundation | TS monorepo (`apps/web`, `apps/worker`, `packages/core`), auth, orgs, teams/agents CRUD, schema | Nothing yet — scaffolding | **Done** |
-| M1 | First working agent | Web session → `DockerSandboxProvider` → `ClaudeCodeRuntime` (no repo) → streamed events, persisted + replayable, **with policy engine, budget caps and credential resolution live** | The runtime port and event log | **Half done.** Sandbox + streamed/persisted/replayable events are real. No `AgentRuntime` port (§1), no policy engine, no budget caps, no `resolveCredentials` (§6, §9) — the safety half is still open. |
+| M1 | First working agent | Web session → `DockerSandboxProvider` → `ClaudeCodeRuntime` (no repo) → streamed events, persisted + replayable, **with policy engine, budget caps and credential resolution live** | The runtime port and event log | **Half done.** Sandbox + streamed/persisted/replayable events are real. `AgentRuntime` port (§1) is real; no policy engine, no budget caps, no `resolveCredentials` (§6, §9) — the safety half is still open. |
 | M2 | Coding agents | GitHub App: install, repo binding, clone, `agent/*` branch, draft PR; blast-radius limits enforced; `Code reviewer` mock works end-to-end | Coding agents are real and contained | **Mostly done.** GitHub App + clone + branch + draft PR are real (§5). "Contained" currently means GitHub App scope only — the policy-engine layer from M1 is still missing, so blast-radius enforcement is one layer deep, not two (§6). |
 | M3 | Context | Skills library + team shared context → context assembly pipeline | §3 | **Done**, and grew beyond the original scope: task-scoped context (not just team-scoped) and a repo-map pipeline shipped alongside it (§2.7). |
 | M4 | Channels | Slack adapter (thread ↔ session) | Channel port | **Partial.** Telegram done; Slack not started. |
@@ -701,12 +709,13 @@ proxy (`apps/worker/src/model-proxy.ts`); each agent turn and repo-map generatio
 per-run token bound to its org and model provider (`run-credentials.ts`), and reaches the model API only through
 that proxy, which swaps the token for `resolveCredentials(orgId, provider)`'s key and logs every request with its
 org and run. The proxy is provider-aware: `MODEL_PROVIDERS` in `model-proxy.ts` maps each `ModelSpec.family` to its
-upstream, allowed paths and key header, routed by prefix (`/anthropic/v1/messages`). The worker hands each runtime a
+upstream, allowed paths and key header, routed by prefix (`/anthropic/v1/messages`, `/openai/v1/responses`). The worker hands each runtime a
 neutral `ModelEndpoint` (`{ baseUrl, token }`) and the adapter maps it onto its SDK's own settings
-(`ClaudeCodeRuntime` sets `ANTHROPIC_BASE_URL`/`ANTHROPIC_API_KEY`), so a second runtime needs a provider entry, a
+(`ClaudeCodeRuntime` sets `ANTHROPIC_BASE_URL`/`ANTHROPIC_API_KEY`; `CodexRuntime` registers the proxy as a custom
+Codex model provider), so a second runtime needs a provider entry, a
 platform key variable, and its own mapping, never a worker change. Repo-map generation follows the same rule: it
 uses the default runtime's optional `repoMap` generator (`AgentRuntime.repoMap`, which declares its model and
-therefore its provider), so `repo-map.ts` never names an SDK. Only `anthropic` exists today. That
+therefore its provider), so `repo-map.ts` never names an SDK. `anthropic` and `openai` exist today; a run token is bound to one provider and rejected on the other's route. That
 `resolveCredentials` (`sandbox-model-access.ts`) is a stub returning the platform key for the provider from the
 worker's environment. There is no BYO-key connection kind, no per-run metering into `usage_records`, and no
 budget check before dispatch; the proxy is the intended place for all three. Design:

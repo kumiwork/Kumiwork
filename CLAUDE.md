@@ -57,10 +57,10 @@ ARCHITECTURE.md's status header for the full picture.
 
 **What's still missing matters for anything touching runs or tool access**: there is no policy engine gating tool
 calls — the sandbox currently runs the SDK with `permissionMode: "bypassPermissions"` and full, unrestricted tool
-access — and no budget/cost enforcement. The platform Anthropic key never enters a sandbox: agent turns and repo-map
+access — and no budget/cost enforcement. Provider API keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) never enter a sandbox: agent turns and repo-map
 generation reach the model through a host-side proxy (`apps/worker/src/model-proxy.ts`) using a short-lived per-run
 token, and `resolveCredentials(orgId)` in `apps/worker/src/sandbox-model-access.ts` is a stub that still returns the
-single platform key from `process.env` (no BYO keys, no metering). Don't assume a `PolicyEngine`, budget caps, or
+platform key for the run's provider from `process.env` (no BYO keys, no metering). Don't assume a `PolicyEngine`, budget caps, or
 BYO-key credential resolution exist anywhere in the code just because `agents.toolPolicy` is a schema column — see
 ARCHITECTURE.md §6.
 
@@ -98,7 +98,7 @@ Read ARCHITECTURE.md before making structural decisions. Key constraints — not
 design, not current behavior** (ARCHITECTURE.md §1, §6 have the gap in detail; don't grep for `PolicyEngine` or a
 literal `AgentRuntime` class expecting to find one):
 
-- **The backend must be agnostic to the agent SDK.** Everything agent-execution-related is meant to go behind an `AgentRuntime` port interface, with `ClaudeCodeRuntime` as the first adapter. **Not built yet** — `apps/worker/src/agent-runtime.ts` calls the Claude Agent SDK directly (inside the sandbox); there is no `AgentRuntime` interface or adapter class. What *is* real is `SandboxProvider` (`DockerSandboxProvider`). Never let provider types reach the DB or API layer regardless.
+- **The backend must be agnostic to the agent SDK.** Agent execution goes through the `AgentRuntime` port in `apps/worker/src/agent-runtime/`, with two adapters: `ClaudeCodeRuntime` (Claude Agent SDK) and `CodexRuntime` (OpenAI Codex SDK). The selected model decides the runtime: each `MODEL_CATALOG` entry has a `provider`, and `runtimeForModel` maps it to a `RuntimeKind`. The worker picks the model through a `ModelSelector` (`apps/worker/src/model-selection.ts`), the seam for future automatic model selection. Judges, the memory retrospective and repo-map generation still run on Claude only. Never let provider types reach the DB or API layer.
 - **No approval gates.** Runs are never paused waiting for human input — this part holds. But the intended enforcement mechanism, where authorization is decided at config time via `ToolPolicy` and a `PolicyEngine` answers synchronously and emits a `policy_decision` event for audit, **does not exist**. The sandbox currently runs with `permissionMode: "bypassPermissions"` and unrestricted tool access.
 - **Run state lives in Postgres, never in closures.** The explicit state machine (`queued → provisioning → running → finalizing → done | failed | cancelled`) on `runs.status` is what will make a future Temporal migration mechanical. Real.
 - **`shared_context` is always injected; `context_items` are retrieved on demand.** The 64 KB cap on `teams.sharedContext` is enforced both at the API layer and as a constraint — it exists because this text goes into every prompt. Real, and the retrieval pipeline (`team_context_items`/`context_chunks`, plus a task-scoped equivalent) is fully built with pgvector.
@@ -111,4 +111,4 @@ Do not use code comments in this repo. Write code and identifiers clear enough t
 ## `packages/shared` Components
 
 These are plain Tailwind components (no shadcn dependency yet). Use them for all new UI:
-`Button` (variant primary/secondary), `Card`, `CardLink`, `Badge`, `TextInput`, `Textarea`, `PageHeader`, `Breadcrumb`, `TooltipBubble`, `Truncate`, `EmptyState`.
+`Button` (variant primary/secondary), `Card`, `GroupedSelect`, `CardLink`, `Badge`, `TextInput`, `Textarea`, `PageHeader`, `Breadcrumb`, `TooltipBubble`, `Truncate`, `EmptyState`.
