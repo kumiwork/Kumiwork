@@ -6,6 +6,9 @@ import { TASK_DOCUMENT_EXCLUDE_PATTERN } from "./task-document-paths";
 import { SKILL_EXCLUDE_PATTERN } from "./skill-paths";
 import { PYTHON_VENV_EXCLUDE_PATTERN } from "./dependency-setup";
 import { platformGitEnv, refuseUnsafeGitConfig, unsafeGitConfigError, unsafeGitConfigKeys } from "./platform-git";
+import { keepTail, maskSecrets } from "./secret-masking";
+
+const MAX_CLONE_ERROR_DETAIL_CHARS = 2_000;
 
 export type { CloneTarget, OpenedPullRequest, PullRequestFeedbackComment };
 export type GitHubIssue = ScmIssue;
@@ -189,10 +192,12 @@ else
 fi`;
 
   let stdout = "";
+  let stderr = "";
   for await (const chunk of sandboxProvider.exec(sandboxId, ["sh", "-c", script], {
     env: { ...platformGitEnv(), CLONE_URL: target.cloneUrl, REMOTE_URL: target.remoteUrl, BRANCH_NAME: target.branch },
   })) {
     if (chunk.stream === "stdout") stdout += chunk.data;
+    else stderr += chunk.data;
   }
 
   if (stdout.includes("REPO_MISMATCH")) {
@@ -203,7 +208,8 @@ fi`;
   }
   const succeeded = stdout.includes("CLONE_OK") || stdout.includes("ALREADY_CLONED");
   if (!succeeded) {
-    throw new Error("Failed to clone repository into sandbox workspace");
+    const gitOutput = keepTail(maskSecrets(stderr, [target.cloneUrl]).trim(), MAX_CLONE_ERROR_DETAIL_CHARS);
+    throw new Error(`Failed to clone repository into sandbox workspace${gitOutput ? `: ${gitOutput}` : ""}`);
   }
 }
 

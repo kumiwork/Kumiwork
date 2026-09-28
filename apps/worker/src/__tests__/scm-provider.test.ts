@@ -305,6 +305,45 @@ describe("cloneIntoSandbox", () => {
     );
   });
 
+  it("includes git's stderr in the clone failure error", async () => {
+    const sandbox = fakeSandbox([
+      { stream: "stderr", data: "Cloning into '/workspace'...\n" },
+      { stream: "stderr", data: "remote: Invalid username or token.\nfatal: Authentication failed\n" },
+      { stream: "stdout", data: "CLONE_FAILED\n" },
+    ]);
+    await expect(cloneIntoSandbox(sandbox, "sandbox-1", target)).rejects.toThrow(
+      "Failed to clone repository into sandbox workspace: Cloning into '/workspace'...\n" +
+        "remote: Invalid username or token.\nfatal: Authentication failed",
+    );
+  });
+
+  it("redacts the clone token when git echoes the clone url in stderr", async () => {
+    const token = `ghs_${"a".repeat(36)}`;
+    const cloneUrl = `https://x-access-token:${token}@github.com/acme-org/platform.git`;
+    const sandbox = fakeSandbox([
+      { stream: "stderr", data: `fatal: unable to access '${cloneUrl}/': Could not resolve host: github.com\n` },
+      { stream: "stdout", data: "CLONE_FAILED\n" },
+    ]);
+
+    const error = await cloneIntoSandbox(sandbox, "sandbox-1", { ...target, cloneUrl }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toContain("Could not resolve host: github.com");
+    expect((error as Error).message).not.toContain(token);
+  });
+
+  it("keeps only the tail of very long clone stderr", async () => {
+    const sandbox = fakeSandbox([
+      { stream: "stderr", data: `${"x".repeat(10_000)}\nfatal: the real reason\n` },
+      { stream: "stdout", data: "CLONE_FAILED\n" },
+    ]);
+
+    const error = (await cloneIntoSandbox(sandbox, "sandbox-1", target).catch((e: Error) => e)) as Error;
+
+    expect(error.message).toContain("fatal: the real reason");
+    expect(error.message.length).toBeLessThan(3_000);
+  });
+
   it("passes the clone url, remote url, and branch as env vars, not argv", async () => {
     let capturedEnv: Record<string, string> | undefined;
     const sandbox: SandboxProvider = {
