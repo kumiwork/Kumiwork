@@ -1359,6 +1359,8 @@ function ErrorNotice({ messages }: { messages: string[] }) {
         color: "#e8a44a",
         fontSize: 12,
         lineHeight: 1.5,
+        whiteSpace: "pre-wrap",
+        overflowWrap: "anywhere",
       }}
     >
       {messages.map((message, i) => (
