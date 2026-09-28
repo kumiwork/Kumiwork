@@ -17,9 +17,6 @@ interface ReceivedRequest {
   body: string;
 }
 
-const STUB_PROVIDER: string = "stubai";
-const stubProvider = STUB_PROVIDER as ModelProvider;
-
 let upstream: Server;
 let upstreamUrl: string;
 let received: ReceivedRequest[];
@@ -44,14 +41,7 @@ function close(server: Server): Promise<void> {
 function providersWithUpstream(url: string): Record<string, ModelProviderProfile> {
   return {
     anthropic: { ...MODEL_PROVIDERS.anthropic, upstreamBaseUrl: url },
-    [STUB_PROVIDER]: {
-      upstreamBaseUrl: url,
-      allowedPaths: new Set(["/v1/responses"]),
-      healthPaths: new Set(),
-      attachKey: (headers, apiKey) => {
-        headers.authorization = `Bearer ${apiKey}`;
-      },
-    },
+    openai: { ...MODEL_PROVIDERS.openai, upstreamBaseUrl: url },
   };
 }
 
@@ -160,24 +150,24 @@ describe("model proxy", () => {
 
   it("routes each provider to its own paths and key placement", async () => {
     await startProxy();
-    const token = issue({ provider: stubProvider });
+    const token = issue({ provider: "openai" });
 
-    const res = await post("/stubai/v1/responses", undefined, { headers: { authorization: `Bearer ${token}` } });
+    const res = await post("/openai/v1/responses", undefined, { headers: { authorization: `Bearer ${token}` } });
 
     expect(res.status).toBe(200);
     expect(received[0]!.path).toBe("/v1/responses");
-    expect(received[0]!.headers.authorization).toBe("Bearer sk-stubai-real");
+    expect(received[0]!.headers.authorization).toBe("Bearer sk-openai-real");
     expect(received[0]!.headers["x-api-key"]).toBeUndefined();
   });
 
   it("rejects a token on another provider's route", async () => {
     await startProxy();
 
-    const anthropicTokenOnStub = await post("/stubai/v1/responses", issue({ provider: "anthropic" }));
-    const stubTokenOnAnthropic = await post("/anthropic/v1/messages", issue({ provider: stubProvider }));
+    const anthropicTokenOnOpenai = await post("/openai/v1/responses", issue({ provider: "anthropic" }));
+    const openaiTokenOnAnthropic = await post("/anthropic/v1/messages", issue({ provider: "openai" }));
 
-    expect(anthropicTokenOnStub.status).toBe(401);
-    expect(stubTokenOnAnthropic.status).toBe(401);
+    expect(anthropicTokenOnOpenai.status).toBe(401);
+    expect(openaiTokenOnAnthropic.status).toBe(401);
     expect(received).toHaveLength(0);
   });
 
@@ -210,8 +200,9 @@ describe("model proxy", () => {
     "/anthropic/v1/complete",
     "/anthropic/v1/messages/batches",
     "/anthropic/api/oauth/profile",
-    "/stubai/v1/messages",
-    "/openai/v1/responses",
+    "/openai/v1/messages",
+    "/openai/v1/chat/completions",
+    "/openai/v1/models",
     "/constructor/v1/messages",
     "/anthropic",
     "/",
@@ -229,7 +220,7 @@ describe("model proxy", () => {
 
     const head = await fetch(`${proxyUrl}/anthropic/api/hello`, { method: "HEAD" });
     const post = await fetch(`${proxyUrl}/anthropic/api/hello`, { method: "POST" });
-    const otherProvider = await fetch(`${proxyUrl}/stubai/api/hello`, { method: "HEAD" });
+    const otherProvider = await fetch(`${proxyUrl}/openai/api/hello`, { method: "HEAD" });
 
     expect(head.status).toBe(200);
     expect(post.status).toBe(404);

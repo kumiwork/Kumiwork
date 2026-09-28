@@ -32,6 +32,13 @@ describe("resolveCredentials", () => {
     expect(resolveCredentials(3, "anthropic")).toBe("sk-platform");
   });
 
+  it("returns each provider's own platform key", () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-platform");
+    vi.stubEnv("OPENAI_API_KEY", "sk-openai-platform");
+    expect(resolveCredentials(3, "anthropic")).toBe("sk-ant-platform");
+    expect(resolveCredentials(3, "openai")).toBe("sk-openai-platform");
+  });
+
   it("returns nothing for a provider with no configured key", () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-platform");
     expect(resolveCredentials(3, "stubai" as ModelProvider)).toBeUndefined();

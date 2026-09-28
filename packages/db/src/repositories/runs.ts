@@ -154,6 +154,7 @@ export interface ResumeCandidate {
   // The sandboxId active when this ref was recorded — undefined for a run that predates this
   // column, which correctly never matches any real sandboxId (see the schema column's comment).
   sandboxId?: string;
+  model?: ModelSpec;
 }
 
 // Finds the provider session a run *might* resume from: the most recent other run on this
@@ -172,13 +173,17 @@ export async function getLatestResumeCandidate(
   excludeRunId: number,
 ): Promise<ResumeCandidate | undefined> {
   const [row] = await db
-    .select({ providerSessionRef: runs.providerSessionRef, sandboxId: runs.sandboxId })
+    .select({ providerSessionRef: runs.providerSessionRef, sandboxId: runs.sandboxId, model: runs.model })
     .from(runs)
     .where(and(eq(runs.sessionId, sessionId), ne(runs.id, excludeRunId), isNotNull(runs.providerSessionRef)))
     .orderBy(desc(runs.createdAt))
     .limit(1);
   if (!row?.providerSessionRef) return undefined;
-  return { providerSessionRef: row.providerSessionRef, sandboxId: row.sandboxId ?? undefined };
+  return {
+    providerSessionRef: row.providerSessionRef,
+    sandboxId: row.sandboxId ?? undefined,
+    model: row.model ?? undefined,
+  };
 }
 
 // The Context tab's read. Selects ONLY the prompt columns — never the full row —

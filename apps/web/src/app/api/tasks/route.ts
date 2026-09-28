@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server";
 import { createTask, createTaskContextItem, insertContentBlob, listTasks } from "@agentfactory/db";
 import { enqueueRepoMapWarmJob, enqueueTaskContextIngestJob } from "@agentfactory/queue";
-import { isValidModelId } from "@agentfactory/core";
+import { buildModelSpec, isValidModelId } from "@agentfactory/core";
 import type { ExternalAttachment } from "@agentfactory/integrations";
 import { createBlobStore } from "@agentfactory/storage";
 import { requireAuthContext } from "@/server/auth";
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     assigneeAgentId: body.assigneeAgentId ?? undefined,
     area: body.area ?? undefined,
     codebase: body.codebase ?? undefined,
-    model: body.model ?? undefined,
+    model: body.model !== undefined ? buildModelSpec(body.model.id) : undefined,
     externalRef: body.externalRef ?? undefined,
   });
 

@@ -194,6 +194,20 @@ describe("runs repository", () => {
     });
   });
 
+  it("returns the model the candidate run executed on", async () => {
+    const session = await setupSession();
+    const run1 = await createRun(session.id);
+    const model = { family: "anthropic" as const, id: "claude-sonnet-5", maxTokens: 8192 };
+    await updateRunStatus(run1.id, "done", { providerSessionRef: "ref-1", sandboxId: "sandbox-1", model });
+    const run2 = await createRun(session.id);
+
+    await expect(getLatestResumeCandidate(session.id, run2.id)).resolves.toEqual({
+      providerSessionRef: "ref-1",
+      sandboxId: "sandbox-1",
+      model,
+    });
+  });
+
   it("returns undefined when no other run has a provider session ref", async () => {
     const session = await setupSession();
     const run = await createRun(session.id);

@@ -20,7 +20,14 @@ import {
   type SandboxTeardownJobData,
   type TaskContextIngestJobData,
 } from "@agentfactory/queue";
-import { type ModelSpec, type PromptSegment, type Session, buildModelSpec, formatSharedContextForPrompt } from "@agentfactory/core";
+import {
+  type ModelSpec,
+  type PromptSegment,
+  type Session,
+  buildModelSpec,
+  formatSharedContextForPrompt,
+  runtimeForModel,
+} from "@agentfactory/core";
 import {
   clearSessionSandbox,
   createEvent,
@@ -55,6 +62,8 @@ import { DockerCacheVolumeStore } from "./sandbox/docker-cache-volumes";
 import { DockerSandboxProvider } from "./sandbox/docker-sandbox-provider";
 import { InsufficientCreditError, PromptTooLongError } from "./agent-runtime/errors";
 import { getAgentRuntime } from "./agent-runtime/registry";
+import { explicitModelSelector } from "./model-selection";
+import { resumableSessionRef } from "./resume-candidate";
 import type { AgentTurnResult } from "./agent-runtime/types";
 import {
   PLATFORM_PREAMBLE,
@@ -199,10 +208,12 @@ const runWorker = new Worker<RunJobData>(
       const session = await getSession(run.sessionId);
       const agent = session ? await getAgent(session.agentId) : undefined;
       if (!session || !agent) throw new Error(`Run ${runId} has no session/agent to work with`);
-      const runtime = getAgentRuntime(agent.runtimeKind);
+      const task = await getTaskBySessionId(session.id);
+      const triggeringMessage = run.triggeringMessageId ? await getMessage(run.triggeringMessageId) : undefined;
+      const { model: selectedModel } = await explicitModelSelector.select({ agent, task, triggeringMessage });
+      const runtime = getAgentRuntime(runtimeForModel(selectedModel));
       const caps = runtime.capabilities();
 
-      const task = await getTaskBySessionId(session.id);
       const prRef = task ? parsePullRequestReferenceAcrossProviders(task.description) : undefined;
       const repoFullNameForImage = prRef?.repoFullName ?? task?.codebase ?? undefined;
 
@@ -220,7 +231,6 @@ const runWorker = new Worker<RunJobData>(
 
       await updateRunStatus(runId, "running");
 
-      const triggeringMessage = run.triggeringMessageId ? await getMessage(run.triggeringMessageId) : undefined;
       // Resume is only valid if the CURRENT sandbox is the one the candidate ref was actually
       // recorded against — comparing sandboxId snapshots taken before/after just THIS run's own
       // ensureSandbox call is not equivalent and was the bug: it only catches a recreation that
@@ -230,9 +240,11 @@ const runWorker = new Worker<RunJobData>(
       // long gone). When invalid, skip resume entirely and reconstruct from message history
       // instead of attempting (and failing) to resume a conversation that no longer exists
       // anywhere.
-      const resumeCandidate = await getLatestResumeCandidate(session.id, runId);
-      const resumeIsValid = resumeCandidate !== undefined && resumeCandidate.sandboxId === sandboxId;
-      const resumeSessionRef = resumeIsValid ? resumeCandidate.providerSessionRef : undefined;
+      const resumeSessionRef = resumableSessionRef(await getLatestResumeCandidate(session.id, runId), {
+        sandboxId,
+        runtimeKind: runtime.kind,
+      });
+      const resumeIsValid = resumeSessionRef !== undefined;
       const priorConversationText = resumeIsValid
         ? ""
         : formatPriorConversationForPrompt(await listMessages(session.id), run.triggeringMessageId ?? -1);
@@ -653,7 +665,7 @@ const runWorker = new Worker<RunJobData>(
       });
       mark("prompt composed - handing off to model");
 
-      attemptModel = task?.model ?? agent.model;
+      attemptModel = selectedModel;
       let turnResult!: AgentTurnResult;
       const stopTyping = startTypingIndicator(agent.orgId, session);
       // Re-send a reassurance message to Telegram every 25 seconds for as long as the run is
