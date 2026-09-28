@@ -8,6 +8,12 @@ const en = {
     loadError: "Couldn't load data from the server. Try refreshing the page.",
     automatic: "Automatic",
   },
+  models: {
+    provider: {
+      anthropic: "Anthropic",
+      openai: "OpenAI",
+    },
+  },
   nav: {
     teams: "Teams",
     tasks: "Tasks",

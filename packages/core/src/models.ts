@@ -11,6 +11,8 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
   { id: "claude-sonnet-5", label: "Claude Sonnet 5", provider: "anthropic" },
   { id: "claude-opus-5", label: "Claude Opus 5", provider: "anthropic" },
   { id: "claude-fable-5", label: "Claude Fable 5", provider: "anthropic" },
+  { id: "gpt-6-luna", label: "GPT-6 Luna", provider: "openai" },
+  { id: "gpt-6-sol", label: "GPT-6 Sol", provider: "openai" },
 ];
 
 export const DEFAULT_MODEL_ID = "claude-sonnet-5";
