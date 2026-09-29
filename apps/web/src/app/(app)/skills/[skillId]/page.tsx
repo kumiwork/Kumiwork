@@ -10,10 +10,18 @@ import { relativeTime } from "@/lib/relative-time";
 import { ArrowLeftIcon, EditIcon } from "@/lib/icons";
 import { DeleteSkillButton } from "@/components/DeleteSkillButton";
 import { SkillAgentsPicker, type SkillAssignment } from "@/components/SkillAgentsPicker";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 
 interface DraftDetail {
   version: SkillVersion;
   instructions: string;
+}
+
+interface SkillDetail {
+  skill: Skill;
+  versions: SkillVersion[];
+  currentVersionInstructions?: string;
 }
 
 export default function SkillDetailPage() {
@@ -23,6 +31,7 @@ export default function SkillDetailPage() {
 
   const [skill, setSkill] = useState<Skill | null>(null);
   const [versions, setVersions] = useState<SkillVersion[]>([]);
+  const [currentVersionInstructions, setCurrentVersionInstructions] = useState<string | undefined>(undefined);
   const [assignments, setAssignments] = useState<SkillAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -38,12 +47,13 @@ export default function SkillDetailPage() {
 
   const load = useCallback(async () => {
     try {
-      const [{ skill, versions }, assignments] = await Promise.all([
-        apiFetch<{ skill: Skill; versions: SkillVersion[] }>(`/api/skills/${skillId}`),
+      const [{ skill, versions, currentVersionInstructions }, assignments] = await Promise.all([
+        apiFetch<SkillDetail>(`/api/skills/${skillId}`),
         apiFetch<SkillAssignment[]>(`/api/skills/${skillId}/assignments`),
       ]);
       setSkill(skill);
       setVersions(versions);
+      setCurrentVersionInstructions(currentVersionInstructions);
       setAssignments(assignments);
     } catch {
       setNotFound(true);
@@ -165,7 +175,11 @@ export default function SkillDetailPage() {
               <Textarea rows={3} value={draftDescription} onChange={(e) => setDraftDescription(e.target.value)} />
             </Field>
             <Field label={t("skills.create.instructionsLabel")}>
-              <Textarea rows={10} value={draftInstructions} onChange={(e) => setDraftInstructions(e.target.value)} />
+              <EditablePreview
+                rows={10}
+                value={draftInstructions}
+                onChange={(e) => setDraftInstructions(e.target.value)}
+              />
             </Field>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" type="button" onClick={() => setEditing(false)}>
@@ -175,6 +189,17 @@ export default function SkillDetailPage() {
                 {saving ? t("skills.detail.savingDraft") : t("skills.detail.saveDraft")}
               </Button>
             </div>
+          </Card>
+        </div>
+      )}
+
+      {!editing && currentVersionInstructions && (
+        <div className="px-10 pt-8">
+          <h2 className="mb-3 text-base font-semibold text-[var(--color-text)]">
+            {t("skills.detail.instructionsHeading")}
+          </h2>
+          <Card className="p-4 text-sm text-[var(--color-neutral-400)]">
+            <ContentViewer content={currentVersionInstructions} format="markdown" />
           </Card>
         </div>
       )}

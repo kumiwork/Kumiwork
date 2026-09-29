@@ -729,6 +729,7 @@ const en = {
     },
     detail: {
       noPublishedVersion: "Not published yet — this skill only has a draft.",
+      instructionsHeading: "Instructions",
       versionHistory: "Version history",
       draftLabel: "Draft",
       currentBadge: "Current",
