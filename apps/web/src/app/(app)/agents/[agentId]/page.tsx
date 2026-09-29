@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AgentFormModal, type AgentFormValues } from "@/components/AgentFormModal";
 import { AgentMemorySection } from "@/components/AgentMemorySection";
 import { AgentSkillsSection } from "@/components/AgentSkillsSection";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
 import { Badge, Breadcrumb, Button, Card, CardLink, Truncate } from "@agentfactory/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ArrowLeftIcon, ChatIcon, PlusIcon, SettingsIcon } from "@/lib/icons";
@@ -59,7 +60,7 @@ export default function AgentDetailPage() {
           {t("agents.systemPrompt")}
         </p>
         <Card className="p-4 text-sm text-[var(--color-neutral-400)]">
-          <pre style={{ margin: 0, fontFamily: "inherit", fontSize: "inherit", whiteSpace: "pre-wrap", lineHeight: 1.7, color: "inherit" }}>{agent.systemPrompt}</pre>
+          <ContentViewer content={agent.systemPrompt} format="markdown" />
         </Card>
       </div>
 

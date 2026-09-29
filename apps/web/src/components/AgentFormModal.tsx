@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal } from "@/components/Modal";
-import { Button, GroupedSelect, Textarea, TextInput } from "@agentfactory/shared";
+import { Button, GroupedSelect, TextInput } from "@agentfactory/shared";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { AgentMode } from "@agentfactory/core";
@@ -99,7 +100,7 @@ export function AgentFormModal({
           <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-neutral-500)]">
             {t("agentForm.systemPromptLabel")}
           </label>
-          <Textarea
+          <EditablePreview
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
             rows={4}
