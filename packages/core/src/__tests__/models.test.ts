@@ -57,7 +57,8 @@ describe("runtimeForModel", () => {
   });
 
   it("runs OpenAI models on the Codex runtime", () => {
-    expect(runtimeForModel({ family: "openai", id: "gpt-anything", maxTokens: 8192 })).toBe("codex");
+    expect(runtimeForModel(buildModelSpec("gpt-6-sol"))).toBe("codex");
+    expect(runtimeForModel(buildModelSpec("gpt-6-luna"))).toBe("codex");
   });
 
   it("resolves a stored spec whose id has since left the catalog by its provider", () => {

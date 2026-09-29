@@ -24,14 +24,21 @@ describe("ModelSelect", () => {
     );
   });
 
-  it("shows a flat list while every model has the same provider", () => {
+  it("groups the models under their provider", () => {
     const { container } = renderSelect();
-    expect(container.querySelectorAll("optgroup")).toHaveLength(0);
+    const groups = [...container.querySelectorAll("optgroup")].map((group) => ({
+      label: group.getAttribute("label"),
+      models: [...group.querySelectorAll("option")].map((option) => option.textContent),
+    }));
+    expect(groups).toEqual([
+      { label: "Anthropic", models: ["Claude Haiku 4.5", "Claude Sonnet 5", "Claude Opus 5", "Claude Fable 5"] },
+      { label: "OpenAI", models: ["GPT-6 Luna", "GPT-6 Sol"] },
+    ]);
   });
 
   it("reports the chosen model id", () => {
     const { onChange } = renderSelect();
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "claude-opus-5" } });
-    expect(onChange).toHaveBeenCalledWith("claude-opus-5");
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "gpt-6-sol" } });
+    expect(onChange).toHaveBeenCalledWith("gpt-6-sol");
   });
 });
