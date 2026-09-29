@@ -335,6 +335,90 @@ describe("warmRepoMap", () => {
     expect(destroy).toHaveBeenCalledWith("warm-sandbox-1");
   });
 
+  it("retries once and caches the retry's map when the first generation is a file-creation summary", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockResolvedValue("abc123");
+    getRepoMapMock.mockReset().mockResolvedValue(undefined);
+    insertRepoMapMock.mockReset().mockResolvedValue(undefined);
+    resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
+    cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
+    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    const destroy = vi.fn();
+    const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-4" });
+    let generateCalls = 0;
+    const sandbox: SandboxProvider = {
+      create,
+      exec: (async function* (_id: string, cmd: string[]) {
+        if (cmd.join(" ") === HEAD_CMD) {
+          yield { stream: "stdout", data: "abc123\n" } as OutputChunk;
+          return;
+        }
+        generateCalls += 1;
+        const text =
+          generateCalls === 1
+            ? "I've created **CODEBASE_MAP.md** with the full repository overview."
+            : "## Repository Map\n\nActual map content goes here.";
+        yield {
+          stream: "stdout",
+          data: `__RESULT__${JSON.stringify({ text, costUsd: 0, tokens: 100 })}\n`,
+        } as OutputChunk;
+      }) as SandboxProvider["exec"],
+      writeFiles: vi.fn(),
+      readWorkspace: vi.fn(),
+      destroy,
+      exists: vi.fn(),
+      resetMemory: vi.fn(),
+      interrupt: vi.fn(),
+    };
+
+    await warmRepoMap(sandbox, 1, "acme/widgets");
+
+    expect(generateCalls).toBe(2);
+    expect(insertRepoMapMock).toHaveBeenCalledWith(
+      expect.objectContaining({ content: "## Repository Map\n\nActual map content goes here." }),
+    );
+  });
+
+  it("caches nothing when both the first generation and the retry are file-creation summaries", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockResolvedValue("abc123");
+    getRepoMapMock.mockReset().mockResolvedValue(undefined);
+    insertRepoMapMock.mockReset().mockResolvedValue(undefined);
+    resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
+    cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
+    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    const destroy = vi.fn();
+    const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-5" });
+    let generateCalls = 0;
+    const sandbox: SandboxProvider = {
+      create,
+      exec: (async function* (_id: string, cmd: string[]) {
+        if (cmd.join(" ") === HEAD_CMD) {
+          yield { stream: "stdout", data: "abc123\n" } as OutputChunk;
+          return;
+        }
+        generateCalls += 1;
+        yield {
+          stream: "stdout",
+          data: `__RESULT__${JSON.stringify({
+            text: "Done! I've created **.claude/AGENT_MAP.md** with a comprehensive map.",
+            costUsd: 0,
+            tokens: 100,
+          })}\n`,
+        } as OutputChunk;
+      }) as SandboxProvider["exec"],
+      writeFiles: vi.fn(),
+      readWorkspace: vi.fn(),
+      destroy,
+      exists: vi.fn(),
+      resetMemory: vi.fn(),
+      interrupt: vi.fn(),
+    };
+
+    await warmRepoMap(sandbox, 1, "acme/widgets");
+
+    expect(generateCalls).toBe(2);
+    expect(insertRepoMapMock).not.toHaveBeenCalled();
+  });
+
   it("issues no credential and caches nothing when the default runtime cannot generate repo maps", async () => {
     resolveDefaultBranchShaMock.mockReset().mockResolvedValue("abc123");
     getRepoMapMock.mockReset().mockResolvedValue(undefined);

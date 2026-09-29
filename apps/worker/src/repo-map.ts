@@ -7,6 +7,7 @@ import { resolveSandboxImage } from "./sandbox-image-select";
 import { issueSandboxModelCredential } from "./sandbox-model-access";
 import { getDefaultAgentRuntime } from "./agent-runtime/registry";
 import type { RepoMapResult } from "./agent-runtime/types";
+import { isRepoMapFileCreationSummary } from "./repo-map-validate";
 
 const log = createLogger("repo-map");
 
@@ -74,6 +75,27 @@ async function generateRepoMap(
   } finally {
     credential.revoke();
   }
+}
+
+async function generateValidatedRepoMap(
+  sandboxProvider: SandboxProvider,
+  sandboxId: string,
+  orgId: number,
+  repoFullName: string,
+): Promise<RepoMapResult | undefined> {
+  const first = await generateRepoMap(sandboxProvider, sandboxId, orgId);
+  if (!first || !isRepoMapFileCreationSummary(first.text)) return first;
+
+  log.warn("Repo map generation returned a file-creation summary instead of a map; retrying once", {
+    repoFullName,
+  });
+  const retry = await generateRepoMap(sandboxProvider, sandboxId, orgId);
+  if (!retry || !isRepoMapFileCreationSummary(retry.text)) return retry;
+
+  log.warn("Repo map generation returned a file-creation summary again after retry; caching nothing", {
+    repoFullName,
+  });
+  return undefined;
 }
 
 // Run-time path: called from the run pipeline right after clone, with a sandbox that already
@@ -150,7 +172,7 @@ async function generateAndCacheRepoMap(
     const cached = await getRepoMap(orgId, repoFullName, sha);
     if (cached) return cached.content;
 
-    const generated = await generateRepoMap(sandboxProvider, sandboxId, orgId);
+    const generated = await generateValidatedRepoMap(sandboxProvider, sandboxId, orgId, repoFullName);
     if (!generated) return "";
 
     // Truncate once and store/return the same value — insertRepoMap enforces this cap

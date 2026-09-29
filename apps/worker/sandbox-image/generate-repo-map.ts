@@ -11,7 +11,10 @@ const PROMPT =
   "implementation conventions an agent would otherwise have to grep for from scratch — not " +
   "exhaustive docs, just enough to short-circuit obvious discovery (e.g. how styling/theming is " +
   "structured, test file conventions, naming patterns). " +
-  "Do not describe files one by one. Stay under 1500 words.";
+  "Do not describe files one by one. Stay under 1500 words. " +
+  "You have no write access in this session: return the map itself as your final reply, in " +
+  "markdown. Never create, write, or save the map to a file — a reply that just describes a " +
+  "file you created is not acceptable.";
 
 async function main(): Promise<void> {
   let resultText: string | undefined;
@@ -28,6 +31,7 @@ async function main(): Promise<void> {
       cwd: "/workspace",
       permissionMode: "bypassPermissions",
       allowDangerouslySkipPermissions: true,
+      allowedTools: ["Read", "Glob", "Grep"],
     },
   })) {
     if (message.type === "result") {
