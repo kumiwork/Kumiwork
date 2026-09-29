@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { MAX_MEMORY_CONTENT_CHARS } from "@agentfactory/core";
-import { deleteMemoryEntry, getAgent, updateMemoryEntryContent } from "@agentfactory/db";
+import { deleteMemoryEntry, getAgent, memoryEntryBelongsToAgent, updateMemoryEntryContent } from "@agentfactory/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function PATCH(
@@ -13,6 +13,9 @@ export async function PATCH(
 
   const agent = await getAgent(Number(agentId));
   if (!agent || agent.orgId !== ctx.orgId) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await memoryEntryBelongsToAgent(ctx.orgId, agent.id, Number(entryId)))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   if (typeof body.content !== "string" || body.content.trim() === "") {
     return NextResponse.json({ error: "content is required" }, { status: 400 });
@@ -38,6 +41,9 @@ export async function DELETE(
 
   const agent = await getAgent(Number(agentId));
   if (!agent || agent.orgId !== ctx.orgId) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!(await memoryEntryBelongsToAgent(ctx.orgId, agent.id, Number(entryId)))) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   await deleteMemoryEntry(ctx.orgId, Number(entryId));
   return new NextResponse(null, { status: 204 });
