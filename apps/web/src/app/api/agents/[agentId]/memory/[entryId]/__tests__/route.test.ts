@@ -3,11 +3,13 @@ import { MAX_MEMORY_CONTENT_CHARS } from "@agentfactory/core";
 
 const requireAuthContext = vi.fn();
 const getAgent = vi.fn();
+const memoryEntryBelongsToAgent = vi.fn();
 const updateMemoryEntryContent = vi.fn();
 const deleteMemoryEntry = vi.fn();
 
 vi.mock("@agentfactory/db", () => ({
   getAgent: (...args: unknown[]) => getAgent(...args),
+  memoryEntryBelongsToAgent: (...args: unknown[]) => memoryEntryBelongsToAgent(...args),
   updateMemoryEntryContent: (...args: unknown[]) => updateMemoryEntryContent(...args),
   deleteMemoryEntry: (...args: unknown[]) => deleteMemoryEntry(...args),
 }));
@@ -31,6 +33,7 @@ function del(agentId: string, entryId: string) {
 beforeEach(() => {
   requireAuthContext.mockReset().mockResolvedValue({ user: { id: 1 }, orgId: 3 });
   getAgent.mockReset();
+  memoryEntryBelongsToAgent.mockReset().mockResolvedValue(true);
   updateMemoryEntryContent.mockReset().mockResolvedValue(undefined);
   deleteMemoryEntry.mockReset().mockResolvedValue(undefined);
 });
@@ -51,6 +54,17 @@ describe("PATCH /api/agents/[agentId]/memory/[entryId]", () => {
     const res = await patch("5", "1", { content: "New content" });
 
     expect(res.status).toBe(404);
+    expect(updateMemoryEntryContent).not.toHaveBeenCalled();
+  });
+
+  it("404s when the entry belongs to a different agent", async () => {
+    getAgent.mockResolvedValue({ id: 5, orgId: 3 });
+    memoryEntryBelongsToAgent.mockResolvedValue(false);
+
+    const res = await patch("5", "1", { content: "New content" });
+
+    expect(res.status).toBe(404);
+    expect(memoryEntryBelongsToAgent).toHaveBeenCalledWith(3, 5, 1);
     expect(updateMemoryEntryContent).not.toHaveBeenCalled();
   });
 
@@ -107,6 +121,17 @@ describe("DELETE /api/agents/[agentId]/memory/[entryId]", () => {
     const res = await del("5", "1");
 
     expect(res.status).toBe(404);
+    expect(deleteMemoryEntry).not.toHaveBeenCalled();
+  });
+
+  it("404s when the entry belongs to a different agent", async () => {
+    getAgent.mockResolvedValue({ id: 5, orgId: 3 });
+    memoryEntryBelongsToAgent.mockResolvedValue(false);
+
+    const res = await del("5", "1");
+
+    expect(res.status).toBe(404);
+    expect(memoryEntryBelongsToAgent).toHaveBeenCalledWith(3, 5, 1);
     expect(deleteMemoryEntry).not.toHaveBeenCalled();
   });
 
