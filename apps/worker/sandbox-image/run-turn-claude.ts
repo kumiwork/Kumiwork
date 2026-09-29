@@ -1,17 +1,9 @@
 import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk";
 import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
+import { ERROR_MARKER, EVENT_MARKER, RESULT_MARKER } from "./markers.js";
+import { REMEMBER_ACKNOWLEDGEMENT, REMEMBER_CONTENT_DESCRIPTION, REMEMBER_TOOL_DESCRIPTION } from "./remember-tool.js";
 import { extractToolResults, summarizeToolUse, type ToolUseInfo } from "./tool-results.js";
-
-// Prefixes the one line of stdout the worker actually parses (see docker-sandbox-provider.ts /
-// agent-runtime.ts), so it's found deterministically even if the SDK or a tool call logs other
-// noise to stdout first.
-const RESULT_MARKER = "__RESULT__";
-// Prefixes thinking event lines emitted to stdout for the host worker to capture and persist.
-const EVENT_MARKER = "__EVENT__";
-// Prefixes a structured-error line the host worker (agent-runtime.ts) checks for before falling
-// back to its generic "no result line" failure — currently only used for context overflow.
-const ERROR_MARKER = "__ERROR__";
 
 // The first custom in-process tool in this codebase (see the design spec's ground truth: no
 // mcpServers option existed before this). Handler only writes an __EVENT__ line and returns
@@ -20,14 +12,11 @@ const ERROR_MARKER = "__ERROR__";
 // is what actually calls writeMemoryEntry and persists the event.
 const rememberTool = tool(
   "remember",
-  "Save a concise lesson for your own future sessions with this agent. Use this when the user " +
-    "explicitly asks you to remember something, or when you notice something worth carrying " +
-    "forward (a correction, a recurring failure mode). Keep it general and reusable, not specific " +
-    "to this one task's business logic.",
-  { content: z.string().describe("A concise, general lesson, at most a few sentences.") },
+  REMEMBER_TOOL_DESCRIPTION,
+  { content: z.string().describe(REMEMBER_CONTENT_DESCRIPTION) },
   async ({ content }) => {
     process.stdout.write(`${EVENT_MARKER}${JSON.stringify({ type: "memory_write", content })}\n`);
-    return { content: [{ type: "text", text: "Noted for future sessions." }] };
+    return { content: [{ type: "text", text: REMEMBER_ACKNOWLEDGEMENT }] };
   },
 );
 
