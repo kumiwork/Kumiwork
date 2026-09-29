@@ -8,6 +8,25 @@ import {
   getSkillVersionsForSkill,
 } from "@agentfactory/db";
 import { requireAuthContext } from "@/server/auth";
+import { createLogger } from "@agentfactory/logger";
+
+const log = createLogger("api:skills:[skillId]");
+
+async function readCurrentVersionInstructions(
+  orgId: number,
+  currentVersionId: number | undefined,
+): Promise<string | undefined> {
+  if (!currentVersionId) return undefined;
+  try {
+    const currentVersion = await getSkillVersion(currentVersionId);
+    if (!currentVersion) return undefined;
+    const markdown = await getSkillVersionMarkdown(orgId, currentVersion);
+    return markdown ? decomposeSkillMarkdown(markdown).instructions : undefined;
+  } catch (err) {
+    log.warn("Failed to read current version instructions", { currentVersionId, err });
+    return undefined;
+  }
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ skillId: string }> }) {
   const ctx = await requireAuthContext();
@@ -16,11 +35,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ski
   const skill = await getSkillForOrg(skillId, ctx.orgId);
   if (!skill) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const versions = await getSkillVersionsForSkill(skillId);
-  const currentVersion = skill.currentVersionId ? await getSkillVersion(skill.currentVersionId) : undefined;
-  const currentVersionMarkdown = currentVersion ? await getSkillVersionMarkdown(ctx.orgId, currentVersion) : undefined;
-  const currentVersionInstructions = currentVersionMarkdown
-    ? decomposeSkillMarkdown(currentVersionMarkdown).instructions
-    : undefined;
+  const currentVersionInstructions = await readCurrentVersionInstructions(ctx.orgId, skill.currentVersionId);
   return NextResponse.json({ skill, versions, currentVersionInstructions });
 }
 
