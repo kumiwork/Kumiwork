@@ -185,6 +185,49 @@ describe("ContextDocumentsPanel", () => {
     expect(uploaded.type).toBe("text/markdown");
   });
 
+  it("previews a document's content through ContentViewer, resolving format from its filename", async () => {
+    apiFetchMock.mockResolvedValue([{ ...ITEM, title: "handbook.md" }]);
+    const fetchMock = vi.fn().mockResolvedValue(new Response("# Handbook", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      renderPanel();
+      await waitFor(() => expect(screen.getByText("handbook.md")).toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+      expect(await screen.findByRole("heading", { name: "Handbook" })).toBeInTheDocument();
+      expect(fetchMock).toHaveBeenCalledWith("/api/teams/3/context-items/1/content");
+
+      fireEvent.click(screen.getByRole("button", { name: "Hide preview" }));
+      expect(screen.queryByRole("heading", { name: "Handbook" })).not.toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("shows an error line when a preview fails to load", async () => {
+    apiFetchMock.mockResolvedValue([ITEM]);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 404 })));
+    try {
+      renderPanel();
+      await waitFor(() => expect(screen.getByText("Engineering handbook")).toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole("button", { name: "Preview" }));
+
+      expect(await screen.findByText("Couldn't load a preview of this document.")).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("does not offer a preview control for image items", async () => {
+    apiFetchMock.mockResolvedValue([{ ...TASK_ITEM, mime: "image/png", title: "screenshot.png" }]);
+    renderPanel(TASK_SCOPE);
+
+    await waitFor(() => expect(screen.getByText("screenshot.png")).toBeInTheDocument());
+    expect(screen.queryByRole("button", { name: "Preview" })).not.toBeInTheDocument();
+  });
+
   it("removes a document", async () => {
     apiFetchMock.mockResolvedValueOnce([ITEM]).mockResolvedValueOnce(undefined);
     renderPanel();

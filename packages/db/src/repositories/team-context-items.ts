@@ -65,6 +65,21 @@ export async function getTeamContextItem(id: number): Promise<TeamContextItem | 
   return row ? toItem(row) : undefined;
 }
 
+// Org-scoped by the denormalized column, exactly like listTeamContextItemsForOrg — unlike
+// getTeamContextItem (worker-only, unscoped), this is for the content-serving route, which
+// receives both ids from the URL and must not serve another tenant's blob just because a
+// numeric itemId happened to guess right. Mirrors getTaskContextItemForOrg.
+export async function getTeamContextItemForOrg(
+  id: number,
+  orgId: number,
+): Promise<TeamContextItem | undefined> {
+  const [row] = await db
+    .select()
+    .from(teamContextItems)
+    .where(and(eq(teamContextItems.id, id), eq(teamContextItems.orgId, orgId)));
+  return row ? toItem(row) : undefined;
+}
+
 // Same signature and same guarantee as before, now one statement against the denormalized
 // org_id instead of a select-then-delete behind an innerJoin(teams, …). run_context_retrievals
 // no longer has a DB-level FK on item_id (the id space collides with task_context_items), so the
