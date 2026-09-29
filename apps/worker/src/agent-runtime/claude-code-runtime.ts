@@ -14,6 +14,7 @@ import type {
 } from "./types";
 
 const REPO_MAP_RESULT_MARKER = "__RESULT__";
+const AGENT_GIT_EMAIL = "agent@agentfactory.local";
 
 const claudeRepoMapGenerator: RepoMapGenerator = {
   model: buildModelSpec("claude-haiku-4-5"),
@@ -40,6 +41,15 @@ export function claudeModelEnv(endpoint: ModelEndpoint): Record<string, string> 
   };
 }
 
+export function agentGitIdentityEnv(agentName: string): Record<string, string> {
+  return {
+    GIT_AUTHOR_NAME: agentName,
+    GIT_AUTHOR_EMAIL: AGENT_GIT_EMAIL,
+    GIT_COMMITTER_NAME: agentName,
+    GIT_COMMITTER_EMAIL: AGENT_GIT_EMAIL,
+  };
+}
+
 // Mechanical move of what was apps/worker/src/agent-runtime.ts's runAgentTurn(): same env vars,
 // same script, same marker protocol — now read through the shared marker-protocol.ts helper so a
 // second adapter (e.g. Codex) can reuse it. No behavior change.
@@ -59,6 +69,7 @@ class ClaudeCodeRuntime implements AgentRuntime {
       SYSTEM_PROMPT: input.systemPrompt,
       USER_TEXT: input.userText,
       MODEL_ID: input.model.id,
+      ...agentGitIdentityEnv(input.agentName),
       ...(input.modelEndpoint ? claudeModelEnv(input.modelEndpoint) : {}),
     };
     if (input.resumeSessionRef) env.RESUME_SESSION_REF = input.resumeSessionRef;

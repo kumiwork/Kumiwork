@@ -28,6 +28,7 @@ function baseInput() {
     systemPrompt: "Be helpful.",
     model: { family: "anthropic" as const, id: "claude-haiku-4-5", maxTokens: 8192 },
     userText: "What model are you using?",
+    agentName: "Codey",
   };
 }
 
@@ -148,6 +149,39 @@ describe("claudeCodeRuntime", () => {
     await claudeCodeRuntime.runTurn(baseInput(), { sandboxProvider, sandboxId: "sandbox-1" });
 
     expect(execCalls[0].env?.AGENT_TURN_KIND).toBeUndefined();
+  });
+
+  it("sets a fixed git identity from the agent's name for a normal turn", async () => {
+    const { sandboxProvider, execCalls } = fakeSandbox([
+      { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
+    ]);
+
+    await claudeCodeRuntime.runTurn(baseInput(), { sandboxProvider, sandboxId: "sandbox-1" });
+
+    expect(execCalls[0].env).toMatchObject({
+      GIT_AUTHOR_NAME: "Codey",
+      GIT_AUTHOR_EMAIL: "agent@agentfactory.local",
+      GIT_COMMITTER_NAME: "Codey",
+      GIT_COMMITTER_EMAIL: "agent@agentfactory.local",
+    });
+  });
+
+  it("sets the same fixed git identity for a review turn", async () => {
+    const { sandboxProvider, execCalls } = fakeSandbox([
+      { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
+    ]);
+
+    await claudeCodeRuntime.runTurn(
+      { ...baseInput(), isReviewTurn: true },
+      { sandboxProvider, sandboxId: "sandbox-1" },
+    );
+
+    expect(execCalls[0].env).toMatchObject({
+      GIT_AUTHOR_NAME: "Codey",
+      GIT_AUTHOR_EMAIL: "agent@agentfactory.local",
+      GIT_COMMITTER_NAME: "Codey",
+      GIT_COMMITTER_EMAIL: "agent@agentfactory.local",
+    });
   });
 
   it("throws PromptTooLongError when the sandbox emits the overflow marker", async () => {
