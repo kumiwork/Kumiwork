@@ -1248,7 +1248,7 @@ export default function TaskDetailPage() {
             <FilesTab
               workspace={workspace}
               selectedFile={selectedFile}
-              isRunning={isRunning}
+              isRunning={!!isRunning}
               onSelectFile={setSelectedFile}
             />
           </div>
@@ -1538,7 +1538,7 @@ export function FilesTab({
 }: {
   workspace: WorkspaceSnapshot | null;
   selectedFile: string | null;
-  isRunning: string | boolean | null;
+  isRunning: boolean;
   onSelectFile: (path: string) => void;
 }) {
   if (!workspace || Object.keys(workspace).length === 0) {

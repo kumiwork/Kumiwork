@@ -60,6 +60,18 @@
   padding-left: 1.6em;
 }
 
+.markdown ul {
+  list-style-type: disc;
+}
+
+.markdown ol {
+  list-style-type: decimal;
+}
+
+.markdown ul ul {
+  list-style-type: circle;
+}
+
 .markdown li {
   margin: 0.2em 0;
 }
@@ -182,46 +194,46 @@
   white-space: pre-wrap;
 }
 
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-built_in {
+.wrapper :global(.hljs-keyword),
+.wrapper :global(.hljs-selector-tag),
+.wrapper :global(.hljs-literal),
+.wrapper :global(.hljs-built_in) {
   color: var(--cv-keyword);
 }
 
-.hljs-string,
-.hljs-regexp {
+.wrapper :global(.hljs-string),
+.wrapper :global(.hljs-regexp) {
   color: var(--cv-string);
 }
 
-.hljs-number {
+.wrapper :global(.hljs-number) {
   color: var(--cv-number);
 }
 
-.hljs-comment,
-.hljs-quote {
+.wrapper :global(.hljs-comment),
+.wrapper :global(.hljs-quote) {
   color: var(--cv-comment);
   font-style: italic;
 }
 
-.hljs-title,
-.hljs-title.function_,
-.hljs-title.class_ {
+.wrapper :global(.hljs-title),
+.wrapper :global(.hljs-title.function_),
+.wrapper :global(.hljs-title.class_) {
   color: var(--cv-title);
 }
 
-.hljs-attr,
-.hljs-attribute,
-.hljs-property {
+.wrapper :global(.hljs-attr),
+.wrapper :global(.hljs-attribute),
+.wrapper :global(.hljs-property) {
   color: var(--cv-attr);
 }
 
-.hljs-deletion {
+.wrapper :global(.hljs-deletion) {
   background: color-mix(in srgb, var(--cv-deletion) 18%, transparent);
   color: var(--cv-deletion);
 }
 
-.hljs-addition {
+.wrapper :global(.hljs-addition) {
   background: color-mix(in srgb, var(--cv-addition) 18%, transparent);
   color: var(--cv-addition);
 }
