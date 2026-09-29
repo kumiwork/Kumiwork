@@ -346,8 +346,6 @@ function SegmentRow({
   );
 }
 
-// Which documents the excerpts above came from. The row text itself is not repeated here — it is
-// already in the <pre> below, verbatim, exactly as the model received it.
 function ProvenanceGroup({ state, onRetry }: { state: RetrievalsFetchState; onRetry?: () => void }) {
   const { t } = useTranslation();
 

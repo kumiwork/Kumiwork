@@ -1243,55 +1243,14 @@ export default function TaskDetailPage() {
           </div>
         )}
 
-        {/* Files tab */}
         {activeTab === "files" && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {workspace && Object.keys(workspace).length > 0 ? (
-              <>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 4,
-                    padding: "10px 20px",
-                    borderBottom: "1px solid var(--color-divider)",
-                    overflowX: "auto",
-                    flexShrink: 0,
-                  }}
-                >
-                  {Object.keys(workspace).sort().map((path) => (
-                    <button
-                      key={path}
-                      onClick={() => setSelectedFile(path)}
-                      style={{
-                        flexShrink: 0,
-                        background: selectedFile === path ? "rgba(145,132,217,0.15)" : "var(--color-surface)",
-                        border: `1px solid ${selectedFile === path ? "var(--color-accent)" : "var(--color-divider)"}`,
-                        borderRadius: "var(--radius-sm)",
-                        cursor: "pointer",
-                        padding: "3px 10px",
-                        fontSize: 11,
-                        fontFamily: "ui-monospace, monospace",
-                        color: selectedFile === path ? "var(--color-accent)" : "var(--color-neutral-400)",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {path}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
-                  {selectedFile && workspace[selectedFile] !== undefined ? (
-                    <ContentViewer key={selectedFile} content={workspace[selectedFile]} filename={selectedFile} />
-                  ) : (
-                    <div style={{ color: "var(--color-neutral-500)", fontSize: 13 }}>Select a file above.</div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-neutral-500)", fontSize: 13 }}>
-                {isRunning ? "Files will appear when the run completes." : "No files in workspace."}
-              </div>
-            )}
+            <FilesTab
+              workspace={workspace}
+              selectedFile={selectedFile}
+              isRunning={isRunning}
+              onSelectFile={setSelectedFile}
+            />
           </div>
         )}
 
@@ -1569,6 +1528,78 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 
 export function MessageContent({ content }: { content: string }) {
   return <ContentViewer content={content} format="markdown" />;
+}
+
+export function FilesTab({
+  workspace,
+  selectedFile,
+  isRunning,
+  onSelectFile,
+}: {
+  workspace: WorkspaceSnapshot | null;
+  selectedFile: string | null;
+  isRunning: string | boolean | null;
+  onSelectFile: (path: string) => void;
+}) {
+  if (!workspace || Object.keys(workspace).length === 0) {
+    return (
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--color-neutral-500)",
+          fontSize: 13,
+        }}
+      >
+        {isRunning ? "Files will appear when the run completes." : "No files in workspace."}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          padding: "10px 20px",
+          borderBottom: "1px solid var(--color-divider)",
+          overflowX: "auto",
+          flexShrink: 0,
+        }}
+      >
+        {Object.keys(workspace).sort().map((path) => (
+          <button
+            key={path}
+            onClick={() => onSelectFile(path)}
+            style={{
+              flexShrink: 0,
+              background: selectedFile === path ? "rgba(145,132,217,0.15)" : "var(--color-surface)",
+              border: `1px solid ${selectedFile === path ? "var(--color-accent)" : "var(--color-divider)"}`,
+              borderRadius: "var(--radius-sm)",
+              cursor: "pointer",
+              padding: "3px 10px",
+              fontSize: 11,
+              fontFamily: "ui-monospace, monospace",
+              color: selectedFile === path ? "var(--color-accent)" : "var(--color-neutral-400)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {path}
+          </button>
+        ))}
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        {selectedFile && workspace[selectedFile] !== undefined ? (
+          <ContentViewer key={selectedFile} content={workspace[selectedFile]} filename={selectedFile} allowRawToggle />
+        ) : (
+          <div style={{ color: "var(--color-neutral-500)", fontSize: 13 }}>Select a file above.</div>
+        )}
+      </div>
+    </>
+  );
 }
 
 export function TaskDescription({ description }: { description: string }) {
