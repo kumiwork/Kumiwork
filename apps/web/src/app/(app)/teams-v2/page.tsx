@@ -5,12 +5,13 @@ import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, Tex
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import type { Agent, OverflowPolicy, Team } from "@agentfactory/core";
-import { DEFAULT_MODEL_ID, MODEL_CATALOG } from "@agentfactory/core";
+import { DEFAULT_MODEL_ID } from "@agentfactory/core";
 import type { RepoOption } from "@agentfactory/scm";
 import { parseSharedContext, serializeSharedContext } from "@/lib/shared-context";
 import { SharedContextPanels } from "@/components/SharedContextPanels";
 import { ContextDocumentsPanel } from "@/components/ContextDocumentsPanel";
 import { AgentSkillsPicker } from "@/components/AgentSkillsPicker";
+import { ModelSelect } from "@/components/ModelSelect";
 import { apiFetch } from "@/lib/api-client";
 
 const SHARED_CONTEXT_MAX = 65536; // 64 KB
@@ -302,12 +303,7 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
           <label className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">
             {t("teamsV2.modelLabel")}
           </label>
-          <Select
-            value={model}
-            onChange={setModel}
-            className="w-full"
-            options={MODEL_CATALOG.map((entry) => ({ key: entry.id, value: entry.id, label: entry.label }))}
-          />
+          <ModelSelect value={model} onChange={setModel} className="w-full" />
         </div>
 
         <div>
@@ -442,12 +438,7 @@ function AgentDetailPanel({ agent }: { agent: Agent }) {
           <label className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">
             {t("teamsV2.modelLabel")}
           </label>
-          <Select
-            value={model}
-            onChange={setModel}
-            className="w-full"
-            options={MODEL_CATALOG.map((entry) => ({ key: entry.id, value: entry.id, label: entry.label }))}
-          />
+          <ModelSelect value={model} onChange={setModel} className="w-full" />
         </div>
 
         <div>
