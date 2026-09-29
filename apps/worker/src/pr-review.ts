@@ -21,10 +21,12 @@ export const REVIEW_OUTPUT_SCHEMA = {
           body: { type: "string" },
         },
         required: ["path", "line", "body"],
+        additionalProperties: false,
       },
     },
   },
   required: ["summary", "verdict", "comments"],
+  additionalProperties: false,
 } as const;
 
 export interface StructuredReview {
