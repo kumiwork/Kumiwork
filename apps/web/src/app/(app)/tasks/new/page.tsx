@@ -9,6 +9,7 @@ import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import {
   DEFAULT_MODEL_ID,
+  buildModelSpec,
   MODEL_CATALOG,
   TASK_CONTEXT_MIME_CONFIG,
   isTaskContextMimeAllowed,
@@ -184,7 +185,7 @@ export default function NewTaskPage() {
       // assignee to default to) — otherwise leave it unset so the task keeps following the
       // agent's configured model even if that changes later.
       const model =
-        selectedAgent && !modelTouched ? undefined : { family: "anthropic" as const, id: modelId, maxTokens: 8192 };
+        selectedAgent && !modelTouched ? undefined : buildModelSpec(modelId);
 
       const task = await createTask({
         title: title.trim(),

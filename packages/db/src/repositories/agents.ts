@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { Agent, AgentMode, OverflowPolicy } from "@agentfactory/core";
-import { buildModelSpec } from "@agentfactory/core";
+import { buildModelSpec, runtimeForModel } from "@agentfactory/core";
 import { db } from "../client";
 import { agents, agentSkills } from "../schema";
 
@@ -55,6 +55,7 @@ export interface NewAgentInput {
 }
 
 export async function createAgent(orgId: number, input: NewAgentInput): Promise<Agent> {
+  const model = buildModelSpec(input.model);
   const [row] = await db
     .insert(agents)
     .values({
@@ -64,9 +65,9 @@ export async function createAgent(orgId: number, input: NewAgentInput): Promise<
       description: input.description || null,
       avatarEmoji: "🤖",
       systemPrompt: input.systemPrompt,
-      model: buildModelSpec(input.model),
+      model,
       mode: input.mode,
-      runtimeKind: "claude-code",
+      runtimeKind: runtimeForModel(model),
       toolPolicy: { defaultDecision: "deny", rules: [] },
       connectionIds: [],
       onContextOverflow: input.onContextOverflow ?? "fallback",
@@ -93,7 +94,10 @@ export async function updateAgent(agentId: number, patch: AgentPatch): Promise<A
   if ("teamId" in patch) values.teamId = patch.teamId ?? null;
   if ("areaMap" in patch) values.areaMap = patch.areaMap ?? null;
   if (patch.defaultCodebase !== undefined) values.defaultCodebase = patch.defaultCodebase || null;
-  if (patch.model !== undefined) values.model = buildModelSpec(patch.model);
+  if (patch.model !== undefined) {
+    values.model = buildModelSpec(patch.model);
+    values.runtimeKind = runtimeForModel(values.model);
+  }
   if (patch.onContextOverflow !== undefined) values.onContextOverflow = patch.onContextOverflow;
 
   const [row] = await db.update(agents).set(values).where(eq(agents.id, agentId)).returning();
