@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
-import type { ModelSpec } from "@agentfactory/core";
+import type { ModelProvider } from "@agentfactory/core";
 
 export type RunCredentialPurpose = "run" | "repo-map";
 
-export type ModelProvider = ModelSpec["family"];
+export type { ModelProvider };
 
 export interface RunCredentialContext {
   orgId: number;

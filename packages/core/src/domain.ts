@@ -96,8 +96,10 @@ export type AgentMode = "manual" | "automatic";
 
 export type RuntimeKind = "claude-code";
 
+export type ModelProvider = "anthropic";
+
 export interface ModelSpec {
-  family: "anthropic";
+  family: ModelProvider;
   id: string; // e.g. "claude-sonnet-5"
   maxTokens: number;
   thinking?: boolean;
