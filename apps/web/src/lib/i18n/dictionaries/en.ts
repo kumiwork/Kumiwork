@@ -690,6 +690,13 @@ const en = {
     dayOne: "about {count} day ago",
     dayOther: "about {count} days ago",
   },
+  contentViewer: {
+    copy: "Copy",
+    copied: "Copied",
+    rendered: "Rendered",
+    raw: "Raw",
+    largeFileNotice: "Large file, shown as plain text",
+  },
   skills: {
     title: "Skills",
     subtitle: "Author, version, and publish Markdown skills your agents can use",
