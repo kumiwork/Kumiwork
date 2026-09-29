@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { deleteSkillForOrg, getSkillForOrg, getSkillVersionsForSkill } from "@agentfactory/db";
+import {
+  decomposeSkillMarkdown,
+  deleteSkillForOrg,
+  getSkillForOrg,
+  getSkillVersion,
+  getSkillVersionMarkdown,
+  getSkillVersionsForSkill,
+} from "@agentfactory/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ skillId: string }> }) {
@@ -9,7 +16,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ski
   const skill = await getSkillForOrg(skillId, ctx.orgId);
   if (!skill) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const versions = await getSkillVersionsForSkill(skillId);
-  return NextResponse.json({ skill, versions });
+  const currentVersion = skill.currentVersionId ? await getSkillVersion(skill.currentVersionId) : undefined;
+  const currentVersionMarkdown = currentVersion ? await getSkillVersionMarkdown(ctx.orgId, currentVersion) : undefined;
+  const currentVersionInstructions = currentVersionMarkdown
+    ? decomposeSkillMarkdown(currentVersionMarkdown).instructions
+    : undefined;
+  return NextResponse.json({ skill, versions, currentVersionInstructions });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ skillId: string }> }) {
