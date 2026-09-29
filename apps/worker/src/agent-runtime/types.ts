@@ -59,6 +59,7 @@ export interface RunInput {
   systemPrompt: string;
   model: ModelSpec;
   userText: string;
+  agentName: string;
   resumeSessionRef?: string;
   skillNames?: string[];
   outputSchema?: Record<string, unknown>;
