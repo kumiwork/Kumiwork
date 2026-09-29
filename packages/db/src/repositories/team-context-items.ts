@@ -65,10 +65,6 @@ export async function getTeamContextItem(id: number): Promise<TeamContextItem | 
   return row ? toItem(row) : undefined;
 }
 
-// Org-scoped by the denormalized column, exactly like listTeamContextItemsForOrg — unlike
-// getTeamContextItem (worker-only, unscoped), this is for the content-serving route, which
-// receives both ids from the URL and must not serve another tenant's blob just because a
-// numeric itemId happened to guess right. Mirrors getTaskContextItemForOrg.
 export async function getTeamContextItemForOrg(
   id: number,
   orgId: number,

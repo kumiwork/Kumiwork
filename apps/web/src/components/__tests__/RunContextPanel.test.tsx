@@ -24,7 +24,6 @@ const PROMPT = {
   ],
 };
 
-// A segment whose text is genuinely Markdown, distinct from the plain-prose fixtures above.
 const MARKDOWN_SEGMENT_PROMPT = {
   runId: 7,
   promptHash: "e".repeat(64),
