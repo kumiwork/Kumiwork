@@ -12,6 +12,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { TaskStaleDialog } from "@/components/TaskStaleDialog";
 import { CheckIcon, TrashIcon, EditIcon, RunIcon, StopIcon, XIcon } from "@/lib/icons";
 import { apiFetch } from "@/lib/api-client";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
 import { ContextDocumentsPanel } from "@/components/ContextDocumentsPanel";
 import { RunContextPanel } from "@/components/RunContextPanel";
 import { RunEvalPanel } from "@/components/RunEvalPanel";
@@ -636,17 +637,9 @@ export default function TaskDetailPage() {
 
             <section style={{ marginTop: 24 }}>
               <SectionLabel>{t("taskDetail.description")}</SectionLabel>
-              <p
-                style={{
-                  marginTop: 8,
-                  fontSize: 14,
-                  lineHeight: 1.65,
-                  color: "var(--color-neutral-300)",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {task.description || "—"}
-              </p>
+              <div style={{ marginTop: 8 }}>
+                <TaskDescription description={task.description} />
+              </div>
             </section>
 
             {task.acceptanceCriteria.length > 0 && (
@@ -1288,9 +1281,7 @@ export default function TaskDetailPage() {
                 </div>
                 <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
                   {selectedFile && workspace[selectedFile] !== undefined ? (
-                    <pre style={{ margin: 0, fontSize: 12, lineHeight: 1.7, fontFamily: "ui-monospace, monospace", color: "var(--color-neutral-200)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                      {workspace[selectedFile]}
-                    </pre>
+                    <ContentViewer key={selectedFile} content={workspace[selectedFile]} filename={selectedFile} />
                   ) : (
                     <div style={{ color: "var(--color-neutral-500)", fontSize: 13 }}>Select a file above.</div>
                   )}
@@ -1576,38 +1567,17 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   );
 }
 
-function MessageContent({ content }: { content: string }) {
-  const parts = content.split(/(```[\s\S]*?```)/g);
-  return (
-    <>
-      {parts.map((part, i) => {
-        const fence = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
-        if (fence) {
-          return (
-            <pre
-              key={i}
-              style={{
-                margin: "10px 0",
-                padding: "10px 14px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(0,0,0,0.25)",
-                fontSize: 12,
-                lineHeight: 1.6,
-                fontFamily: "ui-monospace, monospace",
-                color: "var(--color-neutral-200)",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                overflowX: "auto",
-              }}
-            >
-              {fence[2]}
-            </pre>
-          );
-        }
-        return <span key={i} style={{ whiteSpace: "pre-wrap" }}>{part}</span>;
-      })}
-    </>
-  );
+export function MessageContent({ content }: { content: string }) {
+  return <ContentViewer content={content} format="markdown" />;
+}
+
+export function TaskDescription({ description }: { description: string }) {
+  if (!description) {
+    return (
+      <p style={{ fontSize: 14, lineHeight: 1.65, color: "var(--color-neutral-300)" }}>—</p>
+    );
+  }
+  return <ContentViewer content={description} format="markdown" />;
 }
 
 const titleButtonStyle: React.CSSProperties = {
