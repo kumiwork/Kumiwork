@@ -31,7 +31,7 @@ async function main(): Promise<void> {
       cwd: "/workspace",
       permissionMode: "bypassPermissions",
       allowDangerouslySkipPermissions: true,
-      allowedTools: ["Read", "Glob", "Grep"],
+      tools: ["Read", "Glob", "Grep"],
     },
   })) {
     if (message.type === "result") {
