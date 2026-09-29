@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, TextInput, Textarea } from "@agentfactory/shared";
+import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, TextInput } from "@agentfactory/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import type { Agent, OverflowPolicy, Team } from "@agentfactory/core";
@@ -11,6 +11,7 @@ import { parseSharedContext, serializeSharedContext } from "@/lib/shared-context
 import { SharedContextPanels } from "@/components/SharedContextPanels";
 import { ContextDocumentsPanel } from "@/components/ContextDocumentsPanel";
 import { AgentSkillsPicker } from "@/components/AgentSkillsPicker";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 
 const SHARED_CONTEXT_MAX = 65536; // 64 KB
@@ -267,7 +268,7 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
           <label className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">
             {t("teamsV2.systemPromptLabel")}
           </label>
-          <Textarea
+          <EditablePreview
             rows={4}
             placeholder={t("teamsV2.systemPromptPlaceholder")}
             value={systemPrompt}
@@ -431,7 +432,7 @@ function AgentDetailPanel({ agent }: { agent: Agent }) {
           <label className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">
             {t("teamsV2.systemPromptLabel")}
           </label>
-          <Textarea
+          <EditablePreview
             rows={4}
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}

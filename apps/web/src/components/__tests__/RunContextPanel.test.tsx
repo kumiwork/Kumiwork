@@ -24,6 +24,13 @@ const PROMPT = {
   ],
 };
 
+// A segment whose text is genuinely Markdown, distinct from the plain-prose fixtures above.
+const MARKDOWN_SEGMENT_PROMPT = {
+  runId: 7,
+  promptHash: "e".repeat(64),
+  segments: [{ id: "agent_system_prompt", text: "## Reviewer\n\nBe **kind**." }],
+};
+
 // A run whose team had indexed documents: the retrieved layer contributed real text.
 const RETRIEVAL_PROMPT = {
   runId: 7,
@@ -110,6 +117,31 @@ describe("RunContextPanel", () => {
     await waitFor(() => expect(screen.getByText("Platform preamble")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Platform preamble"));
     expect(screen.getByText("You are an agent.")).toBeInTheDocument();
+  });
+
+  it("renders a segment's Markdown as formatted output, not literal syntax", async () => {
+    apiFetchMock.mockResolvedValue(MARKDOWN_SEGMENT_PROMPT);
+    renderPanel();
+
+    await waitFor(() => expect(screen.getByText("Agent system prompt")).toBeInTheDocument());
+    fireEvent.click(screen.getByText("Agent system prompt"));
+
+    expect(screen.getByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
+    expect(screen.queryByText("## Reviewer")).not.toBeInTheDocument();
+  });
+
+  it("lets a segment's exact raw text be viewed via its own raw toggle", async () => {
+    apiFetchMock.mockResolvedValue(MARKDOWN_SEGMENT_PROMPT);
+    renderPanel();
+
+    await waitFor(() => expect(screen.getByText("Agent system prompt")).toBeInTheDocument());
+    fireEvent.click(screen.getByText("Agent system prompt"));
+    expect(screen.getByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Raw" }));
+
+    expect(screen.queryByRole("heading", { name: "Reviewer" })).not.toBeInTheDocument();
+    expect(screen.getByText(/## Reviewer/)).toBeInTheDocument();
   });
 
   it("shows the joined prompt and hash in the raw view", async () => {
