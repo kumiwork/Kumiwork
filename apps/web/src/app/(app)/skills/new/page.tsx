@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Skill, SkillVersion } from "@agentfactory/core";
 import { Breadcrumb, Button, PageHeader, TextInput, Textarea } from "@agentfactory/shared";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -67,7 +68,7 @@ export default function NewSkillPage() {
         </Field>
 
         <Field label={t("skills.create.instructionsLabel")}>
-          <Textarea
+          <EditablePreview
             placeholder={t("skills.create.instructionsPlaceholder")}
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}

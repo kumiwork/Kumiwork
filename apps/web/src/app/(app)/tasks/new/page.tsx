@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Breadcrumb, GroupedSelect, PageHeader, Select, TextInput, Textarea, TooltipBubble } from "@agentfactory/shared";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
@@ -324,7 +325,7 @@ export default function NewTaskPage() {
 
         {/* Description */}
         <Field label={t("tasks.create.descriptionLabel")}>
-          <Textarea
+          <EditablePreview
             placeholder={t("tasks.create.descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}

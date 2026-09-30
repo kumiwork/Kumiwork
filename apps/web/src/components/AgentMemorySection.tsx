@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge, Button, Card, Textarea } from "@agentfactory/shared";
+import { Badge, Button, Card } from "@agentfactory/shared";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -210,7 +212,7 @@ function MemoryEntryEditForm({ draft, isBusy, onDraftChange, onSave, onCancel }:
 
   return (
     <div>
-      <Textarea value={draft} onChange={(e) => onDraftChange(e.target.value)} rows={3} />
+      <EditablePreview value={draft} onChange={(e) => onDraftChange(e.target.value)} rows={3} />
       <div className="mt-2 flex gap-2">
         <Button disabled={isBusy} onClick={onSave}>
           {t("agentMemory.saveButton")}
@@ -259,7 +261,7 @@ function MemoryEntryDisplay({ content, onEdit, onDelete }: MemoryEntryDisplayPro
 
   return (
     <div>
-      <p className="text-sm text-[var(--color-text)]">{content}</p>
+      <ContentViewer content={content} format="markdown" />
       <div className="mt-2 flex gap-2">
         <Button variant="secondary" onClick={onEdit}>
           {t("agentMemory.editButton")}

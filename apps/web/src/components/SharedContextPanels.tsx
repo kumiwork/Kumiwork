@@ -8,8 +8,9 @@ import {
   HardDrives,
   PencilSimple,
 } from "@phosphor-icons/react";
-import { Button, Badge, Textarea, TextInput } from "@agentfactory/shared";
+import { Button, Badge, TextInput } from "@agentfactory/shared";
 import { ChevronDownIcon, XIcon } from "@/lib/icons";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { useTranslation } from "@/lib/i18n/context";
 import type {
   SharedContextData,
@@ -159,7 +160,7 @@ function TextBody({
 }) {
   const { t } = useTranslation();
   return (
-    <Textarea
+    <EditablePreview
       value={text}
       onChange={(e) => onChange(e.target.value)}
       placeholder={t("teamsV2.textPlaceholder")}

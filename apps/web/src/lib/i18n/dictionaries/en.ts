@@ -656,6 +656,9 @@ const en = {
     documentsSize: "{size} KB",
     documentsUploadedBy: "Uploaded by {name}",
     documentsDelete: "Remove",
+    documentsPreview: "Preview",
+    documentsHidePreview: "Hide preview",
+    documentsPreviewFailed: "Couldn't load a preview of this document.",
     documentsTooLarge: "That file is larger than the 2 MB limit.",
     documentsUnsupportedType: "Only Markdown (.md) and plain text (.txt) files can be uploaded.",
     documentsUploadFailed: "Couldn't upload that file — it may already be in this team's documents.",
@@ -735,6 +738,7 @@ const en = {
     },
     detail: {
       noPublishedVersion: "Not published yet — this skill only has a draft.",
+      instructionsHeading: "Instructions",
       versionHistory: "Version history",
       draftLabel: "Draft",
       currentBadge: "Current",

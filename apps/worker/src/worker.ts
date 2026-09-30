@@ -698,6 +698,7 @@ const runWorker = new Worker<RunJobData>(
                 systemPrompt,
                 model: attemptModel,
                 userText: (triggeringMessage?.content ?? "") + issueContext + prFeedbackContext,
+                agentName: agent.name,
                 resumeSessionRef,
                 skillNames,
                 outputSchema: review ? REVIEW_OUTPUT_SCHEMA : undefined,
