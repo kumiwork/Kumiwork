@@ -5,7 +5,7 @@ import { SKILL_DIR } from "./skill-paths";
 
 const log = createLogger("skills-materialize");
 
-export { SKILL_DIR, SKILL_EXCLUDE_PATTERN } from "./skill-paths";
+export { SKILL_DIR, SKILL_EXCLUDE_PATTERNS } from "./skill-paths";
 
 // Writes each of the agent's pinned skill versions into the sandbox at
 // .claude/skills/<slug>/SKILL.md, so the Claude Agent SDK discovers and can load them. Never

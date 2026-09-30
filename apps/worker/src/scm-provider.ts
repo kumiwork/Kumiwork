@@ -3,7 +3,7 @@ import { getScmProvider, parseIssueReferenceAcrossProviders, resolveScmConnectio
 import type { CloneTarget, OpenedPullRequest, PullRequestFeedbackComment, ScmIssue } from "@agentfactory/scm";
 import type { SandboxProvider } from "./sandbox/types";
 import { TASK_DOCUMENT_EXCLUDE_PATTERN } from "./task-document-paths";
-import { SKILL_EXCLUDE_PATTERN } from "./skill-paths";
+import { SKILL_EXCLUDE_PATTERNS } from "./skill-paths";
 import { PYTHON_VENV_EXCLUDE_PATTERN } from "./dependency-setup";
 import { platformGitEnv, refuseUnsafeGitConfig, unsafeGitConfigError, unsafeGitConfigKeys } from "./platform-git";
 import { keepTail, maskSecrets } from "./secret-masking";
@@ -15,7 +15,7 @@ export type GitHubIssue = ScmIssue;
 
 // Every path a sandbox checkout writes into that must never end up in the user's PR. Anything
 // added here also needs .git/info/exclude taught about it in cloneIntoSandbox below.
-const GIT_EXCLUDE_PATTERNS = [TASK_DOCUMENT_EXCLUDE_PATTERN, SKILL_EXCLUDE_PATTERN, PYTHON_VENV_EXCLUDE_PATTERN];
+const GIT_EXCLUDE_PATTERNS = [TASK_DOCUMENT_EXCLUDE_PATTERN, ...SKILL_EXCLUDE_PATTERNS, PYTHON_VENV_EXCLUDE_PATTERN];
 
 // Same slugify shape as the org-name idiom in apps/web/src/app/api/auth/register/route.ts,
 // trimmed so a long task title can't run the branch name away. Collapses to "" for a title with

@@ -6,4 +6,6 @@
 // not a free choice of directory name the way TASK_DOCUMENT_DIR is.
 export const SKILL_DIR = ".claude/skills";
 
-export const SKILL_EXCLUDE_PATTERN = "/.claude/skills/";
+export const CODEX_SKILL_DIR = ".agents/skills";
+
+export const SKILL_EXCLUDE_PATTERNS = ["/.claude/skills/", "/.agents/skills/"];
