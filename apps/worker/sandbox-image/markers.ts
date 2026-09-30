@@ -1,4 +1,3 @@
-// Must match apps/worker/sandbox-image/markers.ts, which every turn-runner script imports.
 export const RESULT_MARKER = "__RESULT__";
 export const EVENT_MARKER = "__EVENT__";
 export const ERROR_MARKER = "__ERROR__";
