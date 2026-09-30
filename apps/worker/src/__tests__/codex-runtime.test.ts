@@ -33,6 +33,7 @@ function baseInput() {
     systemPrompt: "Be helpful.",
     model: { family: "openai" as const, id: "gpt-test", maxTokens: 8192 },
     userText: "Fix the bug.",
+    agentName: "Luna Developer",
   };
 }
 
@@ -64,6 +65,10 @@ describe("codexRuntime", () => {
       SYSTEM_PROMPT: "Be helpful.",
       USER_TEXT: "Fix the bug.",
       MODEL_ID: "gpt-test",
+      GIT_AUTHOR_NAME: "Luna Developer",
+      GIT_AUTHOR_EMAIL: "agent@agentfactory.local",
+      GIT_COMMITTER_NAME: "Luna Developer",
+      GIT_COMMITTER_EMAIL: "agent@agentfactory.local",
       RESUME_SESSION_REF: "thread-0",
       OUTPUT_SCHEMA: JSON.stringify({ type: "object" }),
       AGENT_TURN_KIND: "review",
