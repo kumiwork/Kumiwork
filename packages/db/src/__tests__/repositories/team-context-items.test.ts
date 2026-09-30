@@ -11,6 +11,7 @@ import {
   createTeamContextItem,
   deleteTeamContextItemForOrg,
   getTeamContextItem,
+  getTeamContextItemForOrg,
   listTeamContextItemsForOrg,
   markTeamContextItemIndexed,
   markTeamContextItemIndexing,
@@ -65,6 +66,18 @@ describe("team-context-items repository", () => {
     expect(item.error).toBeUndefined();
     expect(item.indexedAt).toBeUndefined();
     await expect(getTeamContextItem(item.id)).resolves.toEqual(item);
+  });
+
+  it("gets an item scoped to its own org, and nothing for another org", async () => {
+    const { org, team } = await setupTeamWithBlob();
+    const otherOrg = await insertOrg();
+    const item = await createTeamContextItem({
+      teamId: team.id, orgId: org.id, title: "Engineering handbook", sizeBytes: 42, sha256: SHA_A, mime: "text/markdown",
+    });
+    if (!item) throw new Error("expected the item to be created");
+
+    await expect(getTeamContextItemForOrg(item.id, org.id)).resolves.toEqual(item);
+    await expect(getTeamContextItemForOrg(item.id, otherOrg.id)).resolves.toBeUndefined();
   });
 
   // The route turns this undefined into a 409. Two items over one blob would both match

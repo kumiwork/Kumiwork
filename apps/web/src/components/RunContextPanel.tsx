@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PromptSegment, Run, RunContextRetrieval, RunPrompt, RunStatus } from "@agentfactory/core";
 import { compactSelectStyle, EmptyState, Select } from "@agentfactory/shared";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/paths";
@@ -242,21 +243,7 @@ export function RunContextPanel({ runs }: { runs: Run[] }) {
               {t("taskDetail.contextPromptHash")}: {prompt.promptHash}
             </p>
           )}
-          <pre
-            style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-divider)",
-              borderRadius: "var(--radius-md)",
-              color: "var(--color-text)",
-              fontSize: 12,
-              lineHeight: 1.6,
-              overflowX: "auto",
-              padding: 16,
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {prompt.segments.map((s) => s.text).join("")}
-          </pre>
+          <ContentViewer content={prompt.segments.map((s) => s.text).join("")} format="text" />
         </div>
       )}
 
@@ -351,28 +338,14 @@ function SegmentRow({
         <ProvenanceGroup state={retrievals} onRetry={onRetryRetrievals} />
       )}
       {expanded && !omitted && (
-        <pre
-          style={{
-            borderTop: "1px solid var(--color-divider)",
-            color: "var(--color-neutral-300)",
-            fontSize: 12,
-            lineHeight: 1.6,
-            margin: 0,
-            maxHeight: 420,
-            overflow: "auto",
-            padding: "12px 14px",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {segment.text}
-        </pre>
+        <div style={{ borderTop: "1px solid var(--color-divider)", padding: "12px 14px" }}>
+          <ContentViewer content={segment.text} format="markdown" allowRawToggle maxHeight={420} />
+        </div>
       )}
     </div>
   );
 }
 
-// Which documents the excerpts above came from. The row text itself is not repeated here — it is
-// already in the <pre> below, verbatim, exactly as the model received it.
 function ProvenanceGroup({ state, onRetry }: { state: RetrievalsFetchState; onRetry?: () => void }) {
   const { t } = useTranslation();
 

@@ -65,6 +65,17 @@ export async function getTeamContextItem(id: number): Promise<TeamContextItem | 
   return row ? toItem(row) : undefined;
 }
 
+export async function getTeamContextItemForOrg(
+  id: number,
+  orgId: number,
+): Promise<TeamContextItem | undefined> {
+  const [row] = await db
+    .select()
+    .from(teamContextItems)
+    .where(and(eq(teamContextItems.id, id), eq(teamContextItems.orgId, orgId)));
+  return row ? toItem(row) : undefined;
+}
+
 // Same signature and same guarantee as before, now one statement against the denormalized
 // org_id instead of a select-then-delete behind an innerJoin(teams, …). run_context_retrievals
 // no longer has a DB-level FK on item_id (the id space collides with task_context_items), so the

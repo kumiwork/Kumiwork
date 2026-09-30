@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Breadcrumb, GroupedSelect, PageHeader, TextInput, Textarea } from "@agentfactory/shared";
+import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
@@ -111,7 +112,7 @@ export default function EditTaskPage() {
 
       <form onSubmit={handleSubmit} style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 20 }}>
         <Field label={t("tasks.create.descriptionLabel")}>
-          <Textarea
+          <EditablePreview
             placeholder={t("tasks.create.descriptionPlaceholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}

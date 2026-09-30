@@ -4,6 +4,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { TASK_CONTEXT_MIME_CONFIG, isTaskContextMimeAllowed, taskContextExtensionMime } from "@agentfactory/core";
 import type { OrgMember, TaskContextItem, TeamContextItem } from "@agentfactory/core";
 import { Badge, EmptyState } from "@agentfactory/shared";
+import { ContentViewer } from "@/components/content-viewer/ContentViewer";
 import { apiFetch } from "@/lib/api-client";
 import {
   CONTEXT_ITEM_STATUS_LABEL_KEYS,
@@ -115,6 +116,9 @@ export function ContextDocumentsPanel({
   const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<{ itemId: number; status: "loading" | "loaded" | "failed"; content?: string } | null>(
+    null,
+  );
 
   const reload = useCallback(async () => {
     try {
@@ -187,11 +191,28 @@ export function ContextDocumentsPanel({
     }
   }
 
+  async function togglePreview(itemId: number) {
+    if (preview?.itemId === itemId) {
+      setPreview(null);
+      return;
+    }
+    setPreview({ itemId, status: "loading" });
+    try {
+      const res = await fetch(`${basePath}/${itemId}/content`);
+      if (!res.ok) throw new Error();
+      const content = await res.text();
+      setPreview({ itemId, status: "loaded", content });
+    } catch {
+      setPreview({ itemId, status: "failed" });
+    }
+  }
+
   async function handleDelete(itemId: number) {
     setErrorKey(null);
     try {
       await apiFetch<void>(`${basePath}/${itemId}`, { method: "DELETE" });
       setItems((prev) => prev.filter((item) => item.id !== itemId));
+      setPreview((prev) => (prev?.itemId === itemId ? null : prev));
     } catch {
       setErrorKey("teamsV2.documentsDeleteFailed");
     }
@@ -266,6 +287,14 @@ export function ContextDocumentsPanel({
                     <Badge tone={CONTEXT_ITEM_STATUS_TONES[item.status]}>
                       {t(CONTEXT_ITEM_STATUS_LABEL_KEYS[item.status])}
                     </Badge>
+                    {!item.mime.startsWith("image/") && (
+                      <button
+                        onClick={() => void togglePreview(item.id)}
+                        className="shrink-0 cursor-pointer text-xs text-[var(--color-neutral-500)] transition-colors hover:text-[var(--color-neutral-300)]"
+                      >
+                        {preview?.itemId === item.id ? t("teamsV2.documentsHidePreview") : t("teamsV2.documentsPreview")}
+                      </button>
+                    )}
                     {!closed && (
                       <button
                         onClick={() => void handleDelete(item.id)}
@@ -280,6 +309,17 @@ export function ContextDocumentsPanel({
                       {t("teamsV2.documentErrorPrefix", { error: item.error })}
                     </p>
                   ) : null}
+                  {preview?.itemId === item.id && (
+                    <div className="px-4 pb-3">
+                      {preview.status === "loading" ? (
+                        <p className="text-xs text-[var(--color-neutral-500)]">{t("common.loading")}</p>
+                      ) : preview.status === "failed" ? (
+                        <p className="text-xs text-red-400">{t("teamsV2.documentsPreviewFailed")}</p>
+                      ) : (
+                        <ContentViewer content={preview.content ?? ""} filename={item.title} maxHeight={320} />
+                      )}
+                    </div>
+                  )}
                 </div>
               </Fragment>
             );

@@ -25,6 +25,7 @@ const MEMORY_BASE_MB = 1024;
 const MEMORY_MAX_MB = 4096;
 const MEMORY_GROWTH_FACTOR = 2;
 const MEMORY_GROWTH_THRESHOLD = 0.8; // fraction of the current cap that triggers a grow
+const DEFAULT_PIDS_LIMIT = 512;
 
 function memoryHostConfig(mb: number): { Memory: number; MemorySwap: number } {
   const bytes = mb * MB;
@@ -181,7 +182,7 @@ export class DockerSandboxProvider implements SandboxProvider {
         SecurityOpt: ["no-new-privileges"],
         ...memoryHostConfig(spec.memoryLimitMb ?? MEMORY_BASE_MB),
         NanoCpus: (spec.cpuLimit ?? 1) * 1e9,
-        PidsLimit: spec.pidsLimit ?? 128,
+        PidsLimit: spec.pidsLimit ?? DEFAULT_PIDS_LIMIT,
         AutoRemove: false,
         ExtraHosts: ["host.docker.internal:host-gateway"],
         Mounts: (spec.volumes ?? []).map((volume) => ({
