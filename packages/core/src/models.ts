@@ -17,12 +17,14 @@ export const DEFAULT_MODEL_ID = "claude-sonnet-5";
 
 const PROVIDER_RUNTIME: Record<ModelProvider, RuntimeKind> = {
   anthropic: "claude-code",
+  openai: "codex",
 };
 
 // Explicit list, not derived from MODEL_CATALOG order — keeps Fable's exclusion a deliberate
 // fact in the data rather than an accident of catalog ordering.
 const ESCALATION_LADDERS: Record<ModelProvider, readonly string[]> = {
   anthropic: ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-5"],
+  openai: [],
 };
 
 export function getCatalogEntry(id: string): ModelCatalogEntry | undefined {

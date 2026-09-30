@@ -94,9 +94,9 @@ export interface OrgMember {
 
 export type AgentMode = "manual" | "automatic";
 
-export type RuntimeKind = "claude-code";
+export type RuntimeKind = "claude-code" | "codex";
 
-export type ModelProvider = "anthropic";
+export type ModelProvider = "anthropic" | "openai";
 
 export interface ModelSpec {
   family: ModelProvider;

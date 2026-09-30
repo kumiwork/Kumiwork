@@ -24,6 +24,14 @@ export const MODEL_PROVIDERS: Record<ModelProvider, ModelProviderProfile> = {
       headers["x-api-key"] = apiKey;
     },
   },
+  openai: {
+    upstreamBaseUrl: "https://api.openai.com",
+    allowedPaths: new Set(["/v1/responses"]),
+    healthPaths: new Set(),
+    attachKey: (headers, apiKey) => {
+      headers.authorization = `Bearer ${apiKey}`;
+    },
+  },
 };
 
 export function modelProxyRoutePrefix(provider: ModelProvider): string {

@@ -12,6 +12,7 @@ export const MODEL_PROXY_SANDBOX_HOST = process.env.MODEL_PROXY_SANDBOX_HOST ?? 
 
 const PLATFORM_KEY_ENV: Record<ModelProvider, string> = {
   anthropic: "ANTHROPIC_API_KEY",
+  openai: "OPENAI_API_KEY",
 };
 
 const defaultStore = new RunCredentialStore();
