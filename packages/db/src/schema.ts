@@ -859,6 +859,25 @@ export const repoMaps = pgTable(
   ],
 );
 
+export const workerJobOutcomes = pgTable(
+  "worker_job_outcomes",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    orgId: integer("org_id")
+      .notNull()
+      .references(() => orgs.id, { onDelete: "cascade" }),
+    jobType: text("job_type").notNull(),
+    subject: text("subject").notNull(),
+    status: text("status").notNull(),
+    reason: text("reason"),
+    error: text("error"),
+    durationMs: integer("duration_ms").notNull(),
+    details: jsonb("details").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("worker_job_outcomes_org_type_created").on(table.orgId, table.jobType, table.createdAt)],
+);
+
 export const CODEBASE_SETUP_COMMAND_MAX_CHARS = 4096;
 
 export const codebaseSettings = pgTable(
