@@ -1,6 +1,15 @@
 import type { CloneTarget } from "@agentfactory/scm";
 import type { SandboxProvider } from "./sandbox/types";
-import { platformGitEnv, refuseUnsafeGitConfig, unsafeGitConfigError, unsafeGitConfigKeys } from "./platform-git";
+import {
+  platformGitEnv,
+  refuseUnsafeGitConfig,
+  retryOnRepoNotFound,
+  unsafeGitConfigError,
+  unsafeGitConfigKeys,
+} from "./platform-git";
+import { keepTail, maskSecrets } from "./secret-masking";
+
+const MAX_CHECKOUT_ERROR_DETAIL_CHARS = 2_000;
 
 // Matches eval-judge.ts's MAX_ARTEFACT_CHARS — same kind of text (a diff), same codebase, one
 // number to reason about rather than a second independently-chosen cap.
@@ -194,7 +203,7 @@ export async function checkoutPullRequest(
   prNumber: number,
   baseBranch: string,
 ): Promise<void> {
-  const script = `
+  const script = `${retryOnRepoNotFound}
 if [ -d /workspace/.git ]; then
   CURRENT_REMOTE=$(git -C /workspace remote get-url origin 2>/dev/null)
   case "$CURRENT_REMOTE" in
@@ -202,7 +211,7 @@ if [ -d /workspace/.git ]; then
     *) echo REPO_MISMATCH; exit 0 ;;
   esac
 else
-  git clone --no-checkout "$CLONE_URL" /workspace
+  retry_on_repo_not_found git clone --no-checkout "$CLONE_URL" /workspace
   CLONE_STATUS=$?
   cd /workspace 2>/dev/null && git remote set-url origin "$REMOTE_URL"
   if [ "$CLONE_STATUS" -ne 0 ]; then echo CHECKOUT_FAILED; exit 0; fi
@@ -210,7 +219,7 @@ fi
 cd /workspace || { echo CHECKOUT_FAILED; exit 0; }
 ${refuseUnsafeGitConfig("/workspace")}
 git remote set-url origin "$CLONE_URL"
-git fetch origin "pull/$PR_NUMBER/head:review/pr-$PR_NUMBER" "$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH" --force --quiet
+retry_on_repo_not_found git fetch origin "pull/$PR_NUMBER/head:review/pr-$PR_NUMBER" "$BASE_BRANCH:refs/remotes/origin/$BASE_BRANCH" --force --quiet
 FETCH_STATUS=$?
 git remote set-url origin "$REMOTE_URL"
 if [ "$FETCH_STATUS" -ne 0 ]; then echo CHECKOUT_FAILED; exit 0; fi
@@ -219,6 +228,7 @@ if [ $? -ne 0 ]; then echo CHECKOUT_FAILED; exit 0; fi
 echo CHECKOUT_OK`;
 
   let stdout = "";
+  let stderr = "";
   for await (const chunk of sandboxProvider.exec(sandboxId, ["sh", "-c", script], {
     env: {
       ...platformGitEnv(),
@@ -230,6 +240,7 @@ echo CHECKOUT_OK`;
     },
   })) {
     if (chunk.stream === "stdout") stdout += chunk.data;
+    else stderr += chunk.data;
   }
 
   const unsafeKeys = unsafeGitConfigKeys(stdout);
@@ -238,7 +249,10 @@ echo CHECKOUT_OK`;
     throw new Error(`Sandbox workspace already contains a different repository than "${target.repoFullName}"`);
   }
   if (!stdout.includes("CHECKOUT_OK")) {
-    throw new Error(`Failed to check out pull request #${prNumber} into sandbox workspace`);
+    const gitOutput = keepTail(maskSecrets(stderr, [target.cloneUrl]).trim(), MAX_CHECKOUT_ERROR_DETAIL_CHARS);
+    throw new Error(
+      `Failed to check out pull request #${prNumber} into sandbox workspace${gitOutput ? `: ${gitOutput}` : ""}`,
+    );
   }
 }
 

@@ -5,7 +5,13 @@ import type { SandboxProvider } from "./sandbox/types";
 import { TASK_DOCUMENT_EXCLUDE_PATTERN } from "./task-document-paths";
 import { SKILL_EXCLUDE_PATTERNS } from "./skill-paths";
 import { PYTHON_VENV_EXCLUDE_PATTERN } from "./dependency-setup";
-import { platformGitEnv, refuseUnsafeGitConfig, unsafeGitConfigError, unsafeGitConfigKeys } from "./platform-git";
+import {
+  platformGitEnv,
+  refuseUnsafeGitConfig,
+  retryOnRepoNotFound,
+  unsafeGitConfigError,
+  unsafeGitConfigKeys,
+} from "./platform-git";
 import { keepTail, maskSecrets } from "./secret-masking";
 
 const MAX_CLONE_ERROR_DETAIL_CHARS = 2_000;
@@ -156,6 +162,7 @@ export async function cloneIntoSandbox(
   target: CloneTarget,
 ): Promise<void> {
   const script = `
+${retryOnRepoNotFound}
 # Makes git blind to the directories task documents and pinned skills are materialised into (see
 # task-documents.ts and skills-materialize.ts). Load-bearing, not hygiene: pushChangesIfDirty runs
 # \`git add -A\` and decides whether there is anything to push from \`git status --porcelain\`, so
@@ -182,7 +189,7 @@ if [ -d /workspace/.git ]; then
     *) echo REPO_MISMATCH ;;
   esac
 else
-  git clone "$CLONE_URL" /workspace
+  retry_on_repo_not_found git clone "$CLONE_URL" /workspace
   CLONE_STATUS=$?
   cd /workspace 2>/dev/null && git checkout -b "$BRANCH_NAME"
   CHECKOUT_STATUS=$?
@@ -350,6 +357,7 @@ export async function pushChangesIfDirty(
   const token = await provider.mintPushToken(target);
 
   const script = `
+${retryOnRepoNotFound}
 cd /workspace || { echo PUSH_FAILED; exit 0; }
 ${refuseUnsafeGitConfig("/workspace")}
 
@@ -397,7 +405,7 @@ else
   # the cached origin/$BRANCH_NAME ref above is stale, and a plain push against a stale base is
   # exactly what git correctly rejects as non-fast-forward. Merge, never rebase, so the push below
   # stays a fast-forward instead of rewriting history the remote already has.
-  git fetch origin "$BRANCH_NAME" --quiet
+  retry_on_repo_not_found git fetch origin "$BRANCH_NAME" --quiet
   MERGE_CONFLICT=0
   if git rev-parse --verify "origin/$BRANCH_NAME" >/dev/null 2>&1 && ! git merge-base --is-ancestor "origin/$BRANCH_NAME" HEAD 2>/dev/null; then
     # Same -c user.email/user.name as the commit step above, and for the same reason: a fresh
@@ -447,7 +455,7 @@ else
     # push even reaches GitHub. This is the hook's own documented bypass, not a real test skip:
     # GitHub Actions (test.yml) still runs the full suite on the pushed branch, and a human reviews
     # the draft PR before merge either way.
-    git push --no-verify -u origin "$BRANCH_NAME"
+    retry_on_repo_not_found git push --no-verify -u origin "$BRANCH_NAME"
     PUSH_STATUS=$?
     git remote set-url origin "https://github.com/$REPO_FULL_NAME.git"
     if [ "$COMMIT_STATUS" -eq 0 ] && [ "$PUSH_STATUS" -eq 0 ]; then echo PUSH_OK; else echo PUSH_FAILED; fi
