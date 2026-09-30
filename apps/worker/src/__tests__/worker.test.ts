@@ -103,6 +103,14 @@ const resolveSandboxImageMock = vi.fn();
 vi.mock("../sandbox-image-select", () => ({
   resolveSandboxImage: (...args: unknown[]) => resolveSandboxImageMock(...args),
   SANDBOX_IMAGE_NODE: "arata-sandbox-node:local",
+  SANDBOX_IMAGE_PYTHON: "arata-sandbox-python:local",
+  SANDBOX_IMAGE_JAVA: "arata-sandbox-java:local",
+}));
+
+vi.mock("../sandbox-image-check", () => ({
+  findProblemImages: () => [],
+  resolveSandboxImageCheckMode: () => "off",
+  runSandboxImageCheck: async () => [],
 }));
 
 vi.mock("../pr-review", async () => {

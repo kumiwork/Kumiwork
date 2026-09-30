@@ -111,7 +111,7 @@ import {
 import { resolveEscalation } from "./model-escalation";
 import { ensureRepoMap, warmRepoMap } from "./repo-map";
 import { runDependencySetup, type DependencySetupOutcome } from "./dependency-setup";
-import { resolveSandboxImage, SANDBOX_IMAGE_NODE } from "./sandbox-image-select";
+import { resolveSandboxImage, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_PYTHON } from "./sandbox-image-select";
 import { dependencyCacheEnv, dependencyCacheVolume } from "./sandbox-cache";
 import { issueSandboxModelCredential, startModelProxy } from "./sandbox-model-access";
 import { buildRetrievalQuery, retrieveContext, type RetrievedContext } from "./context-retrieval";
@@ -126,10 +126,22 @@ import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicato
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
 import { createLogger } from "@agentfactory/logger";
+import { findProblemImages, resolveSandboxImageCheckMode, runSandboxImageCheck } from "./sandbox-image-check";
 
 const log = createLogger("worker");
 
 const sandboxProvider = new DockerSandboxProvider();
+
+const sandboxImageCheckMode = resolveSandboxImageCheckMode(process.env.SANDBOX_IMAGE_CHECK);
+const sandboxImageReports = await runSandboxImageCheck(sandboxImageCheckMode, [
+  SANDBOX_IMAGE_NODE,
+  SANDBOX_IMAGE_PYTHON,
+  SANDBOX_IMAGE_JAVA,
+]);
+if (sandboxImageCheckMode === "enforce" && findProblemImages(sandboxImageReports).some((report) => report.status !== "missing")) {
+  log.error("Refusing to start: sandbox images are stale or unlabeled and SANDBOX_IMAGE_CHECK=enforce");
+  process.exit(1);
+}
 
 // One sandbox per active session, kept warm across runs (ARCHITECTURE.md §4) — the SDK's own
 // resume mechanism needs the same container's filesystem across turns (see the sessions.sandboxId
