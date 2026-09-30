@@ -64,6 +64,40 @@ describe("POST /api/tasks", () => {
     expect(enqueueRepoMapWarmJob).not.toHaveBeenCalled();
   });
 
+  it("stores acceptance criteria that match the domain shape", async () => {
+    createTask.mockResolvedValue({ id: 72, orgId: 3 });
+    const acceptanceCriteria = [{ text: "It works", done: false }];
+
+    const res = await post({ title: "T", acceptanceCriteria });
+
+    expect(res.status).toBe(201);
+    expect(createTask).toHaveBeenCalledWith(3, 1, expect.objectContaining({ acceptanceCriteria }));
+  });
+
+  it("defaults acceptance criteria to an empty list when omitted", async () => {
+    createTask.mockResolvedValue({ id: 73, orgId: 3 });
+
+    await post({ title: "T" });
+
+    expect(createTask).toHaveBeenCalledWith(3, 1, expect.objectContaining({ acceptanceCriteria: [] }));
+  });
+
+  it.each([
+    ["plain strings", ["It works"]],
+    ["a non-array", "It works"],
+    ["an entry missing done", [{ text: "It works" }]],
+    ["an entry with a non-string text", [{ text: 5, done: false }]],
+    ["a null entry", [null]],
+  ])("400s without creating anything when acceptanceCriteria is %s", async (_name, acceptanceCriteria) => {
+    const res = await post({ title: "T", acceptanceCriteria });
+
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({
+      error: "acceptanceCriteria must be an array of { text: string, done: boolean }",
+    });
+    expect(createTask).not.toHaveBeenCalled();
+  });
+
   // The one-line omission behind task T-070's missing repo map: every other entry point that can
   // set a codebase warms the cache, and task creation — the most common one — did not.
   it("warms the repo map when the task is created with a codebase", async () => {
