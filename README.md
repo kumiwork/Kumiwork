@@ -138,11 +138,26 @@ Log in with the demo credentials above.
 The worker is what actually executes an agent turn, inside a sandboxed Docker container. It's not
 required to click around the UI mock, but is needed for real runs.
 
-Build the sandbox image it uses (referenced by `SANDBOX_IMAGE` in `.env.local`):
+Build the sandbox images it uses, one per language (`node`, `python`, `java`), tagged
+`arata-sandbox-<lang>:local`. The build script stamps each image with a hash of
+`apps/worker/sandbox-image/`:
 
 ```bash
-docker build -t agentfactory-sandbox:local apps/worker/sandbox-image
+scripts/build-sandbox-images.sh
 ```
+
+To build a single target by hand, pass the same build arg:
+
+```bash
+docker build --target node --build-arg "SANDBOX_SOURCE_HASH=$(scripts/sandbox-image-hash.sh)" \
+  -t arata-sandbox-node:local apps/worker/sandbox-image
+```
+
+Check that all three work with `scripts/verify-sandbox-image.sh`. Rebuild after any change under
+`apps/worker/sandbox-image/`: at startup the worker compares each image's hash label with the
+current source and warns loudly when an image is stale (`SANDBOX_IMAGE_CHECK=enforce` makes it exit
+instead, `off` disables the check). Override the image tags with `SANDBOX_IMAGE_NODE`,
+`SANDBOX_IMAGE_PYTHON` and `SANDBOX_IMAGE_JAVA`.
 
 Then start the worker:
 
