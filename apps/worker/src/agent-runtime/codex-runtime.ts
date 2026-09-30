@@ -1,5 +1,6 @@
 import type { SandboxProvider } from "../sandbox/types";
 import { CODEX_SKILL_DIR } from "../skill-paths";
+import { agentGitIdentityEnv } from "./claude-code-runtime";
 import { readAgentTurnOutput } from "./marker-protocol";
 import type { AgentRuntime, AgentTurnResult, ModelEndpoint, RunInput, RuntimeCapabilities, RuntimeEvent } from "./types";
 
@@ -25,6 +26,7 @@ class CodexRuntime implements AgentRuntime {
       SYSTEM_PROMPT: input.systemPrompt,
       USER_TEXT: input.userText,
       MODEL_ID: input.model.id,
+      ...agentGitIdentityEnv(input.agentName),
       ...(input.modelEndpoint ? codexModelEnv(input.modelEndpoint) : {}),
     };
     if (input.resumeSessionRef) env.RESUME_SESSION_REF = input.resumeSessionRef;
