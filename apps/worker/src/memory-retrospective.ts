@@ -16,6 +16,7 @@ import { createLogger } from "@agentfactory/logger";
 import { checkLessonEvidence } from "./lesson-evidence";
 import { writeMemoryEntry as writeMemoryEntryDefault } from "./memory-write";
 import { maskSecrets } from "./secret-masking";
+import { describeError, recordJobOutcome, type JobOutcomeFields } from "./job-outcome";
 import {
   buildSessionTimeline,
   escapeTimelineText,
@@ -256,23 +257,29 @@ function prepareEvents(rows: SessionEventRow[], decrypt: RetrospectiveDeps["decr
   });
 }
 
+interface StoreCounts {
+  accepted: number;
+  reinforced: number;
+  rejected: number;
+}
+
 interface Prepared {
   timeline: SessionTimeline;
   knownLessons: Map<number, string>;
   userMessage: string;
 }
 
-async function prepare(orgId: number, agentId: number, sessionId: number, d: RetrospectiveDeps): Promise<Prepared | undefined> {
+async function prepare(orgId: number, agentId: number, sessionId: number, d: RetrospectiveDeps): Promise<Prepared | { skip: string }> {
   const agent = await d.getAgent(agentId);
   const session = await d.getSession(sessionId);
   if (!agent || agent.orgId !== orgId || !session || session.agentId !== agentId) {
     log.warn("Retrospective ids don't belong together; not judging", { orgId, agentId, sessionId });
-    return undefined;
+    return { skip: "ids_mismatch" };
   }
   const runs = await d.getRunsForSession(sessionId);
   if (runs.length === 0) {
     log.info("No runs for session; nothing to review", { sessionId });
-    return undefined;
+    return { skip: "no_runs" };
   }
   const [task, messages, events] = await Promise.all([
     d.getTaskBySessionId(sessionId),
@@ -287,7 +294,7 @@ async function prepare(orgId: number, agentId: number, sessionId: number, d: Ret
   });
   if (!timeline.hasUserMessage && !timeline.hasFailure) {
     log.info("Nothing to review", { sessionId });
-    return undefined;
+    return { skip: "no_user_message_or_failure" };
   }
   const known = await d.readAgentMemoryEntries(orgId, agentId);
   return {
@@ -297,7 +304,7 @@ async function prepare(orgId: number, agentId: number, sessionId: number, d: Ret
   };
 }
 
-async function store(orgId: number, agentId: number, sessionId: number, prepared: Prepared, result: JudgeResult, d: RetrospectiveDeps) {
+async function store(orgId: number, agentId: number, sessionId: number, prepared: Prepared, result: JudgeResult, d: RetrospectiveDeps): Promise<StoreCounts> {
   const counts = { accepted: 0, reinforced: 0, rejected: 0 };
   for (const raw of result.items) {
     const verdict = checkLessonEvidence(raw, prepared.timeline.sources, prepared.knownLessons, []);
@@ -335,6 +342,7 @@ async function store(orgId: number, agentId: number, sessionId: number, prepared
     }
   }
   log.info("Retrospective verdict", { sessionId, reasoning: result.reasoning, ...counts });
+  return counts;
 }
 
 export async function processMemoryRetrospectiveJob(
@@ -344,26 +352,37 @@ export async function processMemoryRetrospectiveJob(
   deps: Partial<RetrospectiveDeps> = {},
 ): Promise<void> {
   const d = { ...defaultDeps, ...deps };
-  let prepared: Prepared | undefined;
+  const startedAt = Date.now();
+  const record = (outcome: Pick<JobOutcomeFields, "status" | "reason" | "error" | "details">) =>
+    recordJobOutcome(startedAt, { orgId, jobType: "memory_retrospective", subject: `session:${sessionId}`, ...outcome });
+
+  let prepared: Prepared | { skip: string };
   try {
     prepared = await prepare(orgId, agentId, sessionId, d);
   } catch (err) {
     log.error("Memory retrospective setup failed", { orgId, agentId, sessionId, err });
+    await record({ status: "failed", reason: "setup_failed", error: describeError(err), details: { agentId } });
     return;
   }
-  if (!prepared) return;
+  if ("skip" in prepared) {
+    await record({ status: "skipped", reason: prepared.skip, details: { agentId } });
+    return;
+  }
 
   let result: JudgeResult;
   try {
     result = await d.judge(prepared.userMessage);
   } catch (err) {
     log.error("Memory retrospective judge call failed", { orgId, agentId, sessionId, err });
+    await record({ status: "failed", reason: "judge_failed", error: describeError(err), details: { agentId } });
     if (err instanceof Anthropic.APIError) throw err;
     return;
   }
   if (result.truncated) {
     log.warn("Judge output hit max_tokens; storing nothing", { sessionId });
+    await record({ status: "failed", reason: "judge_truncated", details: { agentId } });
     return;
   }
-  await store(orgId, agentId, sessionId, prepared, result, d);
+  const counts = await store(orgId, agentId, sessionId, prepared, result, d);
+  await record({ status: "completed", details: { agentId, ...counts } });
 }
