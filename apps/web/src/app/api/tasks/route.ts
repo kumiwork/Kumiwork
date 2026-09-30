@@ -4,7 +4,7 @@
 import { NextResponse } from "next/server";
 import { createTask, createTaskContextItem, insertContentBlob, listTasks } from "@agentfactory/db";
 import { enqueueRepoMapWarmJob, enqueueTaskContextIngestJob } from "@agentfactory/queue";
-import { buildModelSpec, isValidModelId } from "@agentfactory/core";
+import { buildModelSpec, isValidModelId, type AcceptanceCriterion } from "@agentfactory/core";
 import type { ExternalAttachment } from "@agentfactory/integrations";
 import { createBlobStore } from "@agentfactory/storage";
 import { requireAuthContext } from "@/server/auth";
@@ -13,6 +13,19 @@ import { MAX_UPLOAD_BYTES } from "@/app/api/tasks/[taskId]/context-items/route";
 import { createLogger } from "@agentfactory/logger";
 
 const log = createLogger("api:tasks");
+
+function parseAcceptanceCriteria(value: unknown): AcceptanceCriterion[] | undefined {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return undefined;
+  const criteria: AcceptanceCriterion[] = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) return undefined;
+    const { text, done } = entry as { text?: unknown; done?: unknown };
+    if (typeof text !== "string" || typeof done !== "boolean") return undefined;
+    criteria.push({ text, done });
+  }
+  return criteria;
+}
 
 export async function GET() {
   const ctx = await requireAuthContext();
@@ -27,10 +40,17 @@ export async function POST(request: Request) {
   if (body.model !== undefined && !isValidModelId(body.model?.id)) {
     return NextResponse.json({ error: "Invalid model id" }, { status: 400 });
   }
+  const acceptanceCriteria = parseAcceptanceCriteria(body.acceptanceCriteria);
+  if (!acceptanceCriteria) {
+    return NextResponse.json(
+      { error: "acceptanceCriteria must be an array of { text: string, done: boolean }" },
+      { status: 400 },
+    );
+  }
   const task = await createTask(ctx.orgId, ctx.user.id, {
     title: body.title,
     description: body.description ?? "",
-    acceptanceCriteria: body.acceptanceCriteria ?? [],
+    acceptanceCriteria,
     assigneeAgentId: body.assigneeAgentId ?? undefined,
     area: body.area ?? undefined,
     codebase: body.codebase ?? undefined,
