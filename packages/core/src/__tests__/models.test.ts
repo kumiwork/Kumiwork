@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildModelSpec, isValidModelId, nextEscalationTier, runtimeForModel } from "../models";
+import { buildModelSpec, isValidModelId, MODEL_CATALOG, nextEscalationTier, runtimeForModel } from "../models";
 
 describe("nextEscalationTier", () => {
   it("walks up the ladder from haiku to sonnet", () => {
@@ -20,6 +20,13 @@ describe("nextEscalationTier", () => {
 
   it("returns undefined for an unknown model id", () => {
     expect(nextEscalationTier("not-a-real-model")).toBeUndefined();
+  });
+
+  it("never escalates to a model from a different provider", () => {
+    for (const entry of MODEL_CATALOG) {
+      const next = nextEscalationTier(entry.id);
+      if (next) expect(buildModelSpec(next).family).toBe(entry.provider);
+    }
   });
 });
 
@@ -47,6 +54,10 @@ describe("isValidModelId", () => {
 describe("runtimeForModel", () => {
   it("runs Anthropic models on the Claude Code runtime", () => {
     expect(runtimeForModel(buildModelSpec("claude-sonnet-5"))).toBe("claude-code");
+  });
+
+  it("runs OpenAI models on the Codex runtime", () => {
+    expect(runtimeForModel({ family: "openai", id: "gpt-anything", maxTokens: 8192 })).toBe("codex");
   });
 
   it("resolves a stored spec whose id has since left the catalog by its provider", () => {

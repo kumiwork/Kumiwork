@@ -63,6 +63,7 @@ import { DockerSandboxProvider } from "./sandbox/docker-sandbox-provider";
 import { InsufficientCreditError, PromptTooLongError } from "./agent-runtime/errors";
 import { getAgentRuntime } from "./agent-runtime/registry";
 import { explicitModelSelector } from "./model-selection";
+import { resumableSessionRef } from "./resume-candidate";
 import type { AgentTurnResult } from "./agent-runtime/types";
 import {
   PLATFORM_PREAMBLE,
@@ -239,9 +240,11 @@ const runWorker = new Worker<RunJobData>(
       // long gone). When invalid, skip resume entirely and reconstruct from message history
       // instead of attempting (and failing) to resume a conversation that no longer exists
       // anywhere.
-      const resumeCandidate = await getLatestResumeCandidate(session.id, runId);
-      const resumeIsValid = resumeCandidate !== undefined && resumeCandidate.sandboxId === sandboxId;
-      const resumeSessionRef = resumeIsValid ? resumeCandidate.providerSessionRef : undefined;
+      const resumeSessionRef = resumableSessionRef(await getLatestResumeCandidate(session.id, runId), {
+        sandboxId,
+        runtimeKind: runtime.kind,
+      });
+      const resumeIsValid = resumeSessionRef !== undefined;
       const priorConversationText = resumeIsValid
         ? ""
         : formatPriorConversationForPrompt(await listMessages(session.id), run.triggeringMessageId ?? -1);
