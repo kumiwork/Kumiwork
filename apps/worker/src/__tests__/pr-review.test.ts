@@ -3,6 +3,7 @@ import type { ExecOptions, OutputChunk, SandboxProvider } from "../sandbox/types
 import type { CloneTarget } from "@agentfactory/scm";
 import {
   MAX_REVIEW_DIFF_CHARS,
+  REVIEW_OUTPUT_SCHEMA,
   checkoutPullRequest,
   isAncestor,
   parseDiffAnchors,
@@ -224,5 +225,25 @@ describe("renderReviewAsMarkdown", () => {
     expect(md.toLowerCase()).toContain("request changes");
     expect(md).toContain("src/a.ts:11");
     expect(md).toContain("consider a null check");
+  });
+});
+
+describe("REVIEW_OUTPUT_SCHEMA", () => {
+  function strictObjects(schema: unknown): Array<Record<string, unknown>> {
+    if (typeof schema !== "object" || schema === null) return [];
+    const node = schema as Record<string, unknown>;
+    const nested = Object.values(node).flatMap(strictObjects);
+    return node.type === "object" ? [node, ...nested] : nested;
+  }
+
+  it("satisfies strict structured output: every object is closed and requires all its properties", () => {
+    const objects = strictObjects(REVIEW_OUTPUT_SCHEMA);
+    expect(objects.length).toBeGreaterThan(0);
+    for (const object of objects) {
+      expect(object.additionalProperties).toBe(false);
+      expect([...(object.required as string[])].sort()).toEqual(
+        Object.keys(object.properties as Record<string, unknown>).sort(),
+      );
+    }
   });
 });
