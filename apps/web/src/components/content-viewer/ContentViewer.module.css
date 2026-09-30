@@ -237,3 +237,10 @@
   background: color-mix(in srgb, var(--cv-addition) 18%, transparent);
   color: var(--cv-addition);
 }
+
+.loading {
+  min-height: 48px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}

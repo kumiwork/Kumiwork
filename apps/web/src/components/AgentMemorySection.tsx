@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Badge, Button, Card } from "@agentfactory/shared";
-import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
