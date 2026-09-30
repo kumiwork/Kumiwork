@@ -62,7 +62,9 @@ describe("checkoutPullRequest", () => {
 
   it("throws when the sandbox reports no success marker", async () => {
     const sandbox = fakeSandbox([{ stream: "stdout", data: "CHECKOUT_FAILED\n" }]);
-    await expect(checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main")).rejects.toThrow(/Failed to check out/);
+    await expect(checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main")).rejects.toThrow(
+      /^Failed to check out pull request #42 into sandbox workspace$/,
+    );
   });
 
   it("includes git's error in the failure, with the clone token masked", async () => {

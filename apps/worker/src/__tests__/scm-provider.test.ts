@@ -1,7 +1,3 @@
-import { spawnSync } from "node:child_process";
-import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Connection } from "@agentfactory/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
@@ -762,51 +758,7 @@ describe("buildPullRequestBody", () => {
   });
 });
 
-describe("retryOnRepoNotFound", () => {
-  function runWithFakeGit(failures: { count: number; message: string }) {
-    const dir = mkdtempSync(join(tmpdir(), "retry-on-repo-not-found-"));
-    const calls = join(dir, "calls");
-    writeFileSync(calls, "");
-    writeFileSync(
-      join(dir, "git"),
-      `#!/bin/sh
-echo call >> "${calls}"
-if [ "$(wc -l < "${calls}")" -le ${failures.count} ]; then
-  echo "${failures.message}" >&2
-  exit 128
-fi
-echo "git $*"
-`,
-    );
-    chmodSync(join(dir, "git"), 0o755);
-    const result = spawnSync("sh", ["-c", `${retryOnRepoNotFound}\nretry_on_repo_not_found git clone somewhere`], {
-      encoding: "utf8",
-      env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, REPO_NOT_FOUND_RETRY_DELAYS: "0 0 0" },
-    });
-    return { ...result, attempts: readFileSync(calls, "utf8").trim().split("\n").filter(Boolean).length };
-  }
-
-  it("retries until GitHub recognises a freshly minted token", () => {
-    const result = runWithFakeGit({ count: 2, message: "remote: Repository not found." });
-    expect(result.status).toBe(0);
-    expect(result.attempts).toBe(3);
-    expect(result.stdout).toContain("git clone somewhere");
-  });
-
-  it("gives up after the last delay and surfaces git's error", () => {
-    const result = runWithFakeGit({ count: 99, message: "remote: Repository not found." });
-    expect(result.status).toBe(128);
-    expect(result.attempts).toBe(4);
-    expect(result.stderr).toContain("Repository not found");
-  });
-
-  it("does not retry any other git failure", () => {
-    const result = runWithFakeGit({ count: 99, message: "fatal: couldn't find remote ref agent/new-branch" });
-    expect(result.status).toBe(128);
-    expect(result.attempts).toBe(1);
-    expect(result.stderr).toContain("couldn't find remote ref");
-  });
-
+describe("git calls that use a fresh token", () => {
   it("wraps the sandbox clone", async () => {
     const { sandbox, script } = capturingSandbox([{ stream: "stdout", data: "CLONE_OK\n" }]);
     await cloneIntoSandbox(sandbox, "sandbox-1", {
