@@ -63,7 +63,7 @@ describe("SkillDetailPage instructions section", () => {
     renderPage();
 
     expect(await screen.findByText("Instructions")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Do the review" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Do the review" })).toBeInTheDocument();
     expect(screen.getByText("tests")).toBeInTheDocument();
   });
 
