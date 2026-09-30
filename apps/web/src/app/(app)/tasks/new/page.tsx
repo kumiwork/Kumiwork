@@ -8,10 +8,10 @@ import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
+import { ModelSelect } from "@/components/ModelSelect";
 import {
   DEFAULT_MODEL_ID,
   buildModelSpec,
-  MODEL_CATALOG,
   TASK_CONTEXT_MIME_CONFIG,
   isTaskContextMimeAllowed,
   taskContextExtensionMime,
@@ -359,12 +359,7 @@ export default function NewTaskPage() {
 
         {/* Model */}
         <Field label={t("tasks.create.modelLabel")}>
-          <Select
-            value={modelId}
-            onChange={handleModelChange}
-            className="w-full"
-            options={MODEL_CATALOG.map((entry) => ({ key: entry.id, value: entry.id, label: entry.label }))}
-          />
+          <ModelSelect value={modelId} onChange={handleModelChange} className="w-full" />
           <p style={{ marginTop: 4, fontSize: 12, color: "var(--color-neutral-500)" }}>
             {!selectedAgent
               ? t("tasks.create.modelHelperNoAgent")
