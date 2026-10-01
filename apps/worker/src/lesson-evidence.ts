@@ -156,6 +156,10 @@ function namesCommand(lessonText: string, failure: FailureSource): boolean {
   return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`).test(normalizeForMatch(lessonText));
 }
 
+export function lessonTextProblem(lessonText: string, knownSecrets: readonly string[] = []): string | undefined {
+  return blocked(lessonText, knownSecrets);
+}
+
 function blocked(lessonText: string, knownSecrets: readonly string[]): string | undefined {
   if (lessonText.length > MAX_LESSON_CHARS) return "lesson too long";
   if (BLOCKLIST.some((pattern) => pattern.test(lessonText))) return "lesson blocklisted";

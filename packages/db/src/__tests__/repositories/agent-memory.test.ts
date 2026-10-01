@@ -4,10 +4,12 @@ import { db } from "../../client.js";
 import { agentMemoryEntries, agents } from "../../schema.js";
 import {
   deleteMemoryEntry,
+  findSimilarMemoryEntries,
   findSimilarMemoryEntry,
   insertMemoryEntryWithWrite,
   readAgentMemoryEntries,
   reinforceMemoryEntryWithWrite,
+  replaceMemoryEntryWithWrite,
   updateMemoryEntryContent,
 } from "../../repositories/agent-memory.js";
 import { insertAgent, insertOrg, insertSession, insertUser } from "../fixtures.js";
@@ -67,6 +69,68 @@ describe("agent-memory repository", () => {
     // Orthogonal (π/2 rad) has cosine similarity 0, far below the floor.
     const noMatch = await findSimilarMemoryEntry(org.id, agent.id, planeVector(Math.PI / 2), 0.85);
     expect(noMatch).toBeUndefined();
+  });
+
+  it("lists similar entries above the floor, closest first, with decrypted content, scoped to the agent", async () => {
+    const { org, agent } = await setup();
+    const otherAgent = await insertAgent(org.id);
+    const near = await insertEntry(org.id, agent.id, "Use npm for installs.");
+    await insertMemoryEntryWithWrite(
+      { orgId: org.id, agentId: agent.id, source: "manual", content: "Unrelated.", embedding: planeVector(Math.PI / 2), embeddingModel: EMBEDDING_MODEL },
+      { source: "manual", lesson: "Unrelated." },
+    );
+    await insertEntry(org.id, otherAgent.id, "Other agent's lesson.");
+
+    const found = await findSimilarMemoryEntries(org.id, agent.id, planeVector(0.1), 0.6, 3);
+
+    expect(found).toHaveLength(1);
+    expect(found[0]).toMatchObject({ id: near, weight: 1, content: "Use npm for installs." });
+    expect(found[0]!.score).toBeGreaterThan(0.99);
+  });
+
+  it("replaces an entry's content and embedding, resetting or incrementing weight, and logs an edit write", async () => {
+    const { org, agent } = await setup();
+    const id = await insertEntry(org.id, agent.id, "Use npm for installs.");
+    await reinforceMemoryEntryWithWrite(org.id, agent.id, id, { source: "manual", lesson: "again" });
+
+    const reset = await replaceMemoryEntryWithWrite(
+      org.id,
+      agent.id,
+      id,
+      { content: "Use pnpm for installs.", embedding: planeVector(0.2), embeddingModel: EMBEDDING_MODEL, weight: "reset" },
+      { source: "retrospective", lesson: "Use pnpm for installs.", reason: "Replaces a contradicted lesson" },
+    );
+    expect(reset).toBe(true);
+    let [entry] = await readAgentMemoryEntries(org.id, agent.id);
+    expect(entry).toMatchObject({ id, content: "Use pnpm for installs.", weight: 1 });
+
+    await replaceMemoryEntryWithWrite(
+      org.id,
+      agent.id,
+      id,
+      { content: "Use pnpm; npm only in legacy/.", embedding: planeVector(0.2), embeddingModel: EMBEDDING_MODEL, weight: "increment" },
+      { source: "manual", lesson: "Use pnpm; npm only in legacy/." },
+    );
+    [entry] = await readAgentMemoryEntries(org.id, agent.id);
+    expect(entry).toMatchObject({ content: "Use pnpm; npm only in legacy/.", weight: 2 });
+  });
+
+  it("does not replace an entry that belongs to another agent or org", async () => {
+    const { org, agent } = await setup();
+    const otherAgent = await insertAgent(org.id);
+    const id = await insertEntry(org.id, agent.id, "Mine.");
+
+    const replaced = await replaceMemoryEntryWithWrite(
+      org.id,
+      otherAgent.id,
+      id,
+      { content: "Stolen.", embedding: planeVector(0), embeddingModel: EMBEDDING_MODEL, weight: "reset" },
+      { source: "manual", lesson: "Stolen." },
+    );
+
+    expect(replaced).toBe(false);
+    const [entry] = await readAgentMemoryEntries(org.id, agent.id);
+    expect(entry!.content).toBe("Mine.");
   });
 
   it("never matches across agents or orgs", async () => {

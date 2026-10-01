@@ -52,6 +52,47 @@ export async function findSimilarMemoryEntry(
   });
 }
 
+export interface SimilarMemoryCandidate {
+  id: number;
+  weight: number;
+  score: number;
+  content: string;
+}
+
+export async function findSimilarMemoryEntries(
+  orgId: number,
+  agentId: number,
+  embedding: number[],
+  floor: number,
+  limit: number,
+): Promise<SimilarMemoryCandidate[]> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`set local hnsw.iterative_scan = 'relaxed_order'`);
+
+    const distance = cosineDistance(agentMemoryEntries.embedding, embedding);
+    const rows = await tx
+      .select({
+        id: agentMemoryEntries.id,
+        weight: agentMemoryEntries.weight,
+        ciphertext: agentMemoryEntries.ciphertext,
+        distance: sql<number>`${distance}`.as("distance"),
+      })
+      .from(agentMemoryEntries)
+      .where(and(eq(agentMemoryEntries.orgId, orgId), eq(agentMemoryEntries.agentId, agentId)))
+      .orderBy(distance)
+      .limit(limit);
+
+    return rows
+      .map((row) => ({
+        id: row.id,
+        weight: row.weight,
+        score: 1 - Number(row.distance),
+        content: decryptSecret(row.ciphertext).content,
+      }))
+      .filter((candidate) => candidate.score >= floor);
+  });
+}
+
 export interface NewMemoryEntry {
   orgId: number;
   agentId: number;
@@ -71,6 +112,55 @@ export interface MemoryWriteInput {
 
 function encryptWrite(lesson: string, reason?: string): string {
   return encryptSecret(reason ? { lesson, reason } : { lesson });
+}
+
+export interface ReplaceMemoryEntryInput {
+  content: string;
+  embedding: number[];
+  embeddingModel: string;
+  weight: "reset" | "increment";
+}
+
+export async function replaceMemoryEntryWithWrite(
+  orgId: number,
+  agentId: number,
+  entryId: number,
+  input: ReplaceMemoryEntryInput,
+  write: MemoryWriteInput,
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(agentMemoryEntries)
+      .set({
+        ciphertext: encryptSecret({ content: input.content }),
+        keyVersion: CURRENT_KEY_VERSION,
+        embedding: input.embedding,
+        embeddingModel: input.embeddingModel,
+        weight: input.weight === "reset" ? 1 : sql`${agentMemoryEntries.weight} + 1`,
+        lastReinforcedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(agentMemoryEntries.orgId, orgId),
+          eq(agentMemoryEntries.agentId, agentId),
+          eq(agentMemoryEntries.id, entryId),
+        ),
+      )
+      .returning({ id: agentMemoryEntries.id });
+    if (!updated) return false;
+    await tx.insert(agentMemoryWrites).values({
+      orgId,
+      agentId,
+      entryId,
+      kind: "edit",
+      source: write.source,
+      ciphertext: encryptWrite(write.lesson, write.reason),
+      keyVersion: CURRENT_KEY_VERSION,
+      sessionId: write.sessionId,
+      runId: write.runId,
+    });
+    return true;
+  });
 }
 
 export async function insertMemoryEntryWithWrite(entry: NewMemoryEntry, write: MemoryWriteInput): Promise<number> {
