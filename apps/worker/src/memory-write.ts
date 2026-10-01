@@ -1,11 +1,26 @@
 import { MAX_MEMORY_CONTENT_CHARS, type MemorySource } from "@agentfactory/core";
-import { findSimilarMemoryEntry, insertMemoryEntryWithWrite, reinforceMemoryEntryWithWrite } from "@agentfactory/db";
+import {
+  findSimilarMemoryEntries,
+  insertMemoryEntryWithWrite,
+  reinforceMemoryEntryWithWrite,
+  replaceMemoryEntryWithWrite,
+} from "@agentfactory/db";
+import { createLogger } from "@agentfactory/logger";
 import { getEmbedder, type Embedder } from "./embedder";
+import { adjudicateMemoryWrite, type Adjudication } from "./memory-adjudicator";
+import { lessonTextProblem } from "./lesson-evidence";
 
-// A much higher bar than SIMILARITY_FLOOR (0.6, document retrieval): a false-positive merge here
-// silently discards a distinct new lesson rather than merely missing a relevant excerpt. Tunable,
-// not user-facing, revisit with real data the same way the retrieval floor was.
+const log = createLogger("memory-write");
+
+// At or above this similarity an entry is treated as a duplicate on its own when the adjudicator
+// is unavailable. A false-positive merge silently discards a distinct new lesson rather than
+// merely missing a relevant excerpt, so the bar is much higher than document retrieval's 0.6.
 export const MEMORY_SIMILARITY_FLOOR = 0.85;
+
+// Entries this similar are shown to the adjudicator, which decides whether they are duplicates,
+// contradictions, overlaps to merge, or unrelated. Embeddings cannot tell "use npm" from "use pnpm".
+export const MEMORY_ADJUDICATION_FLOOR = 0.6;
+export const MEMORY_ADJUDICATION_CANDIDATES = 3;
 
 // Re-exported for this module's existing importers (e.g. memory-write.test.ts). The value now
 // lives in @agentfactory/core so apps/web's PATCH .../memory/[entryId] route can enforce the same
@@ -22,17 +37,23 @@ export interface MemoryWriteOptions {
 }
 
 export interface MemoryWriteDeps {
-  findSimilarMemoryEntry: typeof findSimilarMemoryEntry;
+  findSimilarMemoryEntries: typeof findSimilarMemoryEntries;
   insertMemoryEntryWithWrite: typeof insertMemoryEntryWithWrite;
   reinforceMemoryEntryWithWrite: typeof reinforceMemoryEntryWithWrite;
+  replaceMemoryEntryWithWrite: typeof replaceMemoryEntryWithWrite;
+  adjudicate: typeof adjudicateMemoryWrite;
   embedder: Embedder;
 }
 
 const defaultDbDeps: Omit<MemoryWriteDeps, "embedder"> = {
-  findSimilarMemoryEntry,
+  findSimilarMemoryEntries,
   insertMemoryEntryWithWrite,
   reinforceMemoryEntryWithWrite,
+  replaceMemoryEntryWithWrite,
+  adjudicate: adjudicateMemoryWrite,
 };
+
+export type MemoryWriteOutcome = "inserted" | "reinforced" | "superseded" | "merged";
 
 function capContent(content: string): string {
   return content.length > MAX_MEMORY_CONTENT_CHARS ? content.slice(0, MAX_MEMORY_CONTENT_CHARS) : content;
@@ -46,23 +67,71 @@ export async function writeMemoryEntry(
   provenance: MemoryProvenance,
   options: MemoryWriteOptions = {},
   deps: Partial<MemoryWriteDeps> = {},
-): Promise<{ reinforced: boolean }> {
+): Promise<{ reinforced: boolean; outcome: MemoryWriteOutcome }> {
   const d = { ...defaultDbDeps, ...deps };
   const embedder = d.embedder ?? getEmbedder();
   const capped = capContent(content);
   const write = { source, lesson: capped, reason: options.reason, runId: provenance.runId, sessionId: provenance.sessionId };
 
   const [embedding] = await embedder.embedDocuments([capped]);
-  const match = await d.findSimilarMemoryEntry(orgId, agentId, embedding, MEMORY_SIMILARITY_FLOOR);
+  const candidates = await d.findSimilarMemoryEntries(
+    orgId,
+    agentId,
+    embedding,
+    MEMORY_ADJUDICATION_FLOOR,
+    MEMORY_ADJUDICATION_CANDIDATES,
+  );
 
-  if (match) {
-    await d.reinforceMemoryEntryWithWrite(orgId, agentId, match.id, write);
-    return { reinforced: true };
+  const insert = async () => {
+    await d.insertMemoryEntryWithWrite(
+      { orgId, agentId, source, content: capped, embedding, embeddingModel: embedder.modelId },
+      write,
+    );
+    return { reinforced: false, outcome: "inserted" as const };
+  };
+  if (candidates.length === 0) return insert();
+
+  let decision: Adjudication;
+  try {
+    decision = await d.adjudicate(capped, candidates);
+  } catch (err) {
+    log.warn("Memory adjudication failed; falling back to the similarity threshold", { agentId, err });
+    decision =
+      candidates[0].score >= MEMORY_SIMILARITY_FLOOR
+        ? { decision: "duplicate", targetId: candidates[0].id }
+        : { decision: "distinct" };
   }
 
-  await d.insertMemoryEntryWithWrite(
-    { orgId, agentId, source, content: capped, embedding, embeddingModel: embedder.modelId },
-    write,
+  if (decision.decision === "distinct") return insert();
+
+  if (decision.decision === "duplicate") {
+    await d.reinforceMemoryEntryWithWrite(orgId, agentId, decision.targetId, write);
+    return { reinforced: true, outcome: "reinforced" };
+  }
+
+  if (decision.decision === "merge") {
+    const merged = capContent(decision.text);
+    if (lessonTextProblem(merged)) {
+      await d.reinforceMemoryEntryWithWrite(orgId, agentId, decision.targetId, write);
+      return { reinforced: true, outcome: "reinforced" };
+    }
+    const [mergedEmbedding] = await embedder.embedDocuments([merged]);
+    const replaced = await d.replaceMemoryEntryWithWrite(
+      orgId,
+      agentId,
+      decision.targetId,
+      { content: merged, embedding: mergedEmbedding, embeddingModel: embedder.modelId, weight: "increment" },
+      { ...write, lesson: merged, reason: `Merged with: ${capped}${options.reason ? ` (${options.reason})` : ""}` },
+    );
+    return replaced ? { reinforced: true, outcome: "merged" } : insert();
+  }
+
+  const replaced = await d.replaceMemoryEntryWithWrite(
+    orgId,
+    agentId,
+    decision.targetId,
+    { content: capped, embedding, embeddingModel: embedder.modelId, weight: "reset" },
+    { ...write, reason: `Replaces a contradicted lesson${options.reason ? `: ${options.reason}` : ""}` },
   );
-  return { reinforced: false };
+  return replaced ? { reinforced: false, outcome: "superseded" } : insert();
 }

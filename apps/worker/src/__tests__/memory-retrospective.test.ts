@@ -13,6 +13,8 @@ vi.mock("@agentfactory/db", () => ({
   readAgentMemoryEntries: vi.fn(),
   decryptSecret: vi.fn(),
   findSimilarMemoryEntry: vi.fn(),
+  findSimilarMemoryEntries: vi.fn(),
+  replaceMemoryEntryWithWrite: vi.fn(),
   insertMemoryEntryWithWrite: vi.fn(),
   reinforceMemoryEntryWithWrite: vi.fn(),
 }));
