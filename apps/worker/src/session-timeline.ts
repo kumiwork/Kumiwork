@@ -1,3 +1,4 @@
+import { isInfrastructureError } from "./platform-errors";
 import { TRUNCATION_MARKER, truncateMiddle } from "./secret-masking";
 
 export interface TimelineTask { ref: string; title: string; description: string }
@@ -11,7 +12,15 @@ export interface TimelineRunBlock { runId: number; status: string; entries: Time
 export interface TimelineDocument { task?: { attrs: Record<string, string>; text: string }; runs: TimelineRunBlock[]; omittedRuns: number }
 export interface FailureSource { id: string; runId: number; seq: number; tool: string; input: string; command?: string; output: string }
 export interface SuccessMarker { runId: number; seq: number; tool: string; command?: string }
-export interface TimelineSources { runIds: Set<number>; userMessages: Map<number, string[]>; failures: Map<string, FailureSource>; successes: SuccessMarker[] }
+export interface RunErrorSource { id: string; runId: number; seq: number; text: string }
+export interface TimelineSources {
+  runIds: Set<number>;
+  runStatuses: Map<number, string>;
+  userMessages: Map<number, string[]>;
+  failures: Map<string, FailureSource>;
+  successes: SuccessMarker[];
+  runErrors: Map<string, RunErrorSource>;
+}
 export interface SessionTimeline { text: string; sources: TimelineSources; hasUserMessage: boolean; hasFailure: boolean }
 
 const MIN_REVIEWABLE_USER_MESSAGE_CHARS = 15;
@@ -100,7 +109,11 @@ function entriesForEvent(event: TimelineEvent, counters: Counters, sources: Time
   }
   if (event.type === "error") {
     const message = str(data.message) ?? "";
-    if (data.category === "agent") return [{ kind: "run_error", attrs: { id: `e${++counters.errors}` }, text: message }];
+    if (data.category === "agent" || !isInfrastructureError(message)) {
+      const id = `e${++counters.errors}`;
+      sources.runErrors.set(id, { id, runId: event.runId, seq: event.seq, text: message });
+      return [{ kind: "run_error", attrs: { id }, text: message }];
+    }
     return [{ kind: "note", attrs: {}, text: `error: ${firstLine(message)}` }];
   }
   if (event.type === "model_escalated") {
@@ -111,7 +124,14 @@ function entriesForEvent(event: TimelineEvent, counters: Counters, sources: Time
 }
 
 export function buildTimelineDocument(input: TimelineInput): { doc: TimelineDocument; sources: TimelineSources } {
-  const sources: TimelineSources = { runIds: new Set(), userMessages: new Map(), failures: new Map(), successes: [] };
+  const sources: TimelineSources = {
+    runIds: new Set(),
+    runStatuses: new Map(),
+    userMessages: new Map(),
+    failures: new Map(),
+    successes: [],
+    runErrors: new Map(),
+  };
   const counters: Counters = { failures: 0, errors: 0 };
   const messagesById = new Map(input.messages.map((m) => [m.id, m]));
   const eventsByRun = new Map<number, TimelineEvent[]>();
@@ -120,6 +140,7 @@ export function buildTimelineDocument(input: TimelineInput): { doc: TimelineDocu
 
   const runs = [...input.runs].sort((a, b) => a.id - b.id).map((run): TimelineRunBlock => {
     sources.runIds.add(run.id);
+    sources.runStatuses.set(run.id, run.status);
     const entries: TimelineEntry[] = [];
     const trigger = run.triggeringMessageId !== undefined ? messagesById.get(run.triggeringMessageId) : undefined;
     if (trigger?.role === "user") {
@@ -148,7 +169,7 @@ export function buildTimelineDocument(input: TimelineInput): { doc: TimelineDocu
 export function buildSessionTimeline(input: TimelineInput): SessionTimeline {
   const { doc, sources } = buildTimelineDocument(input);
   const hasUserMessage = [...sources.userMessages.values()].flat().some((text) => text.trim().length >= MIN_REVIEWABLE_USER_MESSAGE_CHARS);
-  return { text: renderTimeline(fitTimeline(doc)), sources, hasUserMessage, hasFailure: sources.failures.size > 0 };
+  return { text: renderTimeline(fitTimeline(doc)), sources, hasUserMessage, hasFailure: sources.failures.size > 0 || sources.runErrors.size > 0 };
 }
 
 export const TIMELINE_MAX_CHARS = 80_000;
