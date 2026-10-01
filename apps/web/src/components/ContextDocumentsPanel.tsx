@@ -4,7 +4,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { TASK_CONTEXT_MIME_CONFIG, isTaskContextMimeAllowed, taskContextExtensionMime } from "@agentfactory/core";
 import type { OrgMember, TaskContextItem, TeamContextItem } from "@agentfactory/core";
 import { Badge, EmptyState } from "@agentfactory/shared";
-import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { apiFetch } from "@/lib/api-client";
 import {
   CONTEXT_ITEM_STATUS_LABEL_KEYS,

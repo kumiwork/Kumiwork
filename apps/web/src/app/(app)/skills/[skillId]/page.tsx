@@ -10,7 +10,7 @@ import { relativeTime } from "@/lib/relative-time";
 import { ArrowLeftIcon, EditIcon } from "@/lib/icons";
 import { DeleteSkillButton } from "@/components/DeleteSkillButton";
 import { SkillAgentsPicker, type SkillAssignment } from "@/components/SkillAgentsPicker";
-import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 
 interface DraftDetail {

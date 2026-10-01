@@ -12,7 +12,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { TaskStaleDialog } from "@/components/TaskStaleDialog";
 import { CheckIcon, TrashIcon, EditIcon, RunIcon, StopIcon, XIcon } from "@/lib/icons";
 import { apiFetch } from "@/lib/api-client";
-import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { ContextDocumentsPanel } from "@/components/ContextDocumentsPanel";
 import { RunContextPanel } from "@/components/RunContextPanel";
 import { RunEvalPanel } from "@/components/RunEvalPanel";

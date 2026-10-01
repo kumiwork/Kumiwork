@@ -37,13 +37,13 @@ describe("EditablePreview", () => {
     expect(textarea.value).toBe("# Heading\n\nSome draft text.");
   });
 
-  it("switching to Preview renders the draft as Markdown without losing the textarea's content", () => {
+  it("switching to Preview renders the draft as Markdown without losing the textarea's content", async () => {
     renderHarness();
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
 
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Heading" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Heading" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
 
@@ -51,14 +51,14 @@ describe("EditablePreview", () => {
     expect(textarea.value).toBe("# Heading\n\nSome draft text.");
   });
 
-  it("keeps typed edits after toggling to Preview and back", () => {
+  it("keeps typed edits after toggling to Preview and back", async () => {
     renderHarness();
 
     const textarea = screen.getByRole("textbox") as HTMLTextAreaElement;
     fireEvent.change(textarea, { target: { value: "# Heading\n\nEdited text." } });
 
     fireEvent.click(screen.getByRole("button", { name: "Preview" }));
-    expect(screen.getByText("Edited text.")).toBeInTheDocument();
+    expect(await screen.findByText("Edited text.")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("# Heading\n\nEdited text.");
