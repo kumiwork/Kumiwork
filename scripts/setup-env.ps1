@@ -97,10 +97,13 @@ function Ensure-Docker {
 # the developer's call, not this script's.
 function Ensure-SandboxImage {
     if (-not (Test-CommandExists docker)) { return }
-    docker image inspect agentfactory-sandbox:local *> $null
-    if ($LASTEXITCODE -eq 0) { return }
-    Write-Host "Building agentfactory-sandbox:local (needed to run the worker)..."
-    docker build -t agentfactory-sandbox:local apps/worker/sandbox-image
+    foreach ($lang in @('node', 'python', 'java')) {
+        $tag = "arata-sandbox-$lang`:local"
+        docker image inspect $tag *> $null
+        if ($LASTEXITCODE -eq 0) { continue }
+        Write-Host "Building $tag (needed to run the worker)..."
+        docker build --target $lang --build-arg "SANDBOX_SOURCE_HASH=unknown" -t $tag apps/worker/sandbox-image
+    }
 }
 
 Ensure-Node
