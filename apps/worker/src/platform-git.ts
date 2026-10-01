@@ -46,3 +46,20 @@ export function unsafeGitConfigError(keys: string[]): Error {
       "which could redirect or expose the token. Remove these settings from the checkout to continue.",
   );
 }
+
+export const retryOnRepoNotFound = `
+retry_on_repo_not_found() {
+  retry_log=$(mktemp)
+  for retry_delay in \${REPO_NOT_FOUND_RETRY_DELAYS:-1 2 2 3 3} last; do
+    "$@" 2>"$retry_log"
+    retry_status=$?
+    if [ "$retry_status" -eq 0 ] || [ "$retry_delay" = last ] || ! grep -q "Repository not found" "$retry_log"; then
+      break
+    fi
+    sleep "$retry_delay"
+  done
+  cat "$retry_log" >&2
+  rm -f "$retry_log"
+  return "$retry_status"
+}
+`;

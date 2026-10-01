@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Connection } from "@agentfactory/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
 import { SKILL_EXCLUDE_PATTERNS } from "../skill-paths";
-import { platformGitEnv } from "../platform-git";
+import { platformGitEnv, retryOnRepoNotFound } from "../platform-git";
 
 const resolveScmConnectionMock = vi.fn();
 const getScmProviderMock = vi.fn();
@@ -851,5 +851,43 @@ describe("buildPullRequestBody", () => {
     expect(body).toContain("Created `README.md` with a full local-setup guide.");
     expect(body).toContain("Files live under the repo root.");
     expect(body).not.toContain("/workspace");
+  });
+});
+
+describe("git calls that use a fresh token", () => {
+  it("wraps the sandbox clone", async () => {
+    const { sandbox, script } = capturingSandbox([{ stream: "stdout", data: "CLONE_OK\n" }]);
+    await cloneIntoSandbox(sandbox, "sandbox-1", {
+      cloneUrl: "https://x-access-token:ghs@github.com/acme-org/platform.git",
+      remoteUrl: "https://github.com/acme-org/platform.git",
+      branch: "agent/session-1",
+      repoFullName: "acme-org/platform",
+      provider: "github",
+      installationRef: 999,
+    });
+    expect(script()).toContain(retryOnRepoNotFound);
+    expect(script()).toContain('retry_on_repo_not_found git clone "$CLONE_URL" /workspace');
+  });
+
+  it("wraps the branch refresh and the push", async () => {
+    getScmProviderMock.mockReturnValue({ mintPushToken: vi.fn().mockResolvedValue("ghs_push") });
+    const { sandbox, script } = capturingSandbox([{ stream: "stdout", data: "PUSH_OK\n" }]);
+    await pushChangesIfDirty(
+      sandbox,
+      "sandbox-1",
+      {
+        cloneUrl: "https://x-access-token:ghs@github.com/acme-org/platform.git",
+        remoteUrl: "https://github.com/acme-org/platform.git",
+        branch: "agent/session-1",
+        repoFullName: "acme-org/platform",
+        provider: "github",
+        installationRef: 999,
+      },
+      "msg",
+      "Code reviewer",
+    );
+    expect(script()).toContain(retryOnRepoNotFound);
+    expect(script()).toContain('retry_on_repo_not_found git fetch origin "$BRANCH_NAME" --quiet');
+    expect(script()).toContain('retry_on_repo_not_found git push --no-verify -u origin "$BRANCH_NAME"');
   });
 });

@@ -1,11 +1,12 @@
-import { execFileSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   platformGitEnv,
   refuseUnsafeGitConfig,
+  retryOnRepoNotFound,
   unsafeGitConfigError,
   unsafeGitConfigKeys,
 } from "../platform-git";
@@ -94,5 +95,52 @@ describe("unsafeGitConfigKeys", () => {
 
   it("names the offending keys in the error", () => {
     expect(unsafeGitConfigError(["http.proxy"]).message).toContain("http.proxy");
+  });
+});
+
+describe("retryOnRepoNotFound", () => {
+  function runWithFakeGit(failures: { count: number; message: string }) {
+    const dir = path.join(repo, "fake-git");
+    mkdirSync(dir);
+    const calls = path.join(dir, "calls");
+    writeFileSync(calls, "");
+    writeFileSync(
+      path.join(dir, "git"),
+      `#!/bin/sh
+echo call >> "${calls}"
+if [ "$(wc -l < "${calls}")" -le ${failures.count} ]; then
+  echo "${failures.message}" >&2
+  exit 128
+fi
+echo "git $*"
+`,
+    );
+    chmodSync(path.join(dir, "git"), 0o755);
+    const result = spawnSync("sh", ["-c", `${retryOnRepoNotFound}\nretry_on_repo_not_found git clone somewhere`], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, REPO_NOT_FOUND_RETRY_DELAYS: "0 0 0" },
+    });
+    return { ...result, attempts: readFileSync(calls, "utf8").trim().split("\n").filter(Boolean).length };
+  }
+
+  it("retries until GitHub recognises a freshly minted token", () => {
+    const result = runWithFakeGit({ count: 2, message: "remote: Repository not found." });
+    expect(result.status).toBe(0);
+    expect(result.attempts).toBe(3);
+    expect(result.stdout).toContain("git clone somewhere");
+  });
+
+  it("gives up after the last delay and surfaces git's error", () => {
+    const result = runWithFakeGit({ count: 99, message: "remote: Repository not found." });
+    expect(result.status).toBe(128);
+    expect(result.attempts).toBe(4);
+    expect(result.stderr).toContain("Repository not found");
+  });
+
+  it("does not retry any other git failure", () => {
+    const result = runWithFakeGit({ count: 99, message: "fatal: couldn't find remote ref agent/new-branch" });
+    expect(result.status).toBe(128);
+    expect(result.attempts).toBe(1);
+    expect(result.stderr).toContain("couldn't find remote ref");
   });
 });

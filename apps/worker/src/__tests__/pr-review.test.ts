@@ -13,6 +13,7 @@ import {
   truncateDiff,
   validateReviewComments,
 } from "../pr-review";
+import { retryOnRepoNotFound } from "../platform-git";
 
 // Captures every exec() call's cmd/opts so tests can assert on the actual shell script and env
 // vars sent to the sandbox, not just the marker-based stdout outcome — this is what would have
@@ -61,7 +62,28 @@ describe("checkoutPullRequest", () => {
 
   it("throws when the sandbox reports no success marker", async () => {
     const sandbox = fakeSandbox([{ stream: "stdout", data: "CHECKOUT_FAILED\n" }]);
-    await expect(checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main")).rejects.toThrow(/Failed to check out/);
+    await expect(checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main")).rejects.toThrow(
+      /^Failed to check out pull request #42 into sandbox workspace$/,
+    );
+  });
+
+  it("includes git's error in the failure, with the clone token masked", async () => {
+    const sandbox = fakeSandbox([
+      { stream: "stderr", data: "remote: Repository not found.\nfatal: repository 'https://x-access-token:tok@github.com/acme-org/platform.git/' not found\n" },
+      { stream: "stdout", data: "CHECKOUT_FAILED\n" },
+    ]);
+    const failure = checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main");
+    await expect(failure).rejects.toThrow(/Failed to check out pull request #42 into sandbox workspace: remote: Repository not found/);
+    await expect(failure).rejects.not.toThrow(/x-access-token:tok/);
+  });
+
+  it("retries the clone and the fetch while GitHub does not yet recognise the token", async () => {
+    const sandbox = fakeSandbox([{ stream: "stdout", data: "CHECKOUT_OK\n" }]);
+    await checkoutPullRequest(sandbox, "sandbox-1", target, 42, "main");
+    const script = sandbox.calls[0].cmd[2];
+    expect(script).toContain(retryOnRepoNotFound);
+    expect(script).toContain('retry_on_repo_not_found git clone --no-checkout "$CLONE_URL" /workspace');
+    expect(script).toContain('retry_on_repo_not_found git fetch origin "pull/$PR_NUMBER/head:review/pr-$PR_NUMBER"');
   });
 
   it("resets the remote to REMOTE_URL unconditionally on the clone branch, before branching on clone status, and passes the required env vars", async () => {
