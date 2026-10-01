@@ -3,6 +3,7 @@ import { DEFAULT_MODEL_ID } from "@agentfactory/core";
 import {
   decryptSecret,
   getAgent,
+  getRunPrompt,
   getRunsForSession,
   getSession,
   getTaskBySessionId,
@@ -14,6 +15,7 @@ import {
 } from "@agentfactory/db";
 import { createLogger } from "@agentfactory/logger";
 import { checkLessonEvidence } from "./lesson-evidence";
+import { appliedLessonIds, findLessonApplications } from "./lesson-application";
 import { writeMemoryEntry as writeMemoryEntryDefault } from "./memory-write";
 import { maskSecrets } from "./secret-masking";
 import { describeError, recordJobOutcome, type JobOutcomeFields } from "./job-outcome";
@@ -213,6 +215,7 @@ export interface RetrospectiveDeps {
   listMessages: (sessionId: number) => Promise<TimelineMessage[]>;
   listEventsForSession: (sessionId: number) => Promise<SessionEventRow[]>;
   readAgentMemoryEntries: (orgId: number, agentId: number) => Promise<Array<{ id: number; content: string }>>;
+  getRunPrompt: (runId: number) => Promise<{ segments: Array<{ id: string; text: string }> } | undefined>;
   decryptSecret: (ciphertext: string) => Record<string, string>;
   judge: (userMessage: string) => Promise<JudgeResult>;
   writeMemoryEntry: typeof writeMemoryEntryDefault;
@@ -227,6 +230,7 @@ const defaultDeps: RetrospectiveDeps = {
   listMessages,
   listEventsForSession,
   readAgentMemoryEntries,
+  getRunPrompt,
   decryptSecret,
   judge: judgeRetrospective,
   writeMemoryEntry: writeMemoryEntryDefault,
@@ -271,6 +275,7 @@ interface Prepared {
   timeline: SessionTimeline;
   knownLessons: Map<number, string>;
   userMessage: string;
+  judgeNeeded: boolean;
 }
 
 async function prepare(orgId: number, agentId: number, sessionId: number, d: RetrospectiveDeps): Promise<Prepared | { skip: string }> {
@@ -296,16 +301,50 @@ async function prepare(orgId: number, agentId: number, sessionId: number, d: Ret
     messages: messages.map((m) => ({ ...m, content: mask(m.content) })),
     events: prepareEvents(events, d.decryptSecret, sessionId),
   });
-  if (!timeline.hasUserMessage && !timeline.hasFailure) {
-    log.info("Nothing to review", { sessionId });
-    return { skip: "no_user_message_or_failure" };
-  }
+  const judgeNeeded = timeline.hasUserMessage || timeline.hasFailure;
   const known = await d.readAgentMemoryEntries(orgId, agentId);
   return {
+    judgeNeeded,
     timeline,
     knownLessons: new Map(known.map((entry) => [entry.id, entry.content])),
     userMessage: buildJudgeUserMessage(known.map(({ id, content }) => ({ id, content })), timeline.text),
   };
+}
+
+async function reinforceAppliedLessons(
+  orgId: number,
+  agentId: number,
+  sessionId: number,
+  prepared: Prepared,
+  d: RetrospectiveDeps,
+): Promise<number> {
+  const candidates = findLessonApplications(prepared.knownLessons, prepared.timeline.sources.successes);
+  if (candidates.length === 0) return 0;
+  const memorySegments = new Map<number, string>();
+  for (const runId of new Set(candidates.map((c) => c.runId))) {
+    const prompt = await d.getRunPrompt(runId);
+    memorySegments.set(runId, prompt?.segments.find((segment) => segment.id === "agent_memory")?.text ?? "");
+  }
+  const applied = appliedLessonIds(candidates, (lessonId, runId) => {
+    const content = prepared.knownLessons.get(lessonId);
+    return content !== undefined && (memorySegments.get(runId) ?? "").includes(content);
+  });
+  let reinforced = 0;
+  for (const [lessonId, application] of applied) {
+    try {
+      const result = (await d.reinforceMemoryEntryWithWrite(orgId, agentId, lessonId, {
+        source: "retrospective",
+        lesson: prepared.knownLessons.get(lessonId) ?? "",
+        reason: `Followed successfully: ran "${mask(application.span)}" in run ${application.runId}`,
+        runId: application.runId,
+        sessionId,
+      })) as { reinforced?: boolean } | undefined;
+      if (result?.reinforced !== false) reinforced++;
+    } catch (err) {
+      log.error("Failed to reinforce an applied lesson; continuing with the rest", { sessionId, lessonId, err });
+    }
+  }
+  return reinforced;
 }
 
 async function store(orgId: number, agentId: number, sessionId: number, prepared: Prepared, result: JudgeResult, d: RetrospectiveDeps): Promise<StoreCounts> {
@@ -373,6 +412,23 @@ export async function processMemoryRetrospectiveJob(
     return;
   }
 
+  let appliedReinforced = 0;
+  try {
+    appliedReinforced = await reinforceAppliedLessons(orgId, agentId, sessionId, prepared, d);
+  } catch (err) {
+    log.error("Applied-lesson reinforcement failed", { orgId, agentId, sessionId, err });
+  }
+
+  if (!prepared.judgeNeeded) {
+    log.info("Nothing to judge", { sessionId, appliedReinforced });
+    await record(
+      appliedReinforced > 0
+        ? { status: "completed", reason: "reinforced_applied_only", details: { agentId, appliedReinforced } }
+        : { status: "skipped", reason: "no_user_message_or_failure", details: { agentId } },
+    );
+    return;
+  }
+
   let result: JudgeResult;
   try {
     result = await d.judge(prepared.userMessage);
@@ -388,5 +444,5 @@ export async function processMemoryRetrospectiveJob(
     return;
   }
   const counts = await store(orgId, agentId, sessionId, prepared, result, d);
-  await record({ status: "completed", details: { agentId, ...counts } });
+  await record({ status: "completed", details: { agentId, ...counts, appliedReinforced } });
 }

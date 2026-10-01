@@ -5,6 +5,7 @@ const recordWorkerJobOutcomeMock = vi.fn();
 vi.mock("@agentfactory/db", () => ({
   recordWorkerJobOutcome: (...args: unknown[]) => recordWorkerJobOutcomeMock(...args),
   getAgent: vi.fn(),
+  getRunPrompt: vi.fn(),
   getSession: vi.fn(),
   getTaskBySessionId: vi.fn(),
   getRunsForSession: vi.fn(),
@@ -47,6 +48,7 @@ function deps(overrides: Record<string, unknown> = {}) {
       { id: 2, runId: 10, seq: 2, type: "tool_result", data: { toolUseId: "b", tool: "Bash", isError: true, ciphertext: "bad" }, createdAt: "" },
     ]),
     readAgentMemoryEntries: vi.fn().mockResolvedValue([{ id: 12, content: "Release notes are for end users." }]),
+    getRunPrompt: vi.fn().mockResolvedValue(undefined),
     decryptSecret: vi.fn((c: string) => {
       if (c === "bad") throw new Error("tampered");
       return { output: "Author identity unknown, key ghp_" + "A1b2C3d4E5".repeat(4) };
@@ -146,7 +148,7 @@ describe("processMemoryRetrospectiveJob", () => {
     expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         status: "completed",
-        details: { agentId: 2, accepted: expect.any(Number), reinforced: expect.any(Number), rejected: expect.any(Number) },
+        details: { agentId: 2, accepted: expect.any(Number), reinforced: expect.any(Number), rejected: expect.any(Number), appliedReinforced: 0 },
         durationMs: expect.any(Number),
       }),
     );
@@ -165,6 +167,76 @@ describe("processMemoryRetrospectiveJob", () => {
     expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ orgId: 1, jobType: "memory_retrospective", subject: "session:3", status: "skipped", reason: "no_user_message_or_failure" }),
     );
+  });
+
+  describe("reinforcing lessons the agent followed", () => {
+    const LESSON = "Tests here run with `make check`; `npm test` is not set up.";
+
+    function quietSession(overrides: Record<string, unknown> = {}) {
+      return deps({
+        listMessages: vi.fn().mockResolvedValue([{ id: 100, role: "user", content: "Task brief", kind: "task_brief" }]),
+        listEventsForSession: vi.fn().mockResolvedValue([
+          { id: 1, runId: 10, seq: 1, type: "tool_result", data: { tool: "Bash", command: "make check", inputSummary: "make check", isError: false, subagent: false }, createdAt: "" },
+        ]),
+        readAgentMemoryEntries: vi.fn().mockResolvedValue([{ id: 12, content: LESSON }]),
+        getRunPrompt: vi.fn().mockResolvedValue({ segments: [{ id: "agent_memory", text: `## What You've Learned\n\n- ${LESSON}\n` }] }),
+        ...overrides,
+      });
+    }
+
+    it("reinforces a lesson whose command the agent ran successfully, without calling the judge", async () => {
+      const d = quietSession();
+      await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+      expect(d.judge).not.toHaveBeenCalled();
+      expect(d.reinforceMemoryEntryWithWrite).toHaveBeenCalledExactlyOnceWith(1, 2, 12, {
+        source: "retrospective",
+        lesson: LESSON,
+        reason: 'Followed successfully: ran "make check" in run 10',
+        runId: 10,
+        sessionId: 3,
+      });
+      expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: "completed", reason: "reinforced_applied_only", details: { agentId: 2, appliedReinforced: 1 } }),
+      );
+    });
+
+    it("does not reinforce a lesson that was not in the run's prompt", async () => {
+      const d = quietSession({ getRunPrompt: vi.fn().mockResolvedValue({ segments: [{ id: "agent_memory", text: "" }] }) });
+      await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+      expect(d.reinforceMemoryEntryWithWrite).not.toHaveBeenCalled();
+      expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(expect.objectContaining({ status: "skipped" }));
+    });
+
+    it("does not reinforce on a command the lesson says not to use", async () => {
+      const d = quietSession({
+        listEventsForSession: vi.fn().mockResolvedValue([
+          { id: 1, runId: 10, seq: 1, type: "tool_result", data: { tool: "Bash", command: "npm test", inputSummary: "npm test", isError: false, subagent: false }, createdAt: "" },
+        ]),
+      });
+      await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+      expect(d.reinforceMemoryEntryWithWrite).not.toHaveBeenCalled();
+    });
+
+    it("keeps judging, and reports the reinforcement, when the session also has a user correction", async () => {
+      const d = quietSession({
+        listMessages: vi.fn().mockResolvedValue([
+          { id: 100, role: "user", content: "Task: Notes\nWrite notes.", kind: "task_brief" },
+          { id: 101, role: "user", content: CORRECTION },
+        ]),
+        judge: vi.fn().mockResolvedValue({ items: [], truncated: false }),
+      });
+      await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+      expect(d.reinforceMemoryEntryWithWrite).toHaveBeenCalledOnce();
+      expect(d.judge).toHaveBeenCalledOnce();
+      expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ status: "completed", details: expect.objectContaining({ appliedReinforced: 1 }) }),
+      );
+    });
+
+    it("carries on when reinforcing fails", async () => {
+      const d = quietSession({ reinforceMemoryEntryWithWrite: vi.fn().mockRejectedValue(new Error("db")) });
+      await expect(processMemoryRetrospectiveJob(1, 2, 3, d as never)).resolves.toBeUndefined();
+    });
   });
 
   it("judges a session whose only signal is an actionable run error", async () => {
