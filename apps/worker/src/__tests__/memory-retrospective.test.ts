@@ -165,6 +165,29 @@ describe("processMemoryRetrospectiveJob", () => {
     );
   });
 
+  it("judges a session whose only signal is an actionable run error", async () => {
+    const d = deps({
+      listMessages: vi.fn().mockResolvedValue([{ id: 100, role: "user", content: "Task brief", kind: "task_brief" }]),
+      listEventsForSession: vi.fn().mockResolvedValue([
+        { runId: 11, seq: 1, type: "error", data: { message: "Cannot push: remote branch already has unrelated commits that conflict" } },
+      ]),
+    });
+    await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+    expect(d.judge).toHaveBeenCalledOnce();
+    expect(d.judge.mock.calls[0]![0]).toContain("<run_error id=\"e1\">");
+  });
+
+  it("does not judge a session whose only signal is an infrastructure error", async () => {
+    const d = deps({
+      listMessages: vi.fn().mockResolvedValue([{ id: 100, role: "user", content: "Task brief", kind: "task_brief" }]),
+      listEventsForSession: vi.fn().mockResolvedValue([
+        { runId: 11, seq: 1, type: "error", data: { message: "Permission to acme/x.git denied to bot[bot]." } },
+      ]),
+    });
+    await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+    expect(d.judge).not.toHaveBeenCalled();
+  });
+
   it("works when the task is gone", async () => {
     const d = deps({ getTaskBySessionId: vi.fn().mockResolvedValue(undefined) });
     await processMemoryRetrospectiveJob(1, 2, 3, d as never);
