@@ -46,6 +46,7 @@ import {
   getTeamForOrg,
   hasNonTerminalRun,
   insertRunContextRetrievals,
+  listEventsForSession,
   listMessages,
   readAgentMemoryEntries,
   setSessionSandbox,
@@ -100,7 +101,7 @@ import {
   cloneIntoSandbox,
   fetchIssue,
   fetchPullRequestFeedback,
-  openDraftPullRequest,
+  openPullRequest,
   parseIssueReference,
   pushChangesIfDirty,
   resolveCloneTarget,
@@ -125,6 +126,7 @@ import { notifyIssueOfPullRequest } from "./task-notify";
 import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicator } from "./channel-notify";
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
+import { localChecksPassed } from "./local-checks";
 import { createLogger } from "@agentfactory/logger";
 
 const log = createLogger("worker");
@@ -849,7 +851,8 @@ const runWorker = new Worker<RunJobData>(
         // (same head branch) — opening another PR for a branch that already has one 422s. Only
         // ever open once per task; task.prNumber is the record of whether that's already happened.
         if (result.pushed && !task.prNumber) {
-          const pr = await openDraftPullRequest(
+          const draft = !localChecksPassed(await listEventsForSession(session.id));
+          const pr = await openPullRequest(
             agent.orgId,
             workspace.repoFullName,
             workspace.branch,
@@ -860,6 +863,7 @@ const runWorker = new Worker<RunJobData>(
               summary: text,
               changedFiles,
             }),
+            draft,
           );
           await updateTask(task.id, { prNumber: pr.number, prUrl: pr.url, status: "pr_open" });
           // Inside the `result.pushed && !task.prNumber` guard on purpose: that guard is what makes

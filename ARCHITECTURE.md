@@ -498,7 +498,7 @@ job in order. "Host" means the worker process; "sandbox" means inside the sessio
 | 13 | While the agent works, the script prints `__EVENT__` lines; the host reads them live and stores them as events | Sandbox writes; host parses and persists | `run-turn-claude.ts` → `demux()` in `docker-sandbox-provider.ts` → `agent-runtime/marker-protocol.ts` (`readAgentTurnOutput`) → `onEvent` in `worker.ts` (`createEvent`; `memory_write` goes to `writeMemoryEntry`, encrypted) |
 | 14 | The script prints `__RESULT__` (or `__ERROR__`); the host returns it from `runTurn` or throws a typed error (`PromptTooLongError` triggers model escalation) | Sandbox writes; host parses | `marker-protocol.ts`, `agent-runtime/errors.ts`, `model-escalation.ts` |
 | 15 | Revoke the run token | Host | `worker.ts` (`modelCredential.revoke()` in `finally`) |
-| 16 | Commit and push: the host mints a short-lived push token and passes it to one exec that runs `git push`; the host then opens the draft PR through the GitHub API | Push in the sandbox; PR on the host | `scm-provider.ts` (`pushChangesIfDirty`, `openDraftPullRequest`) |
+| 16 | Commit and push: the host mints a short-lived push token and passes it to one exec that runs `git push`; the host then opens the PR through the GitHub API, ready for review when the agent's latest test/typecheck/lint runs in the session all passed (`local-checks.ts`), as a draft otherwise | Push in the sandbox; PR on the host | `scm-provider.ts` (`pushChangesIfDirty`, `openPullRequest`), `local-checks.ts` |
 | 17 | Snapshot `/workspace` for the run | Host, via Docker API (`getArchive`) | `DockerSandboxProvider.readWorkspace` |
 | 18 | Mark the run done, leave the container warm for the next message | Host | `worker.ts` |
 

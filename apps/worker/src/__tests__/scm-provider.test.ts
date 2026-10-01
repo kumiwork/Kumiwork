@@ -19,7 +19,7 @@ const {
   fetchCommitRangeDiff,
   fetchIssue,
   fetchPullRequestFeedback,
-  openDraftPullRequest,
+  openPullRequest,
   parseIssueReference,
   pushChangesIfDirty,
   resolveCloneTarget,
@@ -189,21 +189,21 @@ describe("fetchCommitRangeDiff (thin wrapper over the registry)", () => {
   });
 });
 
-describe("openDraftPullRequest (thin wrapper over the registry)", () => {
-  it("delegates to the resolved provider's openDraftPullRequest", async () => {
+describe("openPullRequest (thin wrapper over the registry)", () => {
+  it("delegates to the resolved provider's openPullRequest", async () => {
     const connection = fakeConnection(1);
     const providerFn = vi.fn().mockResolvedValue({ number: 7, url: "https://example.com/pull/7" });
-    resolveScmConnectionMock.mockResolvedValue({ connection, provider: { openDraftPullRequest: providerFn } });
+    resolveScmConnectionMock.mockResolvedValue({ connection, provider: { openPullRequest: providerFn } });
 
-    const pr = await openDraftPullRequest(1, "acme/widgets", "agent/session-1", "title", "body");
+    const pr = await openPullRequest(1, "acme/widgets", "agent/session-1", "title", "body", false);
 
     expect(pr).toEqual({ number: 7, url: "https://example.com/pull/7" });
-    expect(providerFn).toHaveBeenCalledWith(connection, "acme/widgets", "agent/session-1", "title", "body");
+    expect(providerFn).toHaveBeenCalledWith(connection, "acme/widgets", "agent/session-1", "title", "body", false);
   });
 
   it("throws when no connection resolves", async () => {
     resolveScmConnectionMock.mockResolvedValue(undefined);
-    await expect(openDraftPullRequest(1, "acme/widgets", "b", "t", "body")).rejects.toThrow(
+    await expect(openPullRequest(1, "acme/widgets", "b", "t", "body", true)).rejects.toThrow(
       'No connected SCM provider can access repo "acme/widgets"',
     );
   });

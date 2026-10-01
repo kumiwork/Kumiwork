@@ -52,7 +52,7 @@ function stubBitbucketProvider(): ScmProvider & { seenConnections: Connection[][
     resolveDefaultBranchSha: async () => "",
     detectPrimaryLanguage: async () => undefined,
     fetchCommitRangeDiff: async () => "",
-    openDraftPullRequest: async () => {
+    openPullRequest: async () => {
       throw new Error("not implemented");
     },
     parseIssueReference: () => undefined,
