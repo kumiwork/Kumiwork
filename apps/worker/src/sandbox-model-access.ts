@@ -2,6 +2,7 @@ import type { Server } from "node:http";
 import { createLogger } from "@agentfactory/logger";
 import type { ModelEndpoint } from "./agent-runtime/types";
 import { createModelProxy, modelProxyRoutePrefix } from "./model-proxy";
+import { recordRunUsage } from "./usage-metering";
 import { RunCredentialStore, type ModelProvider, type RunCredentialContext } from "./run-credentials";
 
 const log = createLogger("sandbox-model-access");
@@ -23,7 +24,7 @@ export function resolveCredentials(_orgId: number, provider: ModelProvider): str
 }
 
 export function startModelProxy(store: RunCredentialStore = defaultStore): Promise<Server> {
-  const server = createModelProxy({ store, resolveCredentials });
+  const server = createModelProxy({ store, resolveCredentials, recordUsage: recordRunUsage });
   return new Promise((resolve, reject) => {
     server.once("error", reject);
     server.listen(MODEL_PROXY_PORT, MODEL_PROXY_BIND, () => {

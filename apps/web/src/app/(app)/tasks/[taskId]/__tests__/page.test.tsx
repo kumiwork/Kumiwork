@@ -50,7 +50,7 @@ describe("Task page read-only surfaces", () => {
     expect(screen.getByText("2")).toBeInTheDocument();
   });
 
-  it("wires the Files tab: selecting README.md shows the Rendered/Raw toggle", () => {
+  it("wires the Files tab: selecting README.md shows the Rendered/Raw toggle", async () => {
     const workspace = {
       "README.md": "# Read me\n\nSome **bold** prose.",
       "index.ts": "export function add(a: number, b: number) {\n  return a + b;\n}\n",
@@ -59,7 +59,7 @@ describe("Task page read-only surfaces", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "README.md" }));
 
-    expect(screen.getByRole("heading", { name: "Read me" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Read me" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rendered" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Raw" })).toBeInTheDocument();
   });

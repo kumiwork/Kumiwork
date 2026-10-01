@@ -34,6 +34,13 @@ RUN mkdir -p /workspace /cache && chown -R node:node /workspace /agent /opt/core
 USER node
 WORKDIR /workspace
 
+# Stamped by scripts/build-sandbox-images.sh with the hash of everything in this directory, and
+# compared by the worker at startup (sandbox-image-check.ts) so an image built before a change to
+# run-turn-*.ts and friends is reported as stale instead of silently running old code. The python
+# and java stages inherit the label from this stage.
+ARG SANDBOX_SOURCE_HASH=unknown
+LABEL arata.sandbox.source-hash=$SANDBOX_SOURCE_HASH
+
 # Idle keep-alive: the actual agent turn runs as a `docker exec` (see
 # docker-sandbox-provider.ts), not as this container's main process, so the same container can
 # be exec'd into more than once per session.

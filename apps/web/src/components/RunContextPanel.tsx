@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PromptSegment, Run, RunContextRetrieval, RunPrompt, RunStatus } from "@agentfactory/core";
 import { compactSelectStyle, EmptyState, Select } from "@agentfactory/shared";
-import { ContentViewer } from "@/components/content-viewer/ContentViewer";
+import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/paths";

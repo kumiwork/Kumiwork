@@ -1,9 +1,24 @@
 import type { ModelProvider, ModelSpec, OverflowPolicy, RuntimeKind } from "./domain";
 
+export interface ModelPricing {
+  inputPerMTok: number;
+  outputPerMTok: number;
+  cacheReadPerMTok?: number;
+  cacheWritePerMTok?: number;
+}
+
 export interface ModelCatalogEntry {
   id: string;
   label: string;
   provider: ModelProvider;
+  pricing?: ModelPricing;
+}
+
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
 }
 
 export const MODEL_CATALOG: ModelCatalogEntry[] = [
@@ -31,6 +46,30 @@ const ESCALATION_LADDERS: Record<ModelProvider, readonly string[]> = {
 
 export function getCatalogEntry(id: string): ModelCatalogEntry | undefined {
   return MODEL_CATALOG.find((entry) => entry.id === id);
+}
+
+export function findCatalogEntryForResponseModel(responseModel: string): ModelCatalogEntry | undefined {
+  return MODEL_CATALOG.filter((entry) => responseModel === entry.id || responseModel.startsWith(`${entry.id}-`)).sort(
+    (a, b) => b.id.length - a.id.length,
+  )[0];
+}
+
+export function totalTokens(usage: TokenUsage): number {
+  return usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
+}
+
+export function computeCostUsd(responseModel: string, usage: TokenUsage): number | undefined {
+  const pricing = findCatalogEntryForResponseModel(responseModel)?.pricing;
+  if (!pricing) return undefined;
+  const cacheRead = pricing.cacheReadPerMTok ?? pricing.inputPerMTok;
+  const cacheWrite = pricing.cacheWritePerMTok ?? pricing.inputPerMTok;
+  return (
+    (usage.inputTokens * pricing.inputPerMTok +
+      usage.outputTokens * pricing.outputPerMTok +
+      usage.cacheReadTokens * cacheRead +
+      usage.cacheWriteTokens * cacheWrite) /
+    1_000_000
+  );
 }
 
 export function isValidModelId(id: string): boolean {

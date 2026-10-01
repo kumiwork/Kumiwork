@@ -2,6 +2,7 @@ import { createServer, type IncomingHttpHeaders, type IncomingMessage, type Serv
 import { Readable } from "node:stream";
 import type { ReadableStream as WebReadableStream } from "node:stream/web";
 import { createLogger } from "@agentfactory/logger";
+import { createUsageExtractor, type ModelUsage } from "./model-usage";
 import type { ModelProvider, RunCredentialContext, RunCredentialStore } from "./run-credentials";
 
 const log = createLogger("model-proxy");
@@ -70,6 +71,7 @@ export interface ModelProxyOptions {
   ) => Promise<string | undefined> | string | undefined;
   providers?: Readonly<Record<string, ModelProviderProfile>>;
   maxBodyBytes?: number;
+  recordUsage?: (context: RunCredentialContext, usage: ModelUsage) => Promise<void> | void;
 }
 
 class BodyTooLargeError extends Error {}
@@ -141,7 +143,7 @@ async function forward(
   apiKey: string,
   search: string,
   maxBodyBytes: number,
-): Promise<number> {
+): Promise<{ status: number; usage?: ModelUsage }> {
   const body = await readBody(req, maxBodyBytes);
   const abort = new AbortController();
   res.on("close", () => {
@@ -161,15 +163,17 @@ async function forward(
   res.writeHead(upstream.status, headers);
   if (!upstream.body) {
     res.end();
-    return upstream.status;
+    return { status: upstream.status };
   }
+  const extractor = upstream.ok ? createUsageExtractor(route.provider, upstream.headers.get("content-type")) : undefined;
   await new Promise<void>((resolve, reject) => {
     const stream = Readable.fromWeb(upstream.body as unknown as WebReadableStream<Uint8Array>);
     stream.on("error", reject);
+    stream.on("data", (chunk: Uint8Array) => extractor?.push(chunk));
     res.on("close", resolve);
     stream.pipe(res);
   });
-  return upstream.status;
+  return { status: upstream.status, usage: extractor?.finish() };
 }
 
 function reject(req: IncomingMessage, res: ServerResponse, status: number, type: string, message: string): void {
@@ -206,6 +210,7 @@ export function createModelProxy(options: ModelProxyOptions): Server {
 
     void (async () => {
       let status = 0;
+      let usage: ModelUsage | undefined;
       try {
         const apiKey = await options.resolveCredentials(context.orgId, route.provider);
         if (!apiKey) {
@@ -213,7 +218,9 @@ export function createModelProxy(options: ModelProxyOptions): Server {
           reject(req, res, 503, "api_error", "No model credential is configured for this organization");
           return;
         }
-        status = await forward(req, res, route, apiKey, url.search, maxBodyBytes);
+        const result = await forward(req, res, route, apiKey, url.search, maxBodyBytes);
+        status = result.status;
+        usage = result.usage;
       } catch (err) {
         if (err instanceof BodyTooLargeError) {
           status = 413;
@@ -233,6 +240,13 @@ export function createModelProxy(options: ModelProxyOptions): Server {
           status,
           durationMs: Date.now() - startedAt,
         });
+        if (usage && options.recordUsage) {
+          try {
+            await options.recordUsage(context, usage);
+          } catch (err) {
+            log.error("Failed to record model usage", { orgId: context.orgId, runId: context.runId, err });
+          }
+        }
       }
     })();
   });

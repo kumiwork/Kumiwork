@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+vi.mock("@agentfactory/db", () => ({ addRunUsage: vi.fn() }));
+
 import { RunCredentialStore, type ModelProvider } from "../run-credentials";
 import { issueSandboxModelCredential, resolveCredentials } from "../sandbox-model-access";
 

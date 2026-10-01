@@ -264,11 +264,11 @@ export const githubScmProvider: ScmProvider = {
     return compareRes.text();
   },
 
-  // Opens a draft PR against the repo's actual default branch (fetched fresh rather than
-  // assumed "main"). draft:true and the app's own permissions (contents:write,
-  // pull_requests:write, no admin) mean this token physically cannot merge or touch a
-  // protected branch even if something upstream were wrong.
-  async openDraftPullRequest(connection, repoFullName, branch, title, body) {
+  // Opens a PR against the repo's actual default branch (fetched fresh rather than assumed
+  // "main"). The app's own permissions (contents:write, pull_requests:write, no admin) mean this
+  // token physically cannot merge or touch a protected branch even if something upstream were
+  // wrong, whether the PR is a draft or ready for review.
+  async openPullRequest(connection, repoFullName, branch, title, body, draft) {
     const token = await getInstallationToken(installationIdOf(connection));
     const repoRes = await fetch(`${GITHUB_API}/repos/${repoFullName}`, {
       headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
@@ -285,7 +285,7 @@ export const githubScmProvider: ScmProvider = {
         Accept: "application/vnd.github+json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ title, head: branch, base, body, draft: true }),
+      body: JSON.stringify({ title, head: branch, base, body, draft }),
     });
     if (!prRes.ok) {
       throw new Error(`GitHub API PR creation failed: ${prRes.status} ${await prRes.text().catch(() => "")}`);

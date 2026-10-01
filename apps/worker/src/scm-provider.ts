@@ -118,19 +118,20 @@ export async function fetchCommitRangeDiff(target: CloneTarget, range: RunCommit
   return provider.fetchCommitRangeDiff(target, range);
 }
 
-// Opens a draft PR. Unlike the other wrappers above, this one needs a live Connection (not
+// Opens a PR, as a draft or ready for review. Unlike the other wrappers above, this one needs a live Connection (not
 // just an opaque target) — re-resolves it from orgId + repoFullName, the same way
 // resolveCloneTarget did at clone time.
-export async function openDraftPullRequest(
+export async function openPullRequest(
   orgId: number,
   repoFullName: string,
   branch: string,
   title: string,
   body: string,
+  draft: boolean,
 ): Promise<OpenedPullRequest> {
   const resolved = await resolveScmConnection(orgId, repoFullName);
   if (!resolved) throw new Error(`No connected SCM provider can access repo "${repoFullName}"`);
-  return resolved.provider.openDraftPullRequest(resolved.connection, repoFullName, branch, title, body);
+  return resolved.provider.openPullRequest(resolved.connection, repoFullName, branch, title, body, draft);
 }
 
 // Clones into /workspace on first use only — the same container is reused across a session's
@@ -338,16 +339,37 @@ export interface PushResult {
   branchMismatch?: { agentBranch: string };
 }
 
+export interface PushRetryOptions {
+  maxAttempts?: number;
+  sleep?: (ms: number) => Promise<void>;
+}
+
+const DEFAULT_PUSH_ATTEMPTS = 3;
+const PUSH_RETRY_BASE_DELAY_MS = 2000;
+
+const TRANSIENT_PUSH_FAILURE =
+  /The requested URL returned error: (?:403|5\d\d)|Permission to \S+ denied to |RPC failed; HTTP (?:403|5\d\d)|remote: Internal Server Error/i;
+
+export function isTransientPushFailure(stderr: string): boolean {
+  return TRANSIENT_PUSH_FAILURE.test(stderr);
+}
+
+function defaultSleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function pushChangesIfDirty(
   sandboxProvider: SandboxProvider,
   sandboxId: string,
   target: CloneTarget,
   commitMessage: string,
   authorName: string,
+  retry: PushRetryOptions = {},
 ): Promise<PushResult> {
   const provider = getScmProvider(target.provider);
   if (!provider) throw new Error(`No registered SCM provider for "${target.provider}"`);
-  const token = await provider.mintPushToken(target);
+  const maxAttempts = retry.maxAttempts ?? DEFAULT_PUSH_ATTEMPTS;
+  const sleep = retry.sleep ?? defaultSleep;
 
   const script = `
 cd /workspace || { echo PUSH_FAILED; exit 0; }
@@ -456,18 +478,30 @@ fi`;
 
   let stdout = "";
   let stderr = "";
-  for await (const chunk of sandboxProvider.exec(sandboxId, ["sh", "-c", script], {
-    env: {
-      ...platformGitEnv(),
-      BRANCH_NAME: target.branch,
-      REPO_FULL_NAME: target.repoFullName,
-      COMMIT_MESSAGE: commitMessage,
-      AUTHOR_NAME: authorName,
-      PUSH_TOKEN: token,
-    },
-  })) {
-    if (chunk.stream === "stdout") stdout += chunk.data;
-    else stderr += chunk.data;
+  const changedFileLines = new Set<string>();
+  for (let attempt = 1; ; attempt++) {
+    const token = await provider.mintPushToken(target);
+    stdout = "";
+    stderr = "";
+    for await (const chunk of sandboxProvider.exec(sandboxId, ["sh", "-c", script], {
+      env: {
+        ...platformGitEnv(),
+        BRANCH_NAME: target.branch,
+        REPO_FULL_NAME: target.repoFullName,
+        COMMIT_MESSAGE: commitMessage,
+        AUTHOR_NAME: authorName,
+        PUSH_TOKEN: token,
+      },
+    })) {
+      if (chunk.stream === "stdout") stdout += chunk.data;
+      else stderr += chunk.data;
+    }
+    for (const line of stdout.split("\n")) {
+      if (line.startsWith("CHANGED_FILE:")) changedFileLines.add(line);
+    }
+    const retryable = stdout.includes("PUSH_FAILED") && isTransientPushFailure(stderr);
+    if (!retryable || attempt >= maxAttempts) break;
+    await sleep(PUSH_RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
   }
 
   const unsafeKeys = unsafeGitConfigKeys(stdout);
@@ -477,9 +511,7 @@ fi`;
 
   if (stdout.includes("NO_CHANGES")) return { pushed: false, changedFiles: [], branchMismatch };
   if (stdout.includes("PUSH_OK")) {
-    const changedFiles = stdout
-      .split("\n")
-      .filter((line) => line.startsWith("CHANGED_FILE:"))
+    const changedFiles = [...changedFileLines]
       .map((line) => line.slice("CHANGED_FILE:".length).trim())
       .filter(Boolean);
     const baseSha = /^BASE_SHA:(\S+)$/m.exec(stdout)?.[1];

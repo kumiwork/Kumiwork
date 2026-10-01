@@ -19,7 +19,7 @@ const {
   fetchCommitRangeDiff,
   fetchIssue,
   fetchPullRequestFeedback,
-  openDraftPullRequest,
+  openPullRequest,
   parseIssueReference,
   pushChangesIfDirty,
   resolveCloneTarget,
@@ -189,21 +189,21 @@ describe("fetchCommitRangeDiff (thin wrapper over the registry)", () => {
   });
 });
 
-describe("openDraftPullRequest (thin wrapper over the registry)", () => {
-  it("delegates to the resolved provider's openDraftPullRequest", async () => {
+describe("openPullRequest (thin wrapper over the registry)", () => {
+  it("delegates to the resolved provider's openPullRequest", async () => {
     const connection = fakeConnection(1);
     const providerFn = vi.fn().mockResolvedValue({ number: 7, url: "https://example.com/pull/7" });
-    resolveScmConnectionMock.mockResolvedValue({ connection, provider: { openDraftPullRequest: providerFn } });
+    resolveScmConnectionMock.mockResolvedValue({ connection, provider: { openPullRequest: providerFn } });
 
-    const pr = await openDraftPullRequest(1, "acme/widgets", "agent/session-1", "title", "body");
+    const pr = await openPullRequest(1, "acme/widgets", "agent/session-1", "title", "body", false);
 
     expect(pr).toEqual({ number: 7, url: "https://example.com/pull/7" });
-    expect(providerFn).toHaveBeenCalledWith(connection, "acme/widgets", "agent/session-1", "title", "body");
+    expect(providerFn).toHaveBeenCalledWith(connection, "acme/widgets", "agent/session-1", "title", "body", false);
   });
 
   it("throws when no connection resolves", async () => {
     resolveScmConnectionMock.mockResolvedValue(undefined);
-    await expect(openDraftPullRequest(1, "acme/widgets", "b", "t", "body")).rejects.toThrow(
+    await expect(openPullRequest(1, "acme/widgets", "b", "t", "body", true)).rejects.toThrow(
       'No connected SCM provider can access repo "acme/widgets"',
     );
   });
@@ -617,6 +617,102 @@ describe("pushChangesIfDirty", () => {
     await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "Code reviewer")).rejects.toThrow(
       "Failed to push agent changes to the remote",
     );
+  });
+
+  describe("transient push failures", () => {
+    const forbidden = [
+      { stream: "stderr" as const, data: "remote: Permission to acme-org/platform.git denied to agentfactoryapp[bot].\n" },
+      { stream: "stdout" as const, data: "CHANGED_FILE:src/a.ts\nPUSH_FAILED\n" },
+    ];
+    const success = [{ stream: "stdout" as const, data: "PUSH_OK\n" }];
+
+    function scriptedSandbox(attempts: OutputChunk[][]) {
+      const exec = vi.fn(async function* () {
+        for (const chunk of attempts[Math.min(exec.mock.calls.length - 1, attempts.length - 1)]) yield chunk;
+      });
+      const sandbox = { exec } as unknown as SandboxProvider;
+      return { sandbox, exec };
+    }
+
+    it("retries a 403 with a freshly minted token and succeeds", async () => {
+      const mintPushToken = vi.fn().mockResolvedValueOnce("tok1").mockResolvedValueOnce("tok2");
+      getScmProviderMock.mockReturnValue({ mintPushToken });
+      const { sandbox, exec } = scriptedSandbox([forbidden, success]);
+      const sleep = vi.fn().mockResolvedValue(undefined);
+
+      await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep })).resolves.toMatchObject({
+        pushed: true,
+        changedFiles: ["src/a.ts"],
+      });
+
+      expect(exec).toHaveBeenCalledTimes(2);
+      expect(mintPushToken).toHaveBeenCalledTimes(2);
+      const tokens = exec.mock.calls.map((call) => (call as unknown as [string, string[], { env: Record<string, string> }])[2].env.PUSH_TOKEN);
+      expect(tokens).toEqual(["tok1", "tok2"]);
+      expect(sleep).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries a 5xx from the remote", async () => {
+      mockProvider();
+      const { sandbox, exec } = scriptedSandbox([
+        [
+          { stream: "stderr", data: "fatal: unable to access 'https://github.com/x.git/': The requested URL returned error: 503\n" },
+          { stream: "stdout", data: "PUSH_FAILED\n" },
+        ],
+        success,
+      ]);
+      await pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep: vi.fn() });
+      expect(exec).toHaveBeenCalledTimes(2);
+    });
+
+    it("gives up after the bounded number of attempts and reports the push error", async () => {
+      const mintPushToken = mockProvider();
+      const { sandbox, exec } = scriptedSandbox([forbidden]);
+      const sleep = vi.fn().mockResolvedValue(undefined);
+
+      await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep })).rejects.toThrow(
+        /Failed to push agent changes.*denied to agentfactoryapp/s,
+      );
+
+      expect(exec).toHaveBeenCalledTimes(3);
+      expect(mintPushToken).toHaveBeenCalledTimes(3);
+      expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([2000, 4000]);
+    });
+
+    it("never retries a non-fast-forward rejection", async () => {
+      mockProvider();
+      const { sandbox, exec } = scriptedSandbox([
+        [
+          { stream: "stderr", data: "! [rejected] agent/session-1 -> agent/session-1 (non-fast-forward)\n" },
+          { stream: "stdout", data: "PUSH_FAILED\n" },
+        ],
+      ]);
+      await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep: vi.fn() })).rejects.toThrow(
+        "Failed to push agent changes",
+      );
+      expect(exec).toHaveBeenCalledTimes(1);
+    });
+
+    it("never retries PUSH_CONFLICT", async () => {
+      mockProvider();
+      const { sandbox, exec } = scriptedSandbox([
+        [
+          { stream: "stderr", data: "returned error: 403\n" },
+          { stream: "stdout", data: "PUSH_CONFLICT\n" },
+        ],
+      ]);
+      await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep: vi.fn() })).rejects.toThrow(
+        "already has unrelated commits",
+      );
+      expect(exec).toHaveBeenCalledTimes(1);
+    });
+
+    it("never retries a branch mismatch that had nothing to push", async () => {
+      mockProvider();
+      const { sandbox, exec } = scriptedSandbox([[{ stream: "stdout", data: "BRANCH_MISMATCH:main\nNO_CHANGES\n" }]]);
+      await pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep: vi.fn() });
+      expect(exec).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("throws when the target's provider isn't registered", async () => {

@@ -46,6 +46,7 @@ import {
   getTeamForOrg,
   hasNonTerminalRun,
   insertRunContextRetrievals,
+  listEventsForSession,
   listMessages,
   readAgentMemoryEntries,
   setSessionSandbox,
@@ -100,7 +101,7 @@ import {
   cloneIntoSandbox,
   fetchIssue,
   fetchPullRequestFeedback,
-  openDraftPullRequest,
+  openPullRequest,
   parseIssueReference,
   pushChangesIfDirty,
   resolveCloneTarget,
@@ -111,7 +112,7 @@ import {
 import { resolveEscalation } from "./model-escalation";
 import { ensureRepoMap, warmRepoMap } from "./repo-map";
 import { runDependencySetup, type DependencySetupOutcome } from "./dependency-setup";
-import { resolveSandboxImage, SANDBOX_IMAGE_NODE } from "./sandbox-image-select";
+import { resolveSandboxImage, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_PYTHON } from "./sandbox-image-select";
 import { dependencyCacheEnv, dependencyCacheVolume } from "./sandbox-cache";
 import { issueSandboxModelCredential, startModelProxy } from "./sandbox-model-access";
 import { buildRetrievalQuery, retrieveContext, type RetrievedContext } from "./context-retrieval";
@@ -125,11 +126,24 @@ import { notifyIssueOfPullRequest } from "./task-notify";
 import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicator } from "./channel-notify";
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
+import { localChecksPassed } from "./local-checks";
 import { createLogger } from "@agentfactory/logger";
+import { findProblemImages, resolveSandboxImageCheckMode, runSandboxImageCheck } from "./sandbox-image-check";
 
 const log = createLogger("worker");
 
 const sandboxProvider = new DockerSandboxProvider();
+
+const sandboxImageCheckMode = resolveSandboxImageCheckMode(process.env.SANDBOX_IMAGE_CHECK);
+const sandboxImageReports = await runSandboxImageCheck(sandboxImageCheckMode, [
+  SANDBOX_IMAGE_NODE,
+  SANDBOX_IMAGE_PYTHON,
+  SANDBOX_IMAGE_JAVA,
+]);
+if (sandboxImageCheckMode === "enforce" && findProblemImages(sandboxImageReports).some((report) => report.status !== "missing")) {
+  log.error("Refusing to start: sandbox images are stale or unlabeled and SANDBOX_IMAGE_CHECK=enforce");
+  process.exit(1);
+}
 
 // One sandbox per active session, kept warm across runs (ARCHITECTURE.md §4) — the SDK's own
 // resume mechanism needs the same container's filesystem across turns (see the sessions.sandboxId
@@ -849,7 +863,8 @@ const runWorker = new Worker<RunJobData>(
         // (same head branch) — opening another PR for a branch that already has one 422s. Only
         // ever open once per task; task.prNumber is the record of whether that's already happened.
         if (result.pushed && !task.prNumber) {
-          const pr = await openDraftPullRequest(
+          const draft = !localChecksPassed(await listEventsForSession(session.id));
+          const pr = await openPullRequest(
             agent.orgId,
             workspace.repoFullName,
             workspace.branch,
@@ -860,6 +875,7 @@ const runWorker = new Worker<RunJobData>(
               summary: text,
               changedFiles,
             }),
+            draft,
           );
           await updateTask(task.id, { prNumber: pr.number, prUrl: pr.url, status: "pr_open" });
           // Inside the `result.pushed && !task.prNumber` guard on purpose: that guard is what makes

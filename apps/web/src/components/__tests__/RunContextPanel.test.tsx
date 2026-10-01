@@ -115,7 +115,7 @@ describe("RunContextPanel", () => {
 
     await waitFor(() => expect(screen.getByText("Platform preamble")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Platform preamble"));
-    expect(screen.getByText("You are an agent.")).toBeInTheDocument();
+    expect(await screen.findByText("You are an agent.")).toBeInTheDocument();
   });
 
   it("renders a segment's Markdown as formatted output, not literal syntax", async () => {
@@ -125,7 +125,7 @@ describe("RunContextPanel", () => {
     await waitFor(() => expect(screen.getByText("Agent system prompt")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Agent system prompt"));
 
-    expect(screen.getByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
     expect(screen.queryByText("## Reviewer")).not.toBeInTheDocument();
   });
 
@@ -135,7 +135,7 @@ describe("RunContextPanel", () => {
 
     await waitFor(() => expect(screen.getByText("Agent system prompt")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Agent system prompt"));
-    expect(screen.getByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Reviewer" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Raw" }));
 
@@ -152,7 +152,7 @@ describe("RunContextPanel", () => {
     // The joined text spans a newline inside a single <pre>; match on raw textContent
     // rather than getByText's whitespace-collapsing normalizer.
     expect(
-      screen.getByText((_, element) => element?.textContent === "You are an agent.\nYou are a reviewer."),
+      await screen.findByText((_, element) => element?.textContent === "You are an agent.\nYou are a reviewer."),
     ).toBeInTheDocument();
     expect(screen.getByText(`Prompt hash: ${"c".repeat(64)}`)).toBeInTheDocument();
   });

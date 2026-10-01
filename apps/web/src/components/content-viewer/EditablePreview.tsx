@@ -3,7 +3,7 @@
 import { useState, type ComponentPropsWithoutRef } from "react";
 import { Textarea } from "@agentfactory/shared";
 import { useTranslation } from "@/lib/i18n/context";
-import { ContentViewer, type ContentViewerProps } from "./ContentViewer";
+import { ContentViewer, type ContentViewerProps } from "./LazyContentViewer";
 import styles from "./ContentViewer.module.css";
 
 type TextareaProps = ComponentPropsWithoutRef<"textarea">;

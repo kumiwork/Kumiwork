@@ -128,7 +128,7 @@ vi.mock("../scm-provider", () => ({
   resolveDetectedLanguage: vi.fn(async () => undefined),
   fetchIssue: vi.fn(),
   fetchPullRequestFeedback: vi.fn(),
-  openDraftPullRequest: vi.fn(),
+  openPullRequest: vi.fn(),
   parseIssueReference: vi.fn(() => undefined),
   pushChangesIfDirty: vi.fn(async () => ({ changedFiles: [], pushed: false })),
   resolveCloneTarget: vi.fn(),

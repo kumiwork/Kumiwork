@@ -60,7 +60,7 @@ calls — the sandbox currently runs the SDK with `permissionMode: "bypassPermis
 access — and no budget/cost enforcement. Provider API keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) never enter a sandbox: agent turns and repo-map
 generation reach the model through a host-side proxy (`apps/worker/src/model-proxy.ts`) using a short-lived per-run
 token, and `resolveCredentials(orgId)` in `apps/worker/src/sandbox-model-access.ts` is a stub that still returns the
-platform key for the run's provider from `process.env` (no BYO keys, no metering). Don't assume a `PolicyEngine`, budget caps, or
+platform key for the run's provider from `process.env` (no BYO keys). The proxy does meter per-run token usage into `runs.tokens_used`/`runs.cost_usd` (`model-usage.ts`, `usage-metering.ts`); cost stays 0 for any model without `pricing` in `MODEL_CATALOG`. Don't assume a `PolicyEngine`, budget caps, or
 BYO-key credential resolution exist anywhere in the code just because `agents.toolPolicy` is a schema column — see
 ARCHITECTURE.md §6.
 

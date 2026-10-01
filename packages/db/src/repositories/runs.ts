@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import type { ModelSpec, PromptSegment, Run, RunCommitRange, RunPrompt, RunStatus } from "@agentfactory/core";
 import { db } from "../client";
 import { runs } from "../schema";
@@ -118,6 +118,16 @@ export async function updateRunCommitRange(id: number, commitRange: RunCommitRan
 export async function createRun(sessionId: number, triggeringMessageId?: number): Promise<Run> {
   const [row] = await db.insert(runs).values({ sessionId, triggeringMessageId }).returning();
   return toRun(row);
+}
+
+export async function addRunUsage(id: number, usage: { tokens: number; costUsd: number }): Promise<void> {
+  await db
+    .update(runs)
+    .set({
+      tokensUsed: sql`${runs.tokensUsed} + ${Math.max(0, Math.round(usage.tokens))}`,
+      costUsd: sql`${runs.costUsd} + ${Math.max(0, usage.costUsd)}`,
+    })
+    .where(eq(runs.id, id));
 }
 
 export async function getRun(id: number): Promise<Run | undefined> {
