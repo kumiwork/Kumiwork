@@ -122,7 +122,7 @@ vi.mock("../scm-provider", () => ({
   buildPullRequestBody: vi.fn(() => ""),
   cloneIntoSandbox: vi.fn(),
   fetchIssue: vi.fn(),
-  openDraftPullRequest: vi.fn(),
+  openPullRequest: vi.fn(),
   parseIssueReference: vi.fn(() => undefined),
   pushChangesIfDirty: vi.fn(async () => ({ changedFiles: [], pushed: false })),
   resolveCloneTarget: vi.fn(),

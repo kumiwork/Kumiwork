@@ -118,19 +118,20 @@ export async function fetchCommitRangeDiff(target: CloneTarget, range: RunCommit
   return provider.fetchCommitRangeDiff(target, range);
 }
 
-// Opens a draft PR. Unlike the other wrappers above, this one needs a live Connection (not
+// Opens a PR, as a draft or ready for review. Unlike the other wrappers above, this one needs a live Connection (not
 // just an opaque target) — re-resolves it from orgId + repoFullName, the same way
 // resolveCloneTarget did at clone time.
-export async function openDraftPullRequest(
+export async function openPullRequest(
   orgId: number,
   repoFullName: string,
   branch: string,
   title: string,
   body: string,
+  draft: boolean,
 ): Promise<OpenedPullRequest> {
   const resolved = await resolveScmConnection(orgId, repoFullName);
   if (!resolved) throw new Error(`No connected SCM provider can access repo "${repoFullName}"`);
-  return resolved.provider.openDraftPullRequest(resolved.connection, repoFullName, branch, title, body);
+  return resolved.provider.openPullRequest(resolved.connection, repoFullName, branch, title, body, draft);
 }
 
 // Clones into /workspace on first use only — the same container is reused across a session's

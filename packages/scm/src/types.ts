@@ -113,12 +113,13 @@ export interface ScmProvider {
   resolveDefaultBranchSha(connection: Connection, repoFullName: string): Promise<string>;
   detectPrimaryLanguage(connection: Connection, repoFullName: string): Promise<string | undefined>;
   fetchCommitRangeDiff(target: CloneTarget, range: RunCommitRange): Promise<string>;
-  openDraftPullRequest(
+  openPullRequest(
     connection: Connection,
     repoFullName: string,
     branch: string,
     title: string,
     body: string,
+    draft: boolean,
   ): Promise<OpenedPullRequest>;
   parseIssueReference(text: string): { repoFullName: string; issueNumber: number } | undefined;
   fetchPullRequest(connection: Connection, repoFullName: string, prNumber: number): Promise<PullRequestInfo>;

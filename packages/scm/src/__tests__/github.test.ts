@@ -438,8 +438,8 @@ describe("fetchCommitRangeDiff", () => {
   });
 });
 
-describe("openDraftPullRequest", () => {
-  it("fetches the repo's default branch and opens a draft PR against it", async () => {
+describe("openPullRequest", () => {
+  it("fetches the repo's default branch and opens a draft PR against it when asked for a draft", async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ token: "ghs_pr" }), { status: 200 }))
@@ -449,12 +449,13 @@ describe("openDraftPullRequest", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    const pr = await githubScmProvider.openDraftPullRequest(
+    const pr = await githubScmProvider.openPullRequest(
       githubConnection(1, 999),
       "acme-org/platform",
       "agent/session-1",
       "Fix the bug",
       "body text",
+      true,
     );
 
     expect(pr).toEqual({ number: 7, url: "https://github.com/acme-org/platform/pull/7" });
@@ -469,6 +470,22 @@ describe("openDraftPullRequest", () => {
     });
   });
 
+  it("opens a ready-for-review PR when draft is false", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ token: "ghs_pr" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ default_branch: "main" }), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ number: 8, html_url: "https://github.com/acme-org/platform/pull/8" }), { status: 200 }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await githubScmProvider.openPullRequest(githubConnection(1, 999), "acme-org/platform", "agent/session-1", "t", "b", false);
+
+    const [, , prCall] = fetchMock.mock.calls;
+    expect(JSON.parse(prCall[1].body)).toMatchObject({ draft: false });
+  });
+
   it("throws when PR creation fails", async () => {
     vi.stubGlobal(
       "fetch",
@@ -479,7 +496,7 @@ describe("openDraftPullRequest", () => {
         .mockResolvedValueOnce(new Response("unprocessable", { status: 422 })),
     );
     await expect(
-      githubScmProvider.openDraftPullRequest(githubConnection(1, 999), "acme-org/platform", "agent/session-1", "t", "b"),
+      githubScmProvider.openPullRequest(githubConnection(1, 999), "acme-org/platform", "agent/session-1", "t", "b", true),
     ).rejects.toThrow("GitHub API PR creation failed: 422");
   });
 });
