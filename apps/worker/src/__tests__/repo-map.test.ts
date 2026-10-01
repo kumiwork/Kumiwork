@@ -5,7 +5,9 @@ import { runtimes } from "../agent-runtime/registry";
 
 const getRepoMapMock = vi.fn();
 const insertRepoMapMock = vi.fn();
+const recordWorkerJobOutcomeMock = vi.fn();
 vi.mock("@agentfactory/db", () => ({
+  recordWorkerJobOutcome: (...args: unknown[]) => recordWorkerJobOutcomeMock(...args),
   getRepoMap: (...args: unknown[]) => getRepoMapMock(...args),
   insertRepoMap: (...args: unknown[]) => insertRepoMapMock(...args),
 }));
@@ -271,6 +273,49 @@ describe("warmRepoMap", () => {
     await warmRepoMap(sandbox, 1, "acme/widgets");
 
     expect(create).not.toHaveBeenCalled();
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        orgId: 1,
+        jobType: "repo_map_warm",
+        subject: "acme/widgets",
+        status: "skipped",
+        reason: "already_cached",
+        details: { sha: "abc123" },
+        durationMs: expect.any(Number),
+      }),
+    );
+  });
+
+  it("records a skip with the reason when the default branch sha cannot be resolved", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockResolvedValue(undefined);
+    await warmRepoMap(fakeSandbox({}), 1, "acme/widgets");
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "skipped", reason: "no_default_branch_sha" }),
+    );
+  });
+
+  it("records a skip with the reason when there is no clone target", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockResolvedValue("abc123");
+    getRepoMapMock.mockReset().mockResolvedValue(undefined);
+    resolveCloneTargetMock.mockReset().mockResolvedValue(undefined);
+    await warmRepoMap(fakeSandbox({}), 1, "acme/widgets");
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "skipped", reason: "no_clone_target" }),
+    );
+  });
+
+  it("records the error text when the warm job throws", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockRejectedValue(new Error("GitHub 401"));
+    await warmRepoMap(fakeSandbox({}), 1, "acme/widgets");
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "failed", reason: "exception", error: "GitHub 401" }),
+    );
+  });
+
+  it("does not fail the warm job when recording the outcome fails", async () => {
+    resolveDefaultBranchShaMock.mockReset().mockResolvedValue(undefined);
+    recordWorkerJobOutcomeMock.mockRejectedValueOnce(new Error("db down"));
+    await expect(warmRepoMap(fakeSandbox({}), 1, "acme/widgets")).resolves.toBeUndefined();
   });
 
   it("provisions, clones, generates, and tears down on a cache miss", async () => {
@@ -288,7 +333,7 @@ describe("warmRepoMap", () => {
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
     resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-platform");
-    const destroy = vi.fn();
+    const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-1" });
     const execEnvs = new Map<string, Record<string, string> | undefined>();
     const sandbox: SandboxProvider = {
@@ -333,6 +378,9 @@ describe("warmRepoMap", () => {
     expect(cloneIntoSandboxMock).toHaveBeenCalled();
     expect(insertRepoMapMock).toHaveBeenCalledWith(expect.objectContaining({ content: "warmed map" }));
     expect(destroy).toHaveBeenCalledWith("warm-sandbox-1");
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "completed", reason: "generated", details: expect.objectContaining({ sha: "abc123", chars: 10 }) }),
+    );
   });
 
   it("retries once and caches the retry's map when the first generation is a file-creation summary", async () => {
@@ -342,7 +390,7 @@ describe("warmRepoMap", () => {
     resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
     resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
-    const destroy = vi.fn();
+    const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-4" });
     let generateCalls = 0;
     const sandbox: SandboxProvider = {
@@ -385,7 +433,7 @@ describe("warmRepoMap", () => {
     resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
     resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
-    const destroy = vi.fn();
+    const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-5" });
     let generateCalls = 0;
     const sandbox: SandboxProvider = {
@@ -417,6 +465,9 @@ describe("warmRepoMap", () => {
 
     expect(generateCalls).toBe(2);
     expect(insertRepoMapMock).not.toHaveBeenCalled();
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "failed", reason: "generation_failed", error: expect.stringContaining("file-creation summary") }),
+    );
   });
 
   it("issues no credential and caches nothing when the default runtime cannot generate repo maps", async () => {
@@ -459,7 +510,7 @@ describe("warmRepoMap", () => {
     });
     cloneIntoSandboxMock.mockReset().mockRejectedValue(new Error("clone failed"));
     resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
-    const destroy = vi.fn();
+    const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-2" });
     const sandbox: SandboxProvider = {
       create,
@@ -520,7 +571,7 @@ describe("warmRepoMap", () => {
       installationRef: 1,
     });
     resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
-    const destroy = vi.fn();
+    const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockRejectedValue(new Error("docker unavailable"));
     const sandbox: SandboxProvider = {
       create,

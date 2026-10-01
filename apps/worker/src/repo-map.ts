@@ -8,6 +8,7 @@ import { issueSandboxModelCredential } from "./sandbox-model-access";
 import { getDefaultAgentRuntime } from "./agent-runtime/registry";
 import type { RepoMapResult } from "./agent-runtime/types";
 import { isRepoMapFileCreationSummary } from "./repo-map-validate";
+import { describeError, recordJobOutcome, type JobOutcomeFields } from "./job-outcome";
 
 const log = createLogger("repo-map");
 
@@ -50,28 +51,34 @@ async function getSandboxHeadSha(sandboxProvider: SandboxProvider, sandboxId: st
 // Runs the one-shot generation turn (apps/worker/sandbox-image/generate-repo-map.ts) in the
 // sandbox that already has the repo checked out. Returns undefined on any failure — caller
 // treats that identically to "no map available", never throws further up.
+interface GenerationAttempt {
+  result?: RepoMapResult;
+  error?: string;
+}
+
 async function generateRepoMap(
   sandboxProvider: SandboxProvider,
   sandboxId: string,
   orgId: number,
-): Promise<RepoMapResult | undefined> {
+): Promise<GenerationAttempt> {
   const generator = getDefaultAgentRuntime().repoMap;
-  if (!generator) return undefined;
+  if (!generator) return { error: "No repo map generator registered for the default runtime" };
   const credential = issueSandboxModelCredential(
     { orgId, purpose: "repo-map", provider: generator.model.family },
     undefined,
     GENERATION_TIMEOUT_MS + GENERATION_CREDENTIAL_MARGIN_MS,
   );
   try {
-    return await Promise.race([
+    const result = await Promise.race([
       generator.generate({ sandboxProvider, sandboxId, modelEndpoint: credential.endpoint }),
       new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Repo map generation timed out")), GENERATION_TIMEOUT_MS),
       ),
     ]);
+    return { result };
   } catch (err) {
     log.error("Repo map generation failed", { err });
-    return undefined;
+    return { error: describeError(err) };
   } finally {
     credential.revoke();
   }
@@ -82,20 +89,20 @@ async function generateValidatedRepoMap(
   sandboxId: string,
   orgId: number,
   repoFullName: string,
-): Promise<RepoMapResult | undefined> {
+): Promise<GenerationAttempt> {
   const first = await generateRepoMap(sandboxProvider, sandboxId, orgId);
-  if (!first || !isRepoMapFileCreationSummary(first.text)) return first;
+  if (!first.result || !isRepoMapFileCreationSummary(first.result.text)) return first;
 
   log.warn("Repo map generation returned a file-creation summary instead of a map; retrying once", {
     repoFullName,
   });
   const retry = await generateRepoMap(sandboxProvider, sandboxId, orgId);
-  if (!retry || !isRepoMapFileCreationSummary(retry.text)) return retry;
+  if (!retry.result || !isRepoMapFileCreationSummary(retry.result.text)) return retry;
 
   log.warn("Repo map generation returned a file-creation summary again after retry; caching nothing", {
     repoFullName,
   });
-  return undefined;
+  return { error: "Generation returned a file-creation summary twice; nothing cached" };
 }
 
 // Run-time path: called from the run pipeline right after clone, with a sandbox that already
@@ -159,40 +166,47 @@ export async function ensureRepoMap(
 
 // Generates and caches the map for whatever commit is checked out in `sandboxId`, blocking until
 // it finishes. Only the pre-warm path calls this — it runs on its own queue in its own throwaway
-// sandbox, where wall-clock time costs nobody anything. Returns the stored content, or "" if
-// generation failed.
+// sandbox, where wall-clock time costs nobody anything. Reports what happened rather than
+// throwing, so the pre-warm job can record why a map did or did not land.
 async function generateAndCacheRepoMap(
   sandboxProvider: SandboxProvider,
   sandboxId: string,
   orgId: number,
   repoFullName: string,
-): Promise<string> {
+): Promise<WarmOutcome> {
   try {
     const sha = await getSandboxHeadSha(sandboxProvider, sandboxId);
     const cached = await getRepoMap(orgId, repoFullName, sha);
-    if (cached) return cached.content;
+    if (cached) return { status: "skipped", reason: "already_cached", details: { sha } };
 
     const generated = await generateValidatedRepoMap(sandboxProvider, sandboxId, orgId, repoFullName);
-    if (!generated) return "";
+    if (!generated.result) {
+      return { status: "failed", reason: "generation_failed", error: generated.error, details: { sha } };
+    }
 
-    // Truncate once and store/return the same value — insertRepoMap enforces this cap
-    // independently (defense-in-depth CHECK constraint), but this must return exactly what got
-    // cached, or the caller would see a different (larger) map than every later cache hit.
-    const content = generated.text.slice(0, MAX_CONTENT_LENGTH);
+    // Truncate once and store the same value — insertRepoMap enforces this cap independently
+    // (defense-in-depth CHECK constraint), and the recorded length must match what got cached.
+    const content = generated.result.text.slice(0, MAX_CONTENT_LENGTH);
     await insertRepoMap({
       orgId,
       repoFullName,
       commitSha: sha,
       content,
-      generationCostUsd: generated.costUsd,
-      generationTokens: generated.tokens,
+      generationCostUsd: generated.result.costUsd,
+      generationTokens: generated.result.tokens,
     });
-    return content;
+    return {
+      status: "completed",
+      reason: "generated",
+      details: { sha, chars: content.length, tokens: generated.result.tokens, costUsd: generated.result.costUsd },
+    };
   } catch (err) {
     log.error("Repo map generation failed", { err });
-    return "";
+    return { status: "failed", reason: "generation_failed", error: describeError(err) };
   }
 }
+
+type WarmOutcome = Pick<JobOutcomeFields, "status" | "reason" | "error" | "details">;
 
 // Pre-warm path: called when an agent's or team's defaultCodebase is set (apps/web's agent/team
 // routes enqueue this via @agentfactory/queue's repo-map-warm queue). Resolves the default
@@ -206,29 +220,42 @@ export async function warmRepoMap(
   orgId: number,
   repoFullName: string,
 ): Promise<void> {
+  const startedAt = Date.now();
+  let outcome: WarmOutcome;
   try {
-    const sha = await resolveDefaultBranchSha(orgId, repoFullName);
-    if (!sha) return;
-    if (await getRepoMap(orgId, repoFullName, sha)) return;
-
-    // Branch name only needs to be syntactically valid and not collide with whatever branch git
-    // already checked out — cloneIntoSandbox runs `git checkout -b "$BRANCH_NAME"` on a fresh
-    // clone, which fails if the default branch is also literally "main". This sandbox and its
-    // local branch are both discarded when the container is torn down below.
-    const workspace = await resolveCloneTarget(orgId, repoFullName, `repo-map-warm-${Date.now()}`);
-    if (!workspace) return;
-
-    const image = await resolveSandboxImage(orgId, repoFullName);
-    const sandbox = await sandboxProvider.create({ image, env: {} });
-    try {
-      await cloneIntoSandbox(sandboxProvider, sandbox.id, workspace);
-      await generateAndCacheRepoMap(sandboxProvider, sandbox.id, orgId, repoFullName);
-    } finally {
-      await sandboxProvider.destroy(sandbox.id).catch((err) => {
-        log.error("Failed to tear down warm sandbox", { sandboxId: sandbox.id, repoFullName, err });
-      });
-    }
+    outcome = await runRepoMapWarm(sandboxProvider, orgId, repoFullName);
   } catch (err) {
     log.error("Repo map pre-warm failed", { repoFullName, err });
+    outcome = { status: "failed", reason: "exception", error: describeError(err) };
+  }
+  log.info("Repo map pre-warm finished", { repoFullName, ...outcome });
+  await recordJobOutcome(startedAt, { orgId, jobType: "repo_map_warm", subject: repoFullName, ...outcome });
+}
+
+async function runRepoMapWarm(
+  sandboxProvider: SandboxProvider,
+  orgId: number,
+  repoFullName: string,
+): Promise<WarmOutcome> {
+  const sha = await resolveDefaultBranchSha(orgId, repoFullName);
+  if (!sha) return { status: "skipped", reason: "no_default_branch_sha" };
+  if (await getRepoMap(orgId, repoFullName, sha)) return { status: "skipped", reason: "already_cached", details: { sha } };
+
+  // Branch name only needs to be syntactically valid and not collide with whatever branch git
+  // already checked out — cloneIntoSandbox runs `git checkout -b "$BRANCH_NAME"` on a fresh
+  // clone, which fails if the default branch is also literally "main". This sandbox and its
+  // local branch are both discarded when the container is torn down below.
+  const workspace = await resolveCloneTarget(orgId, repoFullName, `repo-map-warm-${Date.now()}`);
+  if (!workspace) return { status: "skipped", reason: "no_clone_target", details: { sha } };
+
+  const image = await resolveSandboxImage(orgId, repoFullName);
+  const sandbox = await sandboxProvider.create({ image, env: {} });
+  try {
+    await cloneIntoSandbox(sandboxProvider, sandbox.id, workspace);
+    return await generateAndCacheRepoMap(sandboxProvider, sandbox.id, orgId, repoFullName);
+  } finally {
+    await sandboxProvider.destroy(sandbox.id).catch((err) => {
+      log.error("Failed to tear down warm sandbox", { sandboxId: sandbox.id, repoFullName, err });
+    });
   }
 }

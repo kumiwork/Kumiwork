@@ -1,7 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
 
+const recordWorkerJobOutcomeMock = vi.fn();
 vi.mock("@agentfactory/db", () => ({
+  recordWorkerJobOutcome: (...args: unknown[]) => recordWorkerJobOutcomeMock(...args),
   getAgent: vi.fn(),
   getSession: vi.fn(),
   getTaskBySessionId: vi.fn(),
@@ -136,6 +138,18 @@ describe("processMemoryRetrospectiveJob", () => {
     expect(d.judge).not.toHaveBeenCalled();
   });
 
+  it("records a completed outcome with the accepted, reinforced and rejected counts", async () => {
+    const d = deps();
+    await processMemoryRetrospectiveJob(1, 2, 3, d as never);
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        status: "completed",
+        details: { agentId: 2, accepted: expect.any(Number), reinforced: expect.any(Number), rejected: expect.any(Number) },
+        durationMs: expect.any(Number),
+      }),
+    );
+  });
+
   it("skips the judge when there is no user message of 15+ characters and no failure", async () => {
     const d = deps({
       listMessages: vi.fn().mockResolvedValue([
@@ -146,6 +160,9 @@ describe("processMemoryRetrospectiveJob", () => {
     });
     await processMemoryRetrospectiveJob(1, 2, 3, d as never);
     expect(d.judge).not.toHaveBeenCalled();
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ orgId: 1, jobType: "memory_retrospective", subject: "session:3", status: "skipped", reason: "no_user_message_or_failure" }),
+    );
   });
 
   it("works when the task is gone", async () => {
@@ -163,6 +180,9 @@ describe("processMemoryRetrospectiveJob", () => {
   it("swallows other judge errors", async () => {
     const d = deps({ judge: vi.fn().mockRejectedValue(new Error("judge returned no report_lessons tool call")) });
     await expect(processMemoryRetrospectiveJob(1, 2, 3, d as never)).resolves.toBeUndefined();
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "failed", reason: "judge_failed", error: "judge returned no report_lessons tool call" }),
+    );
   });
 
   it("stores nothing when the judge output was cut off", async () => {
@@ -189,6 +209,9 @@ describe("processMemoryRetrospectiveJob", () => {
   it("does not crash on a setup error", async () => {
     const d = deps({ listMessages: vi.fn().mockRejectedValue(new Error("db down")) });
     await expect(processMemoryRetrospectiveJob(1, 2, 3, d as never)).resolves.toBeUndefined();
+    expect(recordWorkerJobOutcomeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "failed", reason: "setup_failed", error: "db down" }),
+    );
   });
 
   it("logs a rejected item without lesson, quote, why, or closest-match text", async () => {
