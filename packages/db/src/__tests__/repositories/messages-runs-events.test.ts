@@ -9,6 +9,7 @@ import { events, messages } from "../../schema.js";
 import { createEvent, listEventsForSession } from "../../repositories/events.js";
 import { createMessage, getFinalAssistantMessageForRun, getMessage, listMessages } from "../../repositories/messages.js";
 import {
+  addRunUsage,
   cancelRun,
   createRun,
   getLatestNonTerminalRun,
@@ -123,6 +124,21 @@ describe("messages repository", () => {
 });
 
 describe("runs repository", () => {
+  it("accumulates token and cost usage atomically across concurrent calls", async () => {
+    const session = await setupSession();
+    const run = await createRun(session.id);
+
+    await Promise.all([
+      addRunUsage(run.id, { tokens: 100, costUsd: 0.01 }),
+      addRunUsage(run.id, { tokens: 250, costUsd: 0.025 }),
+      addRunUsage(run.id, { tokens: 50, costUsd: 0 }),
+    ]);
+
+    const updated = await getRun(run.id);
+    expect(updated?.tokensUsed).toBe(400);
+    expect(updated?.costUsd).toBeCloseTo(0.035, 10);
+  });
+
   it("creates a queued run and updates its status", async () => {
     const session = await setupSession();
     const run = await createRun(session.id);

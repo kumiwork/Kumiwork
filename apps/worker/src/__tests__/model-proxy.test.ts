@@ -1,6 +1,6 @@
 import { createServer, type IncomingHttpHeaders, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MODEL_PROVIDERS,
   createModelProxy,
@@ -103,6 +103,63 @@ function post(path: string, token: string | undefined, init: { headers?: Record<
     body: init.body ?? JSON.stringify({ model: "claude-haiku-4-5", messages: [] }),
   });
 }
+
+describe("model proxy usage recording", () => {
+  const STREAM_USAGE = [
+    'event: message_start\ndata: {"type":"message_start","message":{"model":"claude-haiku-4-5","usage":{"input_tokens":3,"output_tokens":1}}}\n\n',
+    'event: message_delta\ndata: {"type":"message_delta","usage":{"output_tokens":9}}\n\n',
+  ].join("");
+
+  it("reports a streamed response's usage with the credential's context once the response ends", async () => {
+    upstream.removeAllListeners("request");
+    upstream.on("request", (_req, res) => {
+      res.writeHead(200, { "content-type": "text/event-stream" });
+      res.end(STREAM_USAGE);
+    });
+    const recorded: Array<[RunCredentialContext, unknown]> = [];
+    await startProxy({ recordUsage: (context, usage) => void recorded.push([context, usage]) });
+
+    const res = await post("/anthropic/v1/messages", issue({ runId: 99 }));
+    await res.text();
+    await vi.waitFor(() => expect(recorded).toHaveLength(1));
+
+    expect(recorded[0]![0]).toMatchObject({ orgId: 7, runId: 99, purpose: "run" });
+    expect(recorded[0]![1]).toMatchObject({ model: "claude-haiku-4-5", inputTokens: 3, outputTokens: 9 });
+  });
+
+  it("does not report usage for a failed upstream response", async () => {
+    upstream.removeAllListeners("request");
+    upstream.on("request", (_req, res) => {
+      res.writeHead(529, { "content-type": "application/json" });
+      res.end(JSON.stringify({ usage: { input_tokens: 5, output_tokens: 5 } }));
+    });
+    const recordUsage = vi.fn();
+    await startProxy({ recordUsage });
+
+    const res = await post("/anthropic/v1/messages", issue());
+    await res.text();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(res.status).toBe(529);
+    expect(recordUsage).not.toHaveBeenCalled();
+  });
+
+  it("still serves the response when recording usage throws", async () => {
+    upstream.removeAllListeners("request");
+    upstream.on("request", (_req, res) => {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ model: "claude-haiku-4-5", usage: { input_tokens: 1, output_tokens: 1 } }));
+    });
+    const recordUsage = vi.fn().mockRejectedValue(new Error("db down"));
+    await startProxy({ recordUsage });
+
+    const res = await post("/anthropic/v1/messages", issue());
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toMatchObject({ usage: { input_tokens: 1 } });
+    await vi.waitFor(() => expect(recordUsage).toHaveBeenCalled());
+  });
+});
 
 describe("model proxy", () => {
   it("swaps the run token for the real key and forwards the request unchanged otherwise", async () => {
