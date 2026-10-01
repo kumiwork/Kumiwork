@@ -1,9 +1,9 @@
 import { TRUNCATION_MARKER } from "./secret-masking";
-import type { FailureSource, SuccessMarker, TimelineSources } from "./session-timeline";
+import type { FailureSource, RunErrorSource, SuccessMarker, TimelineSources } from "./session-timeline";
 
 export interface JudgedItem {
   runId: number;
-  evidenceSource: "user_message" | "tool_failure";
+  evidenceSource: "user_message" | "tool_failure" | "run_error";
   evidenceRef?: string;
   evidenceQuote: string;
   why: string;
@@ -76,7 +76,7 @@ function parseItem(raw: unknown, sources: TimelineSources, knownLessons: Readonl
   if (!isRecord(raw)) return "not an object";
   const { runId, evidenceSource, evidenceRef, evidenceQuote, why, reinforcesLessonId, lesson } = raw;
   if (typeof runId !== "number" || !sources.runIds.has(runId)) return "unknown run";
-  if (evidenceSource !== "user_message" && evidenceSource !== "tool_failure") return "bad evidence source";
+  if (evidenceSource !== "user_message" && evidenceSource !== "tool_failure" && evidenceSource !== "run_error") return "bad evidence source";
   if (typeof evidenceQuote !== "string" || evidenceQuote.trim() === "") return "missing quote";
   if (typeof why !== "string" || why.trim() === "") return "missing why";
   if (reinforcesLessonId !== undefined && (typeof reinforcesLessonId !== "number" || !knownLessons.has(reinforcesLessonId))) return "unknown lesson id";
@@ -127,6 +127,28 @@ function recovered(failure: FailureSource, successes: SuccessMarker[]): boolean 
   });
 }
 
+function runErrorRecovered(error: RunErrorSource, runStatuses: ReadonlyMap<number, string>): boolean {
+  return [...runStatuses].some(([runId, status]) => status === "done" && runId >= error.runId);
+}
+
+function resolveRunError(item: JudgedItem, sources: TimelineSources): { ok: true; error: RunErrorSource } | { ok: false; reason: string; closest?: string } {
+  const candidates = [...sources.runErrors.values()].filter((e) => e.runId === item.runId);
+  if (item.evidenceRef !== undefined) {
+    const error = sources.runErrors.get(item.evidenceRef);
+    if (!error || error.runId !== item.runId) return { ok: false, reason: "unknown run error" };
+    if (!quoteMatches(item.evidenceQuote, error.text)) {
+      return { ok: false, reason: "quote not found", closest: closestMatch(item.evidenceQuote, [error.text]) };
+    }
+    return { ok: true, error };
+  }
+  const matches = candidates.filter((e) => quoteMatches(item.evidenceQuote, e.text));
+  if (matches.length === 0) {
+    return { ok: false, reason: "quote not found", closest: closestMatch(item.evidenceQuote, candidates.map((e) => e.text)) };
+  }
+  if (matches.length > 1) return { ok: false, reason: "ambiguous run error" };
+  return { ok: true, error: matches[0] };
+}
+
 function namesCommand(lessonText: string, failure: FailureSource): boolean {
   const word = COMMAND_TOOLS.has(failure.tool) ? commandWord(failure.command) : failure.tool.toLowerCase();
   if (!word) return false;
@@ -154,7 +176,12 @@ export function checkLessonEvidence(
 
   const lessonText = item.reinforcesLessonId !== undefined ? (knownLessons.get(item.reinforcesLessonId) ?? "") : (item.lesson ?? "");
   let failure: FailureSource | undefined;
-  if (item.evidenceSource === "user_message") {
+  if (item.evidenceSource === "run_error") {
+    const resolved = resolveRunError(item, sources);
+    if (!resolved.ok) return resolved;
+    if (!runErrorRecovered(resolved.error, sources.runStatuses)) return { ok: false, reason: "no recovery after run error" };
+    item = { ...item, evidenceRef: resolved.error.id };
+  } else if (item.evidenceSource === "user_message") {
     const texts = sources.userMessages.get(item.runId) ?? [];
     if (!texts.some((text) => quoteMatches(item.evidenceQuote, text))) {
       return { ok: false, reason: "quote not found", closest: closestMatch(item.evidenceQuote, texts) };

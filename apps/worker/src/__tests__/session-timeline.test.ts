@@ -87,6 +87,37 @@ describe("buildSessionTimeline", () => {
     expect(text).toContain("<note>error: Sandbox run produced no result line.</note>");
   });
 
+  it("renders platform errors the agent could have caused as run_error evidence", () => {
+    const { text, sources, hasFailure } = buildSessionTimeline(
+      input({
+        events: [
+          { runId: 1, seq: 1, type: "error", data: { message: "Refusing to use repository credentials: url.https://evil.example/.insteadof is set." } },
+        ],
+      }),
+    );
+    expect(text).toContain(`<run_error id="e1">Refusing to use repository credentials`);
+    expect(sources.runErrors.get("e1")).toMatchObject({ runId: 1, seq: 1 });
+    expect(hasFailure).toBe(true);
+  });
+
+  it.each([
+    "Failed to push agent changes to the remote: remote: Permission to acme/x.git denied to bot[bot].",
+    "GitHub API PR creation failed: 403 forbidden",
+    "Couldn't fetch GitHub issue acme/x#1: boom",
+    "request timed out after 30s",
+    "The connected model provider account has run out of usage credits",
+  ])("keeps infrastructure error %j as a note and not as evidence", (message) => {
+    const { text, sources, hasFailure } = buildSessionTimeline(input({ events: [{ runId: 1, seq: 1, type: "error", data: { message } }] }));
+    expect(text).not.toContain("<run_error");
+    expect(sources.runErrors.size).toBe(0);
+    expect(hasFailure).toBe(false);
+  });
+
+  it("records each run's status so recovery can be checked", () => {
+    const { sources } = buildSessionTimeline(input({}));
+    expect(sources.runStatuses.size).toBe(sources.runIds.size);
+  });
+
   it("renders failed dependency steps as tool_failed and skips ok ones", () => {
     const { text, sources } = buildSessionTimeline(
       input({

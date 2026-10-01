@@ -8,6 +8,8 @@ const CORRECTION = `That's not how we write release notes here. Our readers are 
 function sources(overrides: Partial<TimelineSources> = {}): TimelineSources {
   return {
     runIds: new Set([1, 2]),
+    runStatuses: new Map([[1, "failed"], [2, "done"]]),
+    runErrors: new Map(),
     userMessages: new Map([[2, [CORRECTION, "ok"]]]),
     failures: new Map([
       ["f1", { id: "f1", runId: 1, seq: 3, tool: "Bash", input: "Commit the change", command: "git commit -m 'x'", output: "Author identity unknown\n*** Please tell me who you are. <you@example.com>" }],
@@ -41,6 +43,87 @@ function failureItem(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
 }
+
+const PUSH_CONFLICT_ERROR =
+  'Cannot push: remote branch "agent/session-1" already has unrelated commits that conflict with this session\'s changes.';
+
+function runErrorItem(overrides: Record<string, unknown> = {}) {
+  return {
+    runId: 1,
+    evidenceSource: "run_error",
+    evidenceRef: "e1",
+    evidenceQuote: "already has unrelated commits that conflict",
+    why: "The branch name collided with another session's branch.",
+    lesson: "Never reuse a branch name from another session; create a fresh branch for new work.",
+    ...overrides,
+  };
+}
+
+function withRunError(overrides: Partial<TimelineSources> = {}): TimelineSources {
+  return sources({
+    runErrors: new Map([["e1", { id: "e1", runId: 1, seq: 4, text: PUSH_CONFLICT_ERROR }]]),
+    ...overrides,
+  });
+}
+
+describe("run_error evidence", () => {
+  it("accepts a run error followed by a later run that finished", () => {
+    expect(checkLessonEvidence(runErrorItem(), withRunError(), known, [])).toMatchObject({ ok: true });
+  });
+
+  it("resolves the error without an evidenceRef when the quote matches exactly one", () => {
+    const verdict = checkLessonEvidence(runErrorItem({ evidenceRef: undefined }), withRunError(), known, []);
+    expect(verdict).toMatchObject({ ok: true, item: { evidenceRef: "e1" } });
+  });
+
+  it("accepts an error recovered within its own run", () => {
+    const verdict = checkLessonEvidence(runErrorItem(), withRunError({ runStatuses: new Map([[1, "done"]]) }), known, []);
+    expect(verdict).toMatchObject({ ok: true });
+  });
+
+  it("rejects a run error nothing recovered from", () => {
+    const verdict = checkLessonEvidence(runErrorItem(), withRunError({ runStatuses: new Map([[1, "failed"], [2, "failed"]]) }), known, []);
+    expect(verdict).toEqual({ ok: false, reason: "no recovery after run error" });
+  });
+
+  it("rejects a recovery that happened in an earlier run", () => {
+    const verdict = checkLessonEvidence(
+      runErrorItem({ runId: 2 }),
+      withRunError({
+        runIds: new Set([1, 2]),
+        runStatuses: new Map([[1, "done"], [2, "failed"]]),
+        runErrors: new Map([["e1", { id: "e1", runId: 2, seq: 4, text: PUSH_CONFLICT_ERROR }]]),
+      }),
+      known,
+      [],
+    );
+    expect(verdict).toEqual({ ok: false, reason: "no recovery after run error" });
+  });
+
+  it("rejects an unknown error ref, a ref from another run, and a quote that is not in the error", () => {
+    expect(checkLessonEvidence(runErrorItem({ evidenceRef: "e9" }), withRunError(), known, [])).toEqual({ ok: false, reason: "unknown run error" });
+    expect(checkLessonEvidence(runErrorItem({ runId: 2 }), withRunError(), known, [])).toEqual({ ok: false, reason: "unknown run error" });
+    expect(checkLessonEvidence(runErrorItem({ evidenceQuote: "something the platform never said" }), withRunError(), known, [])).toMatchObject({
+      ok: false,
+      reason: "quote not found",
+    });
+  });
+
+  it("rejects an ambiguous quote when no ref is given", () => {
+    const twice = withRunError({
+      runErrors: new Map([
+        ["e1", { id: "e1", runId: 1, seq: 4, text: PUSH_CONFLICT_ERROR }],
+        ["e2", { id: "e2", runId: 1, seq: 9, text: PUSH_CONFLICT_ERROR }],
+      ]),
+    });
+    expect(checkLessonEvidence(runErrorItem({ evidenceRef: undefined }), twice, known, [])).toEqual({ ok: false, reason: "ambiguous run error" });
+  });
+
+  it("still applies the lesson blocklist", () => {
+    const verdict = checkLessonEvidence(runErrorItem({ lesson: "Always push with --force when the branch conflicts." }), withRunError(), known, []);
+    expect(verdict).toEqual({ ok: false, reason: "lesson blocklisted" });
+  });
+});
 
 describe("normalizeForMatch", () => {
   it("unescapes, folds quotes and dashes, collapses whitespace, lower-cases and trims punctuation", () => {
