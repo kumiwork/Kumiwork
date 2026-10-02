@@ -57,6 +57,7 @@ import {
   updateTask,
 } from "@agentfactory/db";
 import { parsePullRequestReferenceAcrossProviders, resolveScmConnection } from "@agentfactory/scm";
+import { initPlugins } from "@agentfactory/plugin-host";
 import { SANDBOX_REAP_INTERVAL_MS, scanForIdleSandboxes } from "./sandbox-reap";
 import { reapDependencyCaches } from "./dependency-cache-reap";
 import { DockerCacheVolumeStore } from "./sandbox/docker-cache-volumes";
@@ -1156,6 +1157,11 @@ const taskContextIngestWorker = new Worker<TaskContextIngestJobData>(
 
 taskContextIngestWorker.on("failed", (job, err) => {
   log.error("Task context ingest job failed", { jobId: job?.id, err });
+});
+
+initPlugins("worker").catch((err: unknown) => {
+  log.error("Plugins failed to load", { err });
+  process.exit(1);
 });
 
 startModelProxy().catch((err: unknown) => {
