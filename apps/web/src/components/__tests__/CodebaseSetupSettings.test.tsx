@@ -35,9 +35,20 @@ beforeEach(() => {
 });
 
 describe("CodebaseSetupSettings", () => {
-  it("shows every codebase with its saved override", async () => {
+  it("is collapsed by default", async () => {
     mockLoad([{ repoFullName: "acme/legacy", setupCommand: "./bootstrap.sh" }]);
     renderSettings();
+
+    await screen.findByText("Codebase setup");
+    expect(screen.queryByLabelText("acme/legacy")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Codebase setup/ })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("shows every codebase with its saved override once expanded", async () => {
+    mockLoad([{ repoFullName: "acme/legacy", setupCommand: "./bootstrap.sh" }]);
+    renderSettings();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Codebase setup/ }));
 
     expect(await screen.findByLabelText("acme/legacy")).toHaveValue("./bootstrap.sh");
     expect(screen.getByLabelText("acme/widgets")).toHaveValue("");
@@ -46,6 +57,8 @@ describe("CodebaseSetupSettings", () => {
   it("saves a new override for one codebase", async () => {
     mockLoad([]);
     renderSettings();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Codebase setup/ }));
 
     const input = await screen.findByLabelText("acme/widgets");
     fireEvent.change(input, { target: { value: "  make deps  " } });
@@ -64,6 +77,8 @@ describe("CodebaseSetupSettings", () => {
     mockLoad([{ repoFullName: "acme/legacy", setupCommand: "./bootstrap.sh" }]);
     renderSettings();
 
+    fireEvent.click(await screen.findByRole("button", { name: /Codebase setup/ }));
+
     const input = await screen.findByLabelText("acme/legacy");
     fireEvent.change(input, { target: { value: "" } });
     fireEvent.click(screen.getAllByRole("button", { name: "Save" })[1]!);
@@ -80,6 +95,8 @@ describe("CodebaseSetupSettings", () => {
     mockLoad([]);
     renderSettings();
 
+    fireEvent.click(await screen.findByRole("button", { name: /Codebase setup/ }));
+
     await screen.findByLabelText("acme/widgets");
     for (const button of screen.getAllByRole("button", { name: "Save" })) expect(button).toBeDisabled();
   });
@@ -87,6 +104,8 @@ describe("CodebaseSetupSettings", () => {
   it("shows a message when there are no codebases", async () => {
     apiFetchMock.mockImplementation(async (path: string) => (path === "/api/connections/repos" ? [] : []));
     renderSettings();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Codebase setup/ }));
 
     expect(await screen.findByText(/No codebases yet/)).toBeInTheDocument();
   });
