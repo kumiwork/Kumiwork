@@ -140,7 +140,7 @@ export async function countIndexedTaskContextItems(taskId: number): Promise<numb
   return row?.value ?? 0;
 }
 
-// The pending-ingest half of the AgentFactory#150 race fix: how many of this task's context
+// The pending-ingest half of the context-ingest race fix: how many of this task's context
 // items are still `pending` or `indexing`, and were created recently enough that they're
 // plausibly still being ingested right now (as opposed to a permanently stuck row from a crashed
 // worker — see context-ingest-wait.ts's own comment for why that cutoff exists). Counts items,

@@ -138,7 +138,7 @@ export async function countIndexedTeamContextItems(teamId: number): Promise<numb
   return row?.value ?? 0;
 }
 
-// The pending-ingest half of the AgentFactory#150 race fix — see
+// The pending-ingest half of the context-ingest race fix — see
 // countPendingTaskContextItems's comment for the full rationale (mirrored here for the team
 // scope). Counts items, not chunks: a not-yet-indexed item has no chunks yet.
 export async function countPendingTeamContextItems(teamId: number, since: Date): Promise<number> {
