@@ -89,6 +89,7 @@ describe("composeSystemPrompt", () => {
       noReminder,
     );
     expect(prompt).toBe(PLATFORM_PREAMBLE + "You are a reviewer.");
+    expect(prompt).toContain("You are a Kumiwork agent");
   });
 
   it("omits the repo map and retrieved context cleanly, leaving team context adjacent to the agent prompt", () => {
@@ -612,6 +613,7 @@ describe("REVIEW_PLATFORM_PREAMBLE", () => {
       noReminder,
     );
     expect(prompt.startsWith(REVIEW_PLATFORM_PREAMBLE)).toBe(true);
+    expect(prompt).toContain("You are a Kumiwork agent");
     expect(prompt).not.toContain(PLATFORM_PREAMBLE);
   });
 });

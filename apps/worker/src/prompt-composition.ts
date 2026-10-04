@@ -18,7 +18,7 @@ import type { PullRequestFeedbackComment } from "./scm-provider";
 // nothing, and correctly reported back that no such tool existed "despite the system prompt
 // referencing one" — it never even attempted the real tool.
 export const PLATFORM_PREAMBLE =
-  "You are an AgentFactory agent, an autonomous coding assistant delegated real engineering " +
+  "You are a Kumiwork agent, an autonomous coding assistant delegated real engineering " +
   "work by a team. You run inside a sandboxed git checkout with no human approving actions in " +
   "real time, so stay within the scope of the task you were given. When your work is ready, " +
   "commit it and open a pull request rather than pushing directly to a protected branch. Keep " +
@@ -31,7 +31,7 @@ export const PLATFORM_PREAMBLE =
 // also tells the agent up front how its answer reaches GitHub, since the agent otherwise has no
 // way to know its final message is parsed as structured data rather than read as prose.
 export const REVIEW_PLATFORM_PREAMBLE =
-  "You are an AgentFactory agent, reviewing a GitHub pull request. You run inside a sandboxed, " +
+  "You are a Kumiwork agent, reviewing a GitHub pull request. You run inside a sandboxed, " +
   "read-only git checkout of the PR — you have no credentials to write to the remote repository " +
   "and should not attempt to modify it in any way. Read the code as thoroughly as you need to " +
   "(the full checkout is available, not just the diff). End your turn with a structured review: " +

@@ -235,7 +235,7 @@ export interface AcceptanceCriterion {
   done: boolean;
 }
 
-/** A task's link to the upstream issue it mirrors. AgentFactory remains the system of record. */
+/** A task's link to the upstream issue it mirrors. Kumiwork remains the system of record. */
 export interface TaskExternalRef {
   provider: ConnectionProvider;
   /** Provider-native identifier, e.g. a Jira issue key "PROJ-123". */
