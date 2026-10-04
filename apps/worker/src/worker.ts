@@ -849,8 +849,8 @@ const runWorker = new Worker<RunJobData>(
         }
         if (result.branchMismatch) {
           // The agent has full unrestricted bash access and occasionally switches off the
-          // session's assigned branch mid-turn (see T-047) — surfaced as a run event rather than
-          // left to vanish the way it did there, whether or not pushChangesIfDirty could recover
+          // session's assigned branch mid-turn — surfaced as a run event rather than left to vanish
+          // silently, whether or not pushChangesIfDirty could recover
           // the work automatically.
           await createEvent(runId, seq++, "error", {
             category: "agent",

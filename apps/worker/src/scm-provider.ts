@@ -45,8 +45,8 @@ function slugifyForBranch(title: string): string {
 // list on GitHub; `session.branchToken` is what actually keeps it unique. Neither `session.id`
 // nor `task.ref` (itself just "T-" + the task's own id) is safe to rely on alone for uniqueness:
 // both are unique only within this database, and more than one database can point sandboxes at
-// the same GitHub repo (a second local dev DB, or a reseed that reassigns an id — see T-051,
-// where a stale `agent/session-9` from an unrelated session already sat on the remote and every
+// the same GitHub repo (a second local dev DB, or a reseed that reassigns an id; in
+// one case a stale `agent/session-9` from an unrelated session already sat on the remote and every
 // retry conflicted with it). branchToken is missing only for sessions created before that field
 // existed, so this falls back to the old bare id-only name for those rather than pushing a name
 // that no longer matches what that old session actually pushed under previously.
@@ -342,8 +342,7 @@ export interface PushResult {
   // was actually on. If that branch was a descendant of target.branch, the script fast-forwards
   // target.branch onto it before continuing (see the BRANCH_MISMATCH marker below) and `pushed`
   // reflects the recovered push; otherwise nothing is touched and `pushed` stays false — the
-  // caller (worker.ts) surfaces either outcome as an event so it's never silently lost like it
-  // was for T-047.
+  // caller (worker.ts) surfaces either outcome as an event so it's never silently lost.
   branchMismatch?: { agentBranch: string };
 }
 

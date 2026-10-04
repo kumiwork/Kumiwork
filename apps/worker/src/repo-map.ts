@@ -18,7 +18,7 @@ const MAX_CONTENT_LENGTH = 16384;
 // This is a partial, best-effort mitigation, not a fix for the race it was originally written
 // for. Generation is measured at 33-38s even on an 884KB repo — about as small as they get — so
 // a run with no head start (created and started back-to-back) will not catch a fresh generation
-// inside this window. On task T-070 the 17-second head start from warming at task creation plus
+// inside this window. In one observed run the 17-second head start from warming at task creation plus
 // this poll happened to land inside the 33-38s range, but that is a coincidence of that specific
 // gap, not a general guarantee.
 //
