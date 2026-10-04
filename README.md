@@ -83,8 +83,11 @@ The repo's `docker-compose.yml` spins up both with the credentials the default e
 docker compose up -d
 ```
 
-This starts Postgres on `localhost:5432` (db `agentfactory`, user/password `agentfactory`) and
+This starts Postgres on `localhost:5432` (db `kumiwork`, user/password `kumiwork`) and
 Redis on `localhost:6379`.
+
+If you already have a local stack from before the rename, run
+`bash scripts/migrate-local-dev-names.sh` once to keep your data.
 
 The Postgres image is `pgvector/pgvector:pg16` (stock PostgreSQL 16 plus the `vector` extension,
 which the migrations enable). If you have a volume from before that change, recreate it —
@@ -223,7 +226,7 @@ cp .env.test.example .env.test.local
 ```
 
 The defaults point at the same `docker-compose.yml` Postgres/Redis, but at the
-`agentfactory_test` database and Redis db index `1`, so they're safe to run alongside `pnpm dev`.
+`kumiwork_test` database and Redis db index `1`, so they're safe to run alongside `pnpm dev`.
 `test:db` runs its own migrations against that database automatically before each run.
 
 `test:e2e` uses Playwright and needs browsers installed once:
@@ -234,7 +237,7 @@ pnpm --filter @agentfactory/web exec playwright install --with-deps chromium
 
 It boots its own `next dev` instance on port 3100 (see `apps/web/playwright.config.ts`), so it
 also needs `apps/web/.env.local` configured (step 3) and Postgres running. `scripts/test-e2e.sh`
-points it at the same scratch `agentfactory_test` database as `test:db` (creating and migrating it
+points it at the same scratch `kumiwork_test` database as `test:db` (creating and migrating it
 automatically if needed, via `.env.test.local` — same setup as above), so it's safe to run
 alongside `pnpm dev` without growing the dev database. It still can't run concurrently with
 `test:db` (which truncates tables between tests) since they now share that database — `pnpm test`
