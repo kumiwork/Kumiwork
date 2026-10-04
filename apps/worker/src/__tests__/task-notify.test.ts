@@ -108,6 +108,7 @@ describe("notifyIssueOfPullRequest", () => {
     expect(addCommentMock).toHaveBeenCalledTimes(1);
     const [key, body] = addCommentMock.mock.calls[0];
     expect(key).toBe("PROJ-1");
+    expect(body).toContain("Kumiwork opened a pull request for");
     expect(body).toContain(PR.url);
     expect(body).toContain(t.ref);
   });

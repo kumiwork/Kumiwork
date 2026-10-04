@@ -147,7 +147,7 @@ export function makeSeedCategories(): ContextCategory[] {
       type: "entries",
       entries: [
         {
-          title: "AgentFactory",
+          title: "Kumiwork",
           desc: "An open-source orchestration layer for autonomous AI agents with fine-grained access control.",
         },
         {

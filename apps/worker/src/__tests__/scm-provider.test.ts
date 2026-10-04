@@ -828,7 +828,7 @@ describe("buildPullRequestBody", () => {
       changedFiles: ["src/RunBanner.tsx", "src/api.ts"],
     });
 
-    expect(body).toContain("Opened automatically by AgentFactory for task T-042.");
+    expect(body).toContain("Opened automatically by Kumiwork for task T-042.");
     expect(body).toContain("Added a Retry button that re-enqueues the run.");
     expect(body).toContain("Add a retry button to the failed-run banner.");
     expect(body).toContain("- `src/RunBanner.tsx`");
@@ -837,7 +837,7 @@ describe("buildPullRequestBody", () => {
 
   it("omits empty sections instead of leaving blank headings", () => {
     const body = buildPullRequestBody({ taskRef: "T-1", taskDescription: "", summary: "", changedFiles: [] });
-    expect(body).toBe("Opened automatically by AgentFactory for task T-1.");
+    expect(body).toBe("Opened automatically by Kumiwork for task T-1.");
   });
 
   it("strips the sandbox's /workspace mount path out of the agent's summary", () => {
