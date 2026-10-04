@@ -27,10 +27,10 @@ if [ -z "${CI:-}" ]; then
   source .env.test.local
   set +a
 
-  if ! docker compose exec -T postgres psql -U agentfactory -d agentfactory -tc \
-    "SELECT 1 FROM pg_database WHERE datname = 'agentfactory_test'" | grep -q 1; then
-    echo "Creating agentfactory_test database..."
-    docker compose exec -T postgres psql -U agentfactory -d agentfactory -c "CREATE DATABASE agentfactory_test"
+  if ! docker compose exec -T postgres psql -U kumiwork -d kumiwork -tc \
+    "SELECT 1 FROM pg_database WHERE datname = 'kumiwork_test'" | grep -q 1; then
+    echo "Creating kumiwork_test database..."
+    docker compose exec -T postgres psql -U kumiwork -d kumiwork -c "CREATE DATABASE kumiwork_test"
   fi
 fi
 
