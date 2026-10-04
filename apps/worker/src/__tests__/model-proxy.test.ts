@@ -230,7 +230,7 @@ describe("model proxy", () => {
 
   it.each([
     ["no credential", undefined],
-    ["an unknown token", "arata-run-not-issued"],
+    ["an unknown token", "kumiwork-run-not-issued"],
     ["the real platform key itself", "sk-anthropic-real"],
   ])("rejects %s without contacting upstream", async (_label, token) => {
     await startProxy();

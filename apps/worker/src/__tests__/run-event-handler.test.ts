@@ -13,7 +13,7 @@ vi.mock("@agentfactory/db", () => ({
 
 const { createRunEventHandler } = await import("../run-event-handler");
 
-const TOKEN = "arata-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
+const TOKEN = "kumiwork-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
 
 function setup() {
   let seq = 1;
