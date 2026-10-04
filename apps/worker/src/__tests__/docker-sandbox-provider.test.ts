@@ -23,12 +23,12 @@ describe("DockerSandboxProvider.create", () => {
   });
 
   it("allows enough processes for an agent runtime plus a test run by default", async () => {
-    await new DockerSandboxProvider().create({ image: "arata-sandbox-node:local", env: {} });
+    await new DockerSandboxProvider().create({ image: "kumiwork-sandbox-node:local", env: {} });
     expect(pidsLimitOfCreatedContainer()).toBe(512);
   });
 
   it("uses the spec's pids limit when one is given", async () => {
-    await new DockerSandboxProvider().create({ image: "arata-sandbox-node:local", env: {}, pidsLimit: 64 });
+    await new DockerSandboxProvider().create({ image: "kumiwork-sandbox-node:local", env: {}, pidsLimit: 64 });
     expect(pidsLimitOfCreatedContainer()).toBe(64);
   });
 });

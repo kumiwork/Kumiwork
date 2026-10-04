@@ -104,11 +104,11 @@ vi.mock("../agent-runtime/registry", () => ({
 const resolveSandboxImageMock = vi.fn();
 vi.mock("../sandbox-image-select", () => ({
   resolveSandboxImage: (...args: unknown[]) => resolveSandboxImageMock(...args),
-  SANDBOX_IMAGE_NODE: "arata-sandbox-node:local",
-  SANDBOX_IMAGE_PYTHON: "arata-sandbox-python:local",
-  SANDBOX_IMAGE_JAVA: "arata-sandbox-java:local",
+  SANDBOX_IMAGE_NODE: "kumiwork-sandbox-node:local",
+  SANDBOX_IMAGE_PYTHON: "kumiwork-sandbox-python:local",
+  SANDBOX_IMAGE_JAVA: "kumiwork-sandbox-java:local",
   LEGACY_SANDBOX_IMAGE_NODE: "legacy-node:local",
-  isNodeBaseImage: (image: string | null | undefined) => image === "arata-sandbox-node:local" || image === "legacy-node:local",
+  isNodeBaseImage: (image: string | null | undefined) => image === "kumiwork-sandbox-node:local" || image === "legacy-node:local",
 }));
 
 vi.mock("../sandbox-image-check", () => ({
@@ -176,19 +176,19 @@ describe("ensureSandbox", () => {
 
   it("creates a sandbox with the resolved image and persists it when the session has none yet", async () => {
     const session = fakeSession({ sandboxId: undefined, sandboxImage: undefined });
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-python:local");
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-python:local");
 
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets", "acme/widgets");
 
     expect(sandboxId).toBe("new-sandbox");
     expect(resolveSandboxImageMock).toHaveBeenCalledWith(5, "acme/widgets");
-    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-python:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
-    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "new-sandbox", "arata-sandbox-python:local");
+    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "kumiwork-sandbox-python:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
+    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "new-sandbox", "kumiwork-sandbox-python:local");
   });
 
   it("never puts the platform Anthropic key in the container environment", async () => {
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-platform");
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-python:local");
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-python:local");
 
     await ensureSandbox(fakeSession({ sandboxId: undefined, sandboxImage: undefined }), 5, "acme/widgets", "acme/widgets");
     vi.unstubAllEnvs();
@@ -199,7 +199,7 @@ describe("ensureSandbox", () => {
   });
 
   it("reuses an already language-specific sandbox without re-resolving the image", async () => {
-    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "arata-sandbox-python:local" });
+    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "kumiwork-sandbox-python:local" });
 
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets");
 
@@ -211,8 +211,8 @@ describe("ensureSandbox", () => {
   });
 
   it("reuses a still-base-image sandbox as-is when re-resolution still returns the base image", async () => {
-    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "arata-sandbox-node:local" });
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-node:local");
+    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "kumiwork-sandbox-node:local" });
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-node:local");
 
     const sandboxId = await ensureSandbox(session, 5, undefined);
 
@@ -224,33 +224,33 @@ describe("ensureSandbox", () => {
   });
 
   it("destroys and recreates a base-image sandbox once the repo's language becomes known", async () => {
-    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "arata-sandbox-node:local" });
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-java:local");
+    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "kumiwork-sandbox-node:local" });
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-java:local");
     h.sandbox.create.mockResolvedValue({ id: "upgraded-sandbox" });
 
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets", "acme/widgets");
 
     expect(h.sandbox.destroy).toHaveBeenCalledWith("existing-sandbox");
-    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-java:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
-    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "arata-sandbox-java:local");
+    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "kumiwork-sandbox-java:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
+    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "kumiwork-sandbox-java:local");
     expect(sandboxId).toBe("upgraded-sandbox");
   });
 
   it("destroys and recreates a sandbox created under the legacy node image tag once the repo's language becomes known", async () => {
     const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "legacy-node:local" });
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-java:local");
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-java:local");
     h.sandbox.create.mockResolvedValue({ id: "upgraded-sandbox" });
 
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets", "acme/widgets");
 
     expect(h.sandbox.destroy).toHaveBeenCalledWith("existing-sandbox");
-    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "arata-sandbox-java:local");
+    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "kumiwork-sandbox-java:local");
     expect(sandboxId).toBe("upgraded-sandbox");
   });
 
   it("mounts no dependency cache for a sandbox without a cache repo, such as a PR review", async () => {
     const session = fakeSession();
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-node:local");
 
     await ensureSandbox(session, 5, "acme/widgets");
 
@@ -258,15 +258,15 @@ describe("ensureSandbox", () => {
   });
 
   it("creates fresh when the session's stored sandboxId no longer exists", async () => {
-    const session = fakeSession({ sandboxId: "gone-sandbox", sandboxImage: "arata-sandbox-python:local" });
+    const session = fakeSession({ sandboxId: "gone-sandbox", sandboxImage: "kumiwork-sandbox-python:local" });
     h.sandbox.exists.mockResolvedValue(false);
-    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-python:local");
+    resolveSandboxImageMock.mockResolvedValue("kumiwork-sandbox-python:local");
 
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets");
 
     expect(h.sandbox.destroy).not.toHaveBeenCalled();
-    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-python:local", env: expect.any(Object), volumes: [] });
-    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "new-sandbox", "arata-sandbox-python:local");
+    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "kumiwork-sandbox-python:local", env: expect.any(Object), volumes: [] });
+    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "new-sandbox", "kumiwork-sandbox-python:local");
     expect(sandboxId).toBe("new-sandbox");
   });
 });

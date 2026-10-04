@@ -68,11 +68,11 @@ describe("sessions repository", () => {
     const agent = await insertAgent(org.id);
     const session = await insertSession(org.id, agent.id);
 
-    await setSessionSandbox(session.id, "container-1", "arata-sandbox-python:local");
+    await setSessionSandbox(session.id, "container-1", "kumiwork-sandbox-python:local");
 
     await expect(getSession(session.id)).resolves.toMatchObject({
       sandboxId: "container-1",
-      sandboxImage: "arata-sandbox-python:local",
+      sandboxImage: "kumiwork-sandbox-python:local",
     });
   });
 
@@ -80,7 +80,7 @@ describe("sessions repository", () => {
     const org = await insertOrg();
     const agent = await insertAgent(org.id);
     const session = await insertSession(org.id, agent.id);
-    await setSessionSandbox(session.id, "container-1", "arata-sandbox-python:local");
+    await setSessionSandbox(session.id, "container-1", "kumiwork-sandbox-python:local");
 
     await clearSessionSandbox(session.id);
 

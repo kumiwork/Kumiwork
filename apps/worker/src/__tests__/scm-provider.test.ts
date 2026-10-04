@@ -621,7 +621,7 @@ describe("pushChangesIfDirty", () => {
 
   describe("transient push failures", () => {
     const forbidden = [
-      { stream: "stderr" as const, data: "remote: Permission to acme-org/platform.git denied to agentfactoryapp[bot].\n" },
+      { stream: "stderr" as const, data: "remote: Permission to acme-org/platform.git denied to kumiworkapp[bot].\n" },
       { stream: "stdout" as const, data: "CHANGED_FILE:src/a.ts\nPUSH_FAILED\n" },
     ];
     const success = [{ stream: "stdout" as const, data: "PUSH_OK\n" }];
@@ -671,7 +671,7 @@ describe("pushChangesIfDirty", () => {
       const sleep = vi.fn().mockResolvedValue(undefined);
 
       await expect(pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "a", { sleep })).rejects.toThrow(
-        /Failed to push agent changes.*denied to agentfactoryapp/s,
+        /Failed to push agent changes.*denied to kumiworkapp/s,
       );
 
       expect(exec).toHaveBeenCalledTimes(3);
