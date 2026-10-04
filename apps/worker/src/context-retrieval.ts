@@ -19,7 +19,7 @@ export const RETRIEVAL_K = 12;
 // no relevant documents, that something goes into every prompt. Under the floor the layer is
 // omitted entirely rather than padded.
 //
-// Measured, not guessed (see or-borco/AgentFactory#135): across 16 real queries against the real
+// Measured, not guessed: across 16 real queries against the real
 // 7-document corpus, every off-topic or gibberish query's best-scoring chunk topped out at 0.556,
 // while every genuinely on-topic query's best-scoring chunk started at 0.642 or higher. 0.6 sits
 // in that gap.
@@ -29,7 +29,7 @@ export const SIMILARITY_FLOOR = 0.6;
 export const RETRIEVAL_BUDGET_BYTES = 8192;
 // Reserved out of RETRIEVAL_BUDGET_BYTES exclusively for task-sourced chunks, which are exempt
 // from SIMILARITY_FLOOR (see retrieveContext below). An unmeasured starting default, like
-// RETRIEVAL_K and the original SIMILARITY_FLOOR before or-borco/AgentFactory#135 — revisit once
+// RETRIEVAL_K and the original SIMILARITY_FLOOR before it was measured — revisit once
 // there is real usage to measure a task's document volume against. Too small and a task with
 // more than one or two substantial documents still loses material a human explicitly attached;
 // too large and team retrieval loses room it has today.

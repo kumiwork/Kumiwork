@@ -966,7 +966,7 @@ describe("hasRetrievedBlock", () => {
   });
 });
 
-// or-borco/AgentFactory#134: with `retrieval` always optional, the real judge omitted it from a
+// With `retrieval` always optional, the real judge omitted it from a
 // real <retrieved> block roughly 75-80% of the time. Measured across two real-API scenarios,
 // marking it required only on calls that actually send a block raised that to 19/20.
 describe("buildReportEvalTool", () => {
