@@ -562,7 +562,7 @@ export function buildPullRequestBody(params: {
   summary: string;
   changedFiles: string[];
 }): string {
-  const sections = [`Opened automatically by AgentFactory for task ${params.taskRef}.`];
+  const sections = [`Opened automatically by Kumiwork for task ${params.taskRef}.`];
   if (params.summary.trim()) sections.push(`## What changed\n${stripSandboxPaths(params.summary.trim())}`);
   if (params.taskDescription.trim()) sections.push(`## Task\n${params.taskDescription.trim()}`);
   if (params.changedFiles.length > 0) {

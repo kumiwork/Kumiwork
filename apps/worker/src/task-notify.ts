@@ -51,7 +51,7 @@ export async function notifyIssueOfPullRequest(
 
     const writeBack = connection.config.writeBack as { comment?: boolean } | undefined;
     if (writeBack?.comment !== false) {
-      const body = `AgentFactory opened a pull request for ${task.ref} (${task.title}): ${pr.url}`;
+      const body = `Kumiwork opened a pull request for ${task.ref} (${task.title}): ${pr.url}`;
       await provider.addComment(externalRef.key, body);
     }
 
