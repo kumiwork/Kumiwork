@@ -45,6 +45,9 @@ This is a pnpm workspace monorepo:
 - **`packages/queue`** — BullMQ setup shared between `apps/web` (enqueue) and `apps/worker` (consume).
 - **`packages/storage`** — the `content_blobs` blob store (local filesystem in dev, S3 in prod).
 - **`packages/integrations`** — the `TaskProvider` port and the `JiraTaskProvider` adapter (direct REST, not MCP — see ARCHITECTURE.md §9).
+- **`packages/plugin-api`** — the contract external plugins compile against: `KumiworkPlugin`, `PluginHost`, `defineExtensionPoint`, `PLUGIN_API_VERSION`, and the `extensionPoints` catalog (empty until a feature adds one). Keep it free of dependencies on other workspace packages unless a contribution type truly needs one.
+- **`packages/plugins`** — the default, empty plugin list (`export const plugins = []`). Never import a real plugin here: the paid build replaces this package via a pnpm override (ARCHITECTURE.md §12).
+- **`packages/plugin-host`** — loads and validates plugins (`loadPlugins`), plus the per-process runtime: `initPlugins(surface)` runs at boot in `apps/worker/src/worker.ts` and `apps/web/src/instrumentation.ts`; feature code reads contributions with `getContributions(extensionPoints.x)`.
 - **`packages/shared`** — reusable UI primitives (Button, Card, Badge, TextInput, etc.) built with Tailwind. No business logic.
 - **`apps/web`** — Next.js 16 App Router frontend + Route Handlers that call `packages/db` directly. This is the real backend, not a mock.
 - **`apps/worker`** — a BullMQ consumer that provisions a Docker sandbox per session (`DockerSandboxProvider`), clones the repo, runs the Claude Agent SDK inside the container, and streams `RunEvent`s back through Postgres/Redis.

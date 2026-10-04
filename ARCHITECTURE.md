@@ -756,3 +756,35 @@ without a clear answer yet; resolve it into §9 once decided.
 | Question | Current thinking | Main tradeoff |
 |---|---|---|
 | **Multi-node session affinity** — warm containers (§4, M1) are node-local, but `sessions.sandboxId` is global (DB-backed). In a multi-node cluster, a session's second request can reach a different node where the container doesn't exist. | **Sticky sessions at the load balancer** — hash session ID (or session cookie) to route all requests for a session to the same node that provisioned its container. Preferred short-term solution because it's simple and doesn't break warm reuse. **Resilience layer**: periodically compact accumulated agent context (system prompt, truncated turn history, latest files snapshot) into a `SessionSnapshot` table keyed by `(sessionId, snapshotSeq)`. On failover (sticky node down), a different node can read the latest snapshot and recreate the container's state from it, so multi-turn resume still works even after node failure — the snapshot becomes the new "warm" state. Snapshots are taken every N turns or on explicit flush; old snapshots can be pruned since only the latest is needed for failover. | Sticky sessions introduce a hard node affinity, so one node's failure loses its sessions until another node reads a snapshot (snapshot write latency and staleness are tradeoffs). Full distributed state requires Temporal or equivalent (§9 note on Temporal migration), which is a much larger undertaking. Snapshot compaction adds write overhead and DB growth; mitigate with bounded snapshot history and periodic vacuum. |
+
+---
+
+## 12. Plugins
+
+Paid features (audit, SSO, extra integrations, …) ship as plugins from a separate private repository. This repo knows
+*extension points*, never specific plugins.
+
+- **Contract — `packages/plugin-api`.** A plugin is `{ id, apiVersion, surfaces?, register(host) }`. In `register` it
+  calls `host.contribute(point, contribution)` for each capability it adds. An extension point is a typed, named
+  handle created with `defineExtensionPoint<T>(name)` and listed in `extensionPoints`; the type parameter makes a
+  mismatched contribution a compile error.
+- **Slot — `packages/plugins`.** Exports the plugin list; empty in this repo, so the open-source build has no plugins
+  and behaves exactly as before. The paid build swaps the package for the private distribution with a pnpm override
+  (`"@agentfactory/plugins": "npm:<private distribution>@<range>"` or `link:` for local development). Nothing else in
+  the codebase names a plugin.
+- **Host — `packages/plugin-host`.** `initPlugins(surface)` runs once per process (`"worker"` at worker boot, `"web"`
+  from Next's `instrumentation.ts`) and stores the registry on `globalThis`, so every bundle in the web server sees
+  one instance. Loading is fail-fast: an invalid id, a duplicate id, an unsupported `apiVersion`, a contribution to an
+  extension point this host doesn't know (a plugin built against a newer `plugin-api`), or a throwing `register`
+  aborts startup rather than running silently without a paid feature. Contributions are only accepted while
+  `register` runs. Points are matched by name, not object identity, so a plugin bundling its own copy of
+  `plugin-api` still works.
+- **Consumers.** Feature code reads `await getContributions(extensionPoints.x)` and must behave sensibly with an
+  empty list — that empty list *is* the community edition, so no stubs are needed.
+- **Adding an extension point** is a normal change in this repo: define the contribution interface in
+  `plugin-api`, add it to `extensionPoints`, consume it where the feature lives. Removing a point or changing a
+  contribution interface incompatibly bumps `PLUGIN_API_VERSION` (and `MIN_SUPPORTED_PLUGIN_API_VERSION` when old
+  plugins can no longer load).
+- **Not built yet:** plugin-owned DB tables/migrations, plugin UI slots, licensing/entitlements (owned by the private
+  plugins, not this repo), and publishing `plugin-api` to a registry.
+
