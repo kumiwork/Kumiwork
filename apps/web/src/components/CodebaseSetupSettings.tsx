@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, TextInput } from "@agentfactory/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
+import { ChevronDownIcon } from "@/lib/icons";
 
 interface RepoOption {
   id: string;
@@ -82,6 +83,7 @@ export function CodebaseSetupSettings() {
   const [repos, setRepos] = useState<RepoOption[] | null>(null);
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [loadFailed, setLoadFailed] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,25 +108,51 @@ export function CodebaseSetupSettings() {
 
   return (
     <>
-      <h2 className="mb-1 text-base font-semibold text-[var(--color-text)]">{t("settings.codebaseSetup.heading")}</h2>
-      <p className="mb-3 text-xs text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.help")}</p>
-      {loadFailed ? (
-        <Card className="px-5 py-4 text-sm text-[var(--color-danger)]">{t("settings.codebaseSetup.loadFailed")}</Card>
-      ) : repos === null ? (
-        <Card className="px-5 py-4 text-sm text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.loading")}</Card>
-      ) : repos.length === 0 ? (
-        <Card className="px-5 py-4 text-sm text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.empty")}</Card>
-      ) : (
-        <Card className="divide-y divide-[var(--color-divider)]">
-          {repos.map((repo) => (
-            <CodebaseSetupRow
-              key={`${repo.provider}:${repo.id}`}
-              repoFullName={repo.fullName}
-              savedCommand={settings[repo.fullName] ?? ""}
-            />
-          ))}
-        </Card>
-      )}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        className="flex cursor-pointer select-none items-start justify-between gap-3"
+        onClick={() => setOpen((prev) => !prev)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((prev) => !prev);
+          }
+        }}
+      >
+        <div>
+          <h2 className="mb-1 text-base font-semibold text-[var(--color-text)]">
+            {t("settings.codebaseSetup.heading")}
+          </h2>
+          <p className="mb-3 text-xs text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.help")}</p>
+        </div>
+        <span
+          className={`mt-0.5 shrink-0 text-[var(--color-neutral-500)] transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
+        >
+          <ChevronDownIcon size={16} />
+        </span>
+      </div>
+      {open &&
+        (loadFailed ? (
+          <Card className="px-5 py-4 text-sm text-[var(--color-danger)]">{t("settings.codebaseSetup.loadFailed")}</Card>
+        ) : repos === null ? (
+          <Card className="px-5 py-4 text-sm text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.loading")}</Card>
+        ) : repos.length === 0 ? (
+          <Card className="px-5 py-4 text-sm text-[var(--color-neutral-500)]">{t("settings.codebaseSetup.empty")}</Card>
+        ) : (
+          <Card className="divide-y divide-[var(--color-divider)]">
+            {repos.map((repo) => (
+              <CodebaseSetupRow
+                key={`${repo.provider}:${repo.id}`}
+                repoFullName={repo.fullName}
+                savedCommand={settings[repo.fullName] ?? ""}
+              />
+            ))}
+          </Card>
+        ))}
     </>
   );
 }
