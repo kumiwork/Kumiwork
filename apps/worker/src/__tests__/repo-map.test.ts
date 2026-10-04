@@ -331,7 +331,7 @@ describe("warmRepoMap", () => {
       installationRef: 1,
     });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     vi.stubEnv("ANTHROPIC_API_KEY", "sk-platform");
     const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-1" });
@@ -359,7 +359,7 @@ describe("warmRepoMap", () => {
 
     await warmRepoMap(sandbox, 1, "acme/widgets");
 
-    expect(create).toHaveBeenCalledWith({ image: "arata-sandbox-node:local", env: {} });
+    expect(create).toHaveBeenCalledWith({ image: "kumiwork-sandbox-node:local", env: {} });
     expect(execEnvs.get(GENERATE_CMD)).toEqual({
       ANTHROPIC_BASE_URL: "http://host.docker.internal:8787/anthropic",
       ANTHROPIC_API_KEY: "kumiwork-run-test",
@@ -389,7 +389,7 @@ describe("warmRepoMap", () => {
     insertRepoMapMock.mockReset().mockResolvedValue(undefined);
     resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-4" });
     let generateCalls = 0;
@@ -432,7 +432,7 @@ describe("warmRepoMap", () => {
     insertRepoMapMock.mockReset().mockResolvedValue(undefined);
     resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-5" });
     let generateCalls = 0;
@@ -477,7 +477,7 @@ describe("warmRepoMap", () => {
     issueSandboxModelCredentialMock.mockClear();
     resolveCloneTargetMock.mockReset().mockResolvedValue({ repoFullName: "acme/widgets" });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     runtimes.unshift({
       kind: "no-repo-map" as RuntimeKind,
       capabilities: () => ({ supportsSkills: false, supportsResume: false }),
@@ -509,7 +509,7 @@ describe("warmRepoMap", () => {
       installationRef: 1,
     });
     cloneIntoSandboxMock.mockReset().mockRejectedValue(new Error("clone failed"));
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-2" });
     const sandbox: SandboxProvider = {
@@ -539,7 +539,7 @@ describe("warmRepoMap", () => {
       installationRef: 1,
     });
     cloneIntoSandboxMock.mockReset().mockResolvedValue(undefined);
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     const destroy = vi.fn().mockRejectedValue(new Error("docker teardown failed"));
     const create = vi.fn().mockResolvedValue({ id: "warm-sandbox-3" });
     const sandbox: SandboxProvider = {
@@ -570,7 +570,7 @@ describe("warmRepoMap", () => {
       provider: "github",
       installationRef: 1,
     });
-    resolveSandboxImageMock.mockReset().mockResolvedValue("arata-sandbox-node:local");
+    resolveSandboxImageMock.mockReset().mockResolvedValue("kumiwork-sandbox-node:local");
     const destroy = vi.fn().mockResolvedValue(undefined);
     const create = vi.fn().mockRejectedValue(new Error("docker unavailable"));
     const sandbox: SandboxProvider = {
