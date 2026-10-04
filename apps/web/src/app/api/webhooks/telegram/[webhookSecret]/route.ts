@@ -39,7 +39,7 @@ import { formatTaskBrief } from "@/server/task-brief";
 const log = createLogger("webhooks:telegram");
 
 const WELCOME_MESSAGE = (orgLabel: string) =>
-  `This connects you to ${orgLabel}'s agents on AgentFactory. Send the invite code your admin gave you to get started.`;
+  `This connects you to ${orgLabel}'s agents on Kumiwork. Send the invite code your admin gave you to get started.`;
 const INVALID_CODE_MESSAGE = "That code isn't valid — ask your admin for a new one.";
 const COOLDOWN_MESSAGE = "Too many invalid codes — try again in a bit.";
 const REVOKED_MESSAGE = "Your access was revoked — ask your admin for a new invite.";

@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AgentFactory",
+  title: "Kumiwork",
   description: "Shared AI agents for your engineering team",
 };
 
