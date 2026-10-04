@@ -1,4 +1,4 @@
-# AgentFactory — Platform Architecture
+# Kumiwork — Platform Architecture
 
 > Status: approved, M2/M3 mostly real, M1's safety layer still open. Postgres/Drizzle
 > (`packages/db`) is the real store for the full domain — `orgs`/`users`/`memberships`,
@@ -24,7 +24,7 @@
 
 ## Context
 
-AgentFactory is a multi-tenant SaaS where an engineering org can create **agents** (coding + general purpose), give
+Kumiwork is a multi-tenant SaaS where an engineering org can create **agents** (coding + general purpose), give
 them a **system prompt, model, skills, and connections** (GitHub, Slack/Telegram/WhatsApp/Discord,
 Jira/Monday/Asana/Sheets), and assign them to **teams** that carry shared context (docs, meeting summaries, product
 and design handoffs).

@@ -1,4 +1,4 @@
-# Contributing to AgentFactory
+# Contributing to Kumiwork
 
 Thanks for your interest in contributing! This document covers the process for contributing to this
 project.

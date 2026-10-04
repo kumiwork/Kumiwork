@@ -1,8 +1,8 @@
-# AgentFactory
+# Kumiwork
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-AgentFactory is a platform for running coding agents against your team's repos. It's a pnpm
+Kumiwork is a platform for running coding agents against your team's repos. It's a pnpm
 workspace monorepo: `apps/web` (Next.js UI + API), `apps/worker` (the process that actually runs
 agent turns in a sandboxed Docker container), and shared `packages/*` (domain types, DB access via
 Drizzle, a BullMQ-backed queue, and shared UI components).
