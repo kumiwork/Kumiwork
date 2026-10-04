@@ -31,14 +31,14 @@ describe("S3BlobStore", () => {
 
   it("puts at <orgId>/<sha[0:2]>/<sha> with the mime as ContentType", async () => {
     sendMock.mockResolvedValue({});
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
 
     const result = await store.put(7, BYTES, "text/markdown");
 
     expect(result).toEqual({ sha256: SHA, sizeBytes: BYTES.byteLength });
     expect(sendMock).toHaveBeenCalledTimes(1);
     expect(sendMock.mock.calls[0][0].input).toEqual({
-      Bucket: "agentfactory-blobs",
+      Bucket: "kumiwork-blobs",
       Key: `7/${SHA.slice(0, 2)}/${SHA}`,
       Body: BYTES,
       ContentType: "text/markdown",
@@ -47,13 +47,13 @@ describe("S3BlobStore", () => {
 
   it("gets the bytes back from the streaming body", async () => {
     sendMock.mockResolvedValue({ Body: { transformToByteArray: async () => BYTES } });
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
 
     const read = await store.get(7, SHA);
 
     expect(Array.from(read!)).toEqual(Array.from(BYTES));
     expect(sendMock.mock.calls[0][0].input).toEqual({
-      Bucket: "agentfactory-blobs",
+      Bucket: "kumiwork-blobs",
       Key: `7/${SHA.slice(0, 2)}/${SHA}`,
     });
   });
@@ -61,14 +61,14 @@ describe("S3BlobStore", () => {
   // Same contract as FsBlobStore's ENOENT branch: a missing object is undefined, not a throw.
   it("returns undefined when the object does not exist", async () => {
     sendMock.mockRejectedValue(Object.assign(new Error("no such key"), { name: "NoSuchKey" }));
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
 
     await expect(store.get(7, SHA)).resolves.toBeUndefined();
   });
 
   it("rethrows any other S3 error rather than swallowing it as a miss", async () => {
     sendMock.mockRejectedValue(Object.assign(new Error("denied"), { name: "AccessDenied" }));
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
 
     await expect(store.get(7, SHA)).rejects.toThrow("denied");
   });
@@ -77,13 +77,13 @@ describe("S3BlobStore", () => {
   // paths — but treating it as a literal (and always-missing) key would silently diverge from the
   // Fs adapter's throw. Both adapters must reject hostile input the same way.
   it("throws on a path-traversal-shaped digest instead of treating it as a literal key", async () => {
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
     await expect(store.get(7, "../../../../etc/passwd")).rejects.toThrow(/Invalid sha256 digest/);
     expect(sendMock).not.toHaveBeenCalled();
   });
 
   it("throws for a digest of the wrong length or with non-hex characters", async () => {
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
     await expect(store.get(7, "abc")).rejects.toThrow(/Invalid sha256 digest/);
     await expect(store.get(7, "g".repeat(64))).rejects.toThrow(/Invalid sha256 digest/);
     expect(sendMock).not.toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe("S3BlobStore", () => {
 
   it("keys two orgs' identical bytes separately", async () => {
     sendMock.mockResolvedValue({});
-    const store = new S3BlobStore("agentfactory-blobs");
+    const store = new S3BlobStore("kumiwork-blobs");
 
     await store.put(1, BYTES, "text/markdown");
     await store.put(2, BYTES, "text/markdown");

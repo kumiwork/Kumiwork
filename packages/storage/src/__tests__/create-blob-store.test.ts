@@ -27,7 +27,7 @@ describe("createBlobStore", () => {
   let root: string;
 
   beforeEach(async () => {
-    root = await mkdtemp(path.join(tmpdir(), "agentfactory-blobs-"));
+    root = await mkdtemp(path.join(tmpdir(), "kumiwork-blobs-"));
     sendMock.mockReset();
   });
 
@@ -48,13 +48,13 @@ describe("createBlobStore", () => {
 
   it("builds an S3-backed store when BLOB_STORE=s3", async () => {
     vi.stubEnv("BLOB_STORE", "s3");
-    vi.stubEnv("S3_BUCKET", "agentfactory-blobs");
+    vi.stubEnv("S3_BUCKET", "kumiwork-blobs");
     sendMock.mockResolvedValue({});
 
     await createBlobStore().put(7, BYTES, "text/markdown");
 
     expect(sendMock.mock.calls[0][0].input).toMatchObject({
-      Bucket: "agentfactory-blobs",
+      Bucket: "kumiwork-blobs",
       Key: `7/${SHA.slice(0, 2)}/${SHA}`,
     });
   });
@@ -81,7 +81,7 @@ describe("createBlobStore", () => {
     await createBlobStore().put(1, BYTES, "text/markdown");
 
     vi.stubEnv("BLOB_STORE", "s3");
-    vi.stubEnv("S3_BUCKET", "agentfactory-blobs");
+    vi.stubEnv("S3_BUCKET", "kumiwork-blobs");
     sendMock.mockResolvedValue({});
     await createBlobStore().put(1, BYTES, "text/markdown");
 

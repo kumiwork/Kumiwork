@@ -35,9 +35,9 @@ afterEach(() => {
 
 describe("authorizeUrl", () => {
   it("builds the GitHub App install URL with the given state", () => {
-    process.env.GITHUB_APP_SLUG = "agentfactory-dev";
+    process.env.GITHUB_APP_SLUG = "kumiwork-dev";
     expect(githubScmProvider.authorizeUrl("abc123")).toBe(
-      "https://github.com/apps/agentfactory-dev/installations/new?state=abc123",
+      "https://github.com/apps/kumiwork-dev/installations/new?state=abc123",
     );
   });
 
@@ -594,7 +594,7 @@ describe("fetchReviewThreads", () => {
         .mockResolvedValueOnce(
           new Response(
             JSON.stringify([
-              { path: "src/a.ts", line: 10, body: "consider a null check", user: { login: "agentfactory[bot]" }, created_at: "2026-09-14T00:00:00Z" },
+              { path: "src/a.ts", line: 10, body: "consider a null check", user: { login: "kumiwork[bot]" }, created_at: "2026-09-14T00:00:00Z" },
               { path: "src/b.ts", line: null, original_line: 5, body: "fixed", user: { login: "alice" }, created_at: "2026-09-14T01:00:00Z" },
             ]),
             { status: 200 },
@@ -605,7 +605,7 @@ describe("fetchReviewThreads", () => {
     const threads = await githubScmProvider.fetchReviewThreads(githubConnection(1, 999), "acme-org/platform", 42);
 
     expect(threads).toEqual([
-      { path: "src/a.ts", line: 10, body: "consider a null check", author: "agentfactory[bot]", createdAt: "2026-09-14T00:00:00Z" },
+      { path: "src/a.ts", line: 10, body: "consider a null check", author: "kumiwork[bot]", createdAt: "2026-09-14T00:00:00Z" },
       { path: "src/b.ts", line: 5, body: "fixed", author: "alice", createdAt: "2026-09-14T01:00:00Z" },
     ]);
   });

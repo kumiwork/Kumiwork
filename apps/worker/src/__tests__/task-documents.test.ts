@@ -361,7 +361,7 @@ describe("TASK_DOCUMENT_EXCLUDE_PATTERN against real git", () => {
 
   // A checkout with one committed file and a clean tree — the state a run starts from.
   function repoWithCommit(): string {
-    const dir = mkdtempSync(join(tmpdir(), "agentfactory-exclude-"));
+    const dir = mkdtempSync(join(tmpdir(), "kumiwork-exclude-"));
     repos.push(dir);
     git(dir, "init", "--quiet");
     git(dir, "config", "user.email", "test@example.com");
