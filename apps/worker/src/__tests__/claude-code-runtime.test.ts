@@ -63,7 +63,7 @@ describe("claudeCodeRuntime", () => {
     const { sandboxProvider, execCalls } = fakeSandbox([
       { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
     ]);
-    const modelEndpoint = { baseUrl: "http://host.docker.internal:8787/anthropic", token: "arata-run-abc" };
+    const modelEndpoint = { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-abc" };
 
     await claudeCodeRuntime.runTurn({ ...baseInput(), modelEndpoint }, { sandboxProvider, sandboxId: "sandbox-1" });
     await claudeCodeRuntime.runTurn(baseInput(), { sandboxProvider, sandboxId: "sandbox-1" });
@@ -71,7 +71,7 @@ describe("claudeCodeRuntime", () => {
 
     expect(execCalls[0].env).toMatchObject({
       ANTHROPIC_BASE_URL: "http://host.docker.internal:8787/anthropic",
-      ANTHROPIC_API_KEY: "arata-run-abc",
+      ANTHROPIC_API_KEY: "kumiwork-run-abc",
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
     });
     expect(execCalls[1].env?.ANTHROPIC_API_KEY).toBeUndefined();
@@ -88,7 +88,7 @@ describe("claudeCodeRuntime", () => {
     const result = await generator.generate({
       sandboxProvider,
       sandboxId: "sandbox-1",
-      modelEndpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "arata-run-abc" },
+      modelEndpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-abc" },
     });
 
     expect(generator.model).toMatchObject({ family: "anthropic", id: "claude-haiku-4-5" });
@@ -96,7 +96,7 @@ describe("claudeCodeRuntime", () => {
     expect(execCalls[0].cmd).toEqual(["/agent/node_modules/.bin/tsx", "/agent/generate-repo-map.ts"]);
     expect(execCalls[0].env).toEqual({
       ANTHROPIC_BASE_URL: "http://host.docker.internal:8787/anthropic",
-      ANTHROPIC_API_KEY: "arata-run-abc",
+      ANTHROPIC_API_KEY: "kumiwork-run-abc",
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
       MODEL_ID: "claude-haiku-4-5",
     });

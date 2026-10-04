@@ -33,7 +33,7 @@ vi.mock("../scm-provider", () => ({
 const resolveSandboxImageMock = vi.fn();
 const revokeModelCredentialMock = vi.fn();
 const issueSandboxModelCredentialMock = vi.fn((..._args: unknown[]) => ({
-  endpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "arata-run-test" },
+  endpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-test" },
   revoke: revokeModelCredentialMock,
 }));
 vi.mock("../sandbox-model-access", () => ({
@@ -362,7 +362,7 @@ describe("warmRepoMap", () => {
     expect(create).toHaveBeenCalledWith({ image: "arata-sandbox-node:local", env: {} });
     expect(execEnvs.get(GENERATE_CMD)).toEqual({
       ANTHROPIC_BASE_URL: "http://host.docker.internal:8787/anthropic",
-      ANTHROPIC_API_KEY: "arata-run-test",
+      ANTHROPIC_API_KEY: "kumiwork-run-test",
       CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
       MODEL_ID: "claude-haiku-4-5",
     });

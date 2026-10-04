@@ -77,13 +77,13 @@ describe("codexRuntime", () => {
 
   it("points Codex at the proxy's versioned base path with the run token", async () => {
     const { sandboxProvider, execCalls } = fakeSandbox([resultLine({ text: "Done", providerSessionRef: "thread-1" })]);
-    const modelEndpoint = { baseUrl: "http://host.docker.internal:8787/openai", token: "arata-run-abc" };
+    const modelEndpoint = { baseUrl: "http://host.docker.internal:8787/openai", token: "kumiwork-run-abc" };
 
     await codexRuntime.runTurn({ ...baseInput(), modelEndpoint }, { sandboxProvider, sandboxId: "sandbox-1" });
 
     expect(execCalls[0]!.env).toMatchObject({
       MODEL_BASE_URL: "http://host.docker.internal:8787/openai/v1",
-      MODEL_TOKEN: "arata-run-abc",
+      MODEL_TOKEN: "kumiwork-run-abc",
     });
   });
 

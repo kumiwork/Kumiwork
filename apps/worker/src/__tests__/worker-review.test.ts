@@ -23,7 +23,7 @@ const h = vi.hoisted(() => {
   const runTurn = vi.fn();
   const revokeModelCredential = vi.fn();
   const issueModelCredential = vi.fn((_context: unknown) => ({
-    endpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "arata-run-test" },
+    endpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-test" },
     revoke: revokeModelCredential,
   }));
   return { workers, sandbox, runTurn, revokeModelCredential, issueModelCredential };
@@ -409,7 +409,7 @@ describe("review run detection gate", () => {
     );
     expect(h.runTurn).toHaveBeenCalledWith(
       expect.objectContaining({
-        modelEndpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "arata-run-test" },
+        modelEndpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-test" },
       }),
       expect.anything(),
     );
