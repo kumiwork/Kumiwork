@@ -98,7 +98,7 @@ function Ensure-Docker {
 function Ensure-SandboxImage {
     if (-not (Test-CommandExists docker)) { return }
     foreach ($lang in @('node', 'python', 'java')) {
-        $tag = "arata-sandbox-$lang`:local"
+        $tag = "kumiwork-sandbox-$lang`:local"
         docker image inspect $tag *> $null
         if ($LASTEXITCODE -eq 0) { continue }
         Write-Host "Building $tag (needed to run the worker)..."
