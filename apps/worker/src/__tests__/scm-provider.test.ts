@@ -565,7 +565,7 @@ describe("pushChangesIfDirty", () => {
     await pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "Code reviewer");
 
     const s = script();
-    expect(s).toContain('git -c user.email="agent@agentfactory.local" -c user.name="$AUTHOR_NAME" merge --no-edit "origin/$BRANCH_NAME"');
+    expect(s).toContain('git -c user.email="agent@kumiwork.local" -c user.name="$AUTHOR_NAME" merge --no-edit "origin/$BRANCH_NAME"');
   });
 
   it("aborts cleanly when merging in the remote tip conflicts", async () => {
