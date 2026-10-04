@@ -45,6 +45,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: bash scripts/check-old-names.sh
       - run: pnpm test:unit
 
   db-integration-test:
