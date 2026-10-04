@@ -147,7 +147,7 @@ const REPORT_EVAL_PROPERTIES: NonNullable<Anthropic.Tool["input_schema"]["proper
   },
 };
 
-// or-borco/AgentFactory#134: with `retrieval` always optional, the real judge omitted it from
+// With `retrieval` always optional, the real judge omitted it from
 // ~75-80% of calls that had a genuine <retrieved> block to grade, despite JUDGE_SYSTEM_PROMPT
 // explicitly instructing it to always report one. Two prompt-level hypotheses were tried and
 // disproven (a larger JUDGE_MAX_TOKENS, reordering the schema's properties). Marking `retrieval`

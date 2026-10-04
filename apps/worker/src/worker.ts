@@ -563,7 +563,7 @@ const runWorker = new Worker<RunJobData>(
       // vector search done here would be thrown away unused.
       let retrieved: RetrievedContext = { text: "", retrievals: [] };
       if (!review && (team || task)) {
-        // Closes the AgentFactory#150 race: a run can otherwise start while a document attached
+        // Closes the context-ingest race: a run can otherwise start while a document attached
         // moments ago is still being chunked and embedded, and retrieveContext (unchanged below)
         // would see zero, a partial, or momentarily fewer chunks than an earlier run saw. This
         // waits briefly for recently-created pending/indexing items to clear, then always

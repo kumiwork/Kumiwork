@@ -13,8 +13,7 @@ export const INGEST_POLL_INTERVAL_MS = 1_000;
 // timeout, forever. Restricting the check to items created in the last 5 minutes means a stuck
 // item stops being polled for shortly after it gets stuck, while comfortably covering every
 // realistic ingest job (repo-map generation, a related race, tops out around 38s elsewhere in
-// this codebase). This is a mitigation for run latency, not a fix for the stuck row itself — see
-// AgentFactory#120 for that class of problem.
+// this codebase). This is a mitigation for run latency, not a fix for the stuck row itself.
 export const INGEST_RECENCY_WINDOW_MS = 5 * 60_000;
 
 export interface ContextIngestScope {
@@ -33,7 +32,7 @@ async function countPending(scope: ContextIngestScope, since: Date): Promise<num
 // Called from the run pipeline right before retrieveContext, once team/task are resolved. A run
 // that starts (via the Run button, a chat message, or a re-run) while an attached document is
 // still being chunked and embedded would otherwise see zero, a partial, or — across a redelivered
-// ingest job's delete-then-rewrite — even fewer chunks than an earlier run saw (AgentFactory#150).
+// ingest job's delete-then-rewrite — even fewer chunks than an earlier run saw.
 // This waits briefly for recently-created pending/indexing items to clear, then always proceeds:
 // retrieveContext itself is unchanged and still just counts chunk rows at query time, exactly as
 // before.
