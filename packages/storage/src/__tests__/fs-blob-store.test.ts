@@ -14,7 +14,7 @@ const SHA = sha256Hex(BYTES);
 
 describe("resolveBlobDir", () => {
   it("passes an absolute path through untouched", () => {
-    expect(resolveBlobDir("/var/lib/agentfactory/blobs")).toBe("/var/lib/agentfactory/blobs");
+    expect(resolveBlobDir("/var/lib/kumiwork/blobs")).toBe("/var/lib/kumiwork/blobs");
   });
 
   // The whole point of the function: apps/web and apps/worker start from different directories,
@@ -41,7 +41,7 @@ describe("FsBlobStore", () => {
   beforeEach(async () => {
     // Files a local adapter writes are not cleaned by the db harness's TRUNCATE, so every test
     // run gets its own directory.
-    root = await mkdtemp(path.join(tmpdir(), "agentfactory-blobs-"));
+    root = await mkdtemp(path.join(tmpdir(), "kumiwork-blobs-"));
     store = new FsBlobStore(root);
   });
 

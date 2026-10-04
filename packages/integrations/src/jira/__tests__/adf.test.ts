@@ -70,9 +70,9 @@ describe("adfToMarkdown", () => {
 
     it("renders a link mark as [text](href)", () => {
       const input = doc([
-        paragraph([text("AgentFactory", [{ type: "link", attrs: { href: "https://example.com" } }])]),
+        paragraph([text("Kumiwork", [{ type: "link", attrs: { href: "https://example.com" } }])]),
       ]);
-      expect(adfToMarkdown(input)).toBe("[AgentFactory](https://example.com)");
+      expect(adfToMarkdown(input)).toBe("[Kumiwork](https://example.com)");
     });
 
     it("wraps link outermost when combined with strong", () => {
