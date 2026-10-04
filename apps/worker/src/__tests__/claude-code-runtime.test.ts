@@ -160,9 +160,9 @@ describe("claudeCodeRuntime", () => {
 
     expect(execCalls[0].env).toMatchObject({
       GIT_AUTHOR_NAME: "Codey",
-      GIT_AUTHOR_EMAIL: "agent@agentfactory.local",
+      GIT_AUTHOR_EMAIL: "agent@kumiwork.local",
       GIT_COMMITTER_NAME: "Codey",
-      GIT_COMMITTER_EMAIL: "agent@agentfactory.local",
+      GIT_COMMITTER_EMAIL: "agent@kumiwork.local",
     });
   });
 
@@ -178,9 +178,9 @@ describe("claudeCodeRuntime", () => {
 
     expect(execCalls[0].env).toMatchObject({
       GIT_AUTHOR_NAME: "Codey",
-      GIT_AUTHOR_EMAIL: "agent@agentfactory.local",
+      GIT_AUTHOR_EMAIL: "agent@kumiwork.local",
       GIT_COMMITTER_NAME: "Codey",
-      GIT_COMMITTER_EMAIL: "agent@agentfactory.local",
+      GIT_COMMITTER_EMAIL: "agent@kumiwork.local",
     });
   });
 

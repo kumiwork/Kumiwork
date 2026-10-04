@@ -7,6 +7,8 @@ export const UNSAFE_LOCAL_GIT_CONFIG_PATTERN =
   "^(url|http|include|includeif|credential|filter)\\.|^core\\.(sshcommand|gitproxy|askpass)$|" +
   "^merge\\..*\\.driver$|^diff\\..*\\.(command|textconv)$";
 
+export const AGENT_GIT_EMAIL = "agent@kumiwork.local";
+
 export const UNSAFE_GIT_CONFIG_MARKER = "UNSAFE_GIT_CONFIG";
 
 export function platformGitEnv(): Record<string, string> {

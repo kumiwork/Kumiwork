@@ -1,6 +1,7 @@
 import type { SandboxProvider } from "../sandbox/types";
 import { SKILL_DIR } from "../skill-paths";
 import { readAgentTurnOutput } from "./marker-protocol";
+import { AGENT_GIT_EMAIL } from "../platform-git";
 import { buildModelSpec } from "@agentfactory/core";
 import type {
   AgentRuntime,
@@ -14,7 +15,6 @@ import type {
 } from "./types";
 
 const REPO_MAP_RESULT_MARKER = "__RESULT__";
-const AGENT_GIT_EMAIL = "agent@agentfactory.local";
 
 const claudeRepoMapGenerator: RepoMapGenerator = {
   model: buildModelSpec("claude-haiku-4-5"),

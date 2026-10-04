@@ -11,6 +11,7 @@ import {
   retryOnRepoNotFound,
   unsafeGitConfigError,
   unsafeGitConfigKeys,
+  AGENT_GIT_EMAIL,
 } from "./platform-git";
 import { keepTail, maskSecrets } from "./secret-masking";
 
@@ -412,7 +413,7 @@ if [ -z "$(git status --porcelain)" ] && [ -z "$STALE_AHEAD" ]; then
 else
   if [ -n "$(git status --porcelain)" ]; then
     git add -A
-    git -c user.email="agent@agentfactory.local" -c user.name="$AUTHOR_NAME" commit -m "$COMMIT_MESSAGE"
+    git -c user.email="${AGENT_GIT_EMAIL}" -c user.name="$AUTHOR_NAME" commit -m "$COMMIT_MESSAGE"
     COMMIT_STATUS=$?
   else
     COMMIT_STATUS=0
@@ -443,7 +444,7 @@ else
     # not a real conflict. Confirmed directly: replaying the exact merge from a real failed run
     # with these flags added succeeded cleanly (0 conflicting files) where the original command
     # (no identity) failed outright.
-    if git -c user.email="agent@agentfactory.local" -c user.name="$AUTHOR_NAME" merge --no-edit "origin/$BRANCH_NAME" >/dev/null 2>&1; then
+    if git -c user.email="${AGENT_GIT_EMAIL}" -c user.name="$AUTHOR_NAME" merge --no-edit "origin/$BRANCH_NAME" >/dev/null 2>&1; then
       echo MERGE_OK
     else
       git diff --name-only --diff-filter=U | sed 's/^/CONFLICT_FILE:/'
