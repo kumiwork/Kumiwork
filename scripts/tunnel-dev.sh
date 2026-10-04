@@ -73,7 +73,7 @@ reregister_telegram_webhooks_bg() {
 
   # Query all active Telegram connections
   local rows
-  rows=$(docker exec "$container" psql -U agentfactory -d agentfactory -t -A -F'|' \
+  rows=$(docker exec "$container" psql -U kumiwork -d kumiwork -t -A -F'|' \
     -c "SELECT cs.ciphertext, c.config->>'webhookSecret', c.config->>'telegramSecretToken' \
         FROM connections c \
         JOIN connection_secrets cs ON cs.id = c.credential_ref \
