@@ -55,7 +55,7 @@ const defaultDeps: EvalRunnerDeps = {
 
 function classifyJudgeError(err: unknown): string {
   const message = err instanceof Error ? err.message : String(err);
-  // Same account-out-of-credits surface the run path classifies (#99) — the provider says
+  // Same account-out-of-credits surface the run path classifies — the provider says
   // "credit balance is too low"; everything else is a generic judge failure.
   return message.toLowerCase().includes("credit balance") ? "insufficient_credit" : "judge_error";
 }

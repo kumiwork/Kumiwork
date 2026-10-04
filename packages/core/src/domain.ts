@@ -128,7 +128,7 @@ export interface Agent {
   toolPolicy: ToolPolicy;
   connectionIds: ID[];
   onContextOverflow: OverflowPolicy;
-  // Intentionally unwired for alpha (issue #65): no editing UI and nothing reads this yet.
+  // Intentionally unwired for alpha: no editing UI and nothing reads this yet.
   areaMap?: Record<string, string>;
   defaultCodebase?: string;
   createdAt: ISODateTime;

@@ -128,7 +128,7 @@ export const agents = pgTable(
     onContextOverflow: text("on_context_overflow", { enum: ["fallback", "fail_fast"] })
       .notNull()
       .default("fallback"),
-    // Intentionally unwired for alpha (issue #65): editing UI removed, nothing reads this.
+    // Intentionally unwired for alpha: editing UI removed, nothing reads this.
     // Column kept to avoid a migration for no gain; do not build UI on top of it without a plan.
     areaMap: jsonb("area_map").$type<Record<string, string>>(),
     defaultCodebase: text("default_codebase"),
@@ -193,7 +193,7 @@ export const connections = pgTable("connections", {
 });
 
 // A single-use, time-limited code an admin hands to a teammate so they can authorize their
-// Telegram (or, per #269, future Slack) account without the admin needing to know their handle
+// Telegram (or, in future, Slack) account without the admin needing to know their handle
 // ahead of time. Redemption is a single atomic UPDATE (see channel-invite-codes.ts) guarded by
 // `redeemedAt IS NULL AND expiresAt > now()` — that's what makes "single-use" race-safe.
 export const channelInviteCodes = pgTable("channel_invite_codes", {

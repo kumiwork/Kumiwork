@@ -54,7 +54,7 @@ Five ports carry this design, one per "we might swap this later" in the requirem
 | `SandboxProvider` (§4) | `DockerSandboxProvider` → Fly/E2B/gVisor | Docker isn't a security boundary at multi-tenant scale |
 | `RunDriver` (§4) | `BullMqRunDriver` → `TemporalRunDriver` | durable orchestration at M5 |
 | `ScmProvider` (§5) | GitHub → Bitbucket/GitLab | "maybe other interfaces like Bitbucket" |
-| `ChannelAdapter` (§5) | Telegram → Slack/Discord/WhatsApp | Telegram real; Slack tracked in #269, others unbuilt |
+| `ChannelAdapter` (§5) | Telegram → Slack/Discord/WhatsApp | Telegram real; Slack and others unbuilt |
 
 The cost is a layer of indirection, and a port designed against a single implementation is usually wrong — which is
 why M6 builds a second `AgentRuntime` adapter as proof rather than assuming the first one generalized.
@@ -565,7 +565,7 @@ Lumping these together is the classic mistake; they behave differently.
    enough to forge an update — single-use invite-code admission
    (`channel_invite_codes`/`channel_authorized_users` tables), and outbound delivery hooked into
    `apps/worker/src/worker.ts` via `channel-notify.ts` (mirrors `task-notify.ts`'s best-effort,
-   never-fails-the-run isolation). Slack (#269), Discord, and WhatsApp remain unbuilt adapter
+   never-fails-the-run isolation). Slack, Discord, and WhatsApp remain unbuilt adapter
    implementations against the same port. M4 (Telegram slice) done.
 3. **Task systems (Jira, Monday, Asana, Google Sheets)** = *both a trigger source and a tool*. Originally planned as
    MCP servers whose webhooks feed the trigger bus. **Jira is real, but as a direct REST adapter, not MCP** — see

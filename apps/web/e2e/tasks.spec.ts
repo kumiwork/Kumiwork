@@ -24,7 +24,7 @@ test("top New task button reappears once the list has tasks", async ({ page, reg
   await expect(page.getByRole("button", { name: "New task" })).toHaveCount(1);
 });
 
-// ── Task detail layout (issue #32) ───────────────────────────────────────────
+// ── Task detail layout ──────────────────────────────────────────────────────
 
 test("task detail shows split-pane layout with reply bar always visible", async ({ page, registeredUser }) => {
   const res = await page.request.post("/api/tasks", {
