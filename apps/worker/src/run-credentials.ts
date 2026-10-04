@@ -16,7 +16,7 @@ interface RunCredentialEntry extends RunCredentialContext {
   expiresAt: number;
 }
 
-export const RUN_CREDENTIAL_PREFIX = "arata-run-";
+export const RUN_CREDENTIAL_PREFIX = "kumiwork-run-";
 export const MAX_RUN_CREDENTIAL_TTL_MS = 2 * 60 * 60 * 1000;
 
 export class RunCredentialStore {

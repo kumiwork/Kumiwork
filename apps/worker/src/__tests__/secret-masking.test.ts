@@ -23,7 +23,7 @@ describe("truncateMiddle", () => {
 });
 
 describe("maskSecrets: known values", () => {
-  const secret = "arata-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
+  const legacySecret = "arata-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
 
   it("masks the literal, URL-encoded and base64 forms", () => {
     const tricky = "p@ss/w0rd+Secret";
@@ -36,8 +36,16 @@ describe("maskSecrets: known values", () => {
   });
 
   it("masks the run proxy token by value and by pattern", () => {
-    expect(maskSecrets(`token ${secret}`, [secret])).toBe(`token ${REDACTED}`);
-    expect(maskSecrets(`token ${secret}`, [])).toBe(`token ${REDACTED}`);
+    expect(maskSecrets(`token ${legacySecret}`, [legacySecret])).toBe(`token ${REDACTED}`);
+    expect(maskSecrets(`token ${legacySecret}`, [])).toBe(`token ${REDACTED}`);
+  });
+
+  it("redacts current and legacy run tokens", () => {
+    const current = "kumiwork-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
+    const legacyToken = "arata-run-Zx9_Qw8-Er7Ty6Ui5Op4As3Df2Gh1Jk0LzXcVbNm";
+    const masked = maskSecrets(`a ${current} b ${legacyToken} c`, []);
+    expect(masked).not.toContain(current);
+    expect(masked).not.toContain(legacyToken);
   });
 });
 
