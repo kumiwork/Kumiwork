@@ -15,7 +15,7 @@ export function platformGitEnv(): Record<string, string> {
     GIT_CONFIG_GLOBAL: "/dev/null",
     GIT_TERMINAL_PROMPT: "0",
     GIT_CONFIG_COUNT: String(FORCED_GIT_CONFIG.length),
-    ARATA_UNSAFE_GIT_CONFIG: UNSAFE_LOCAL_GIT_CONFIG_PATTERN,
+    KUMIWORK_UNSAFE_GIT_CONFIG: UNSAFE_LOCAL_GIT_CONFIG_PATTERN,
   };
   FORCED_GIT_CONFIG.forEach(([key, value], index) => {
     env[`GIT_CONFIG_KEY_${index}`] = key;
@@ -25,8 +25,8 @@ export function platformGitEnv(): Record<string, string> {
 }
 
 export function refuseUnsafeGitConfig(repoDir: string): string {
-  return `if [ -d ${repoDir}/.git ] && git -C ${repoDir} config --local --get-regexp "$ARATA_UNSAFE_GIT_CONFIG" >/dev/null 2>&1; then
-  git -C ${repoDir} config --local --name-only --get-regexp "$ARATA_UNSAFE_GIT_CONFIG" 2>/dev/null | sed 's/^/${UNSAFE_GIT_CONFIG_MARKER}:/'
+  return `if [ -d ${repoDir}/.git ] && git -C ${repoDir} config --local --get-regexp "$KUMIWORK_UNSAFE_GIT_CONFIG" >/dev/null 2>&1; then
+  git -C ${repoDir} config --local --name-only --get-regexp "$KUMIWORK_UNSAFE_GIT_CONFIG" 2>/dev/null | sed 's/^/${UNSAFE_GIT_CONFIG_MARKER}:/'
   exit 0
 fi`;
 }

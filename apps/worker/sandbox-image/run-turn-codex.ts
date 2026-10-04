@@ -2,8 +2,8 @@ import { Codex, type ThreadOptions } from "@openai/codex-sdk";
 import { classifyCodexFailure, translateCodexEvent, type CodexTurnState, REMEMBER_MCP_SERVER } from "./codex-events.js";
 import { ERROR_MARKER, EVENT_MARKER, RESULT_MARKER } from "./markers.js";
 
-const PROXY_PROVIDER_ID = "arata";
-const PROXY_TOKEN_ENV = "ARATA_MODEL_TOKEN";
+const PROXY_PROVIDER_ID = "kumiwork";
+const PROXY_TOKEN_ENV = "KUMIWORK_MODEL_TOKEN";
 
 function parseStructuredOutput(text: string): unknown {
   try {
@@ -31,7 +31,7 @@ async function main(): Promise<void> {
       model_provider: PROXY_PROVIDER_ID,
       model_providers: {
         [PROXY_PROVIDER_ID]: {
-          name: "Arata model proxy",
+          name: "Kumiwork model proxy",
           base_url: baseUrl,
           env_key: PROXY_TOKEN_ENV,
           wire_api: "responses",
