@@ -100,9 +100,9 @@ ensure_sandbox_image() {
     echo "Building $tag (needed to run the worker)..."
     docker build --target "$target" --build-arg "SANDBOX_SOURCE_HASH=$(scripts/sandbox-image-hash.sh)" -t "$tag" apps/worker/sandbox-image
   }
-  build_sandbox_target node arata-sandbox-node:local
-  build_sandbox_target python arata-sandbox-python:local
-  build_sandbox_target java arata-sandbox-java:local
+  build_sandbox_target node kumiwork-sandbox-node:local
+  build_sandbox_target python kumiwork-sandbox-python:local
+  build_sandbox_target java kumiwork-sandbox-java:local
 }
 
 ensure_node

@@ -10,6 +10,12 @@ const { isNodeBaseImage, LEGACY_SANDBOX_IMAGE_NODE, resolveSandboxImage, SANDBOX
 );
 
 describe("resolveSandboxImage", () => {
+  it("defaults to the kumiwork sandbox images", () => {
+    expect(SANDBOX_IMAGE_NODE).toBe("kumiwork-sandbox-node:local");
+    expect(SANDBOX_IMAGE_PYTHON).toBe("kumiwork-sandbox-python:local");
+    expect(SANDBOX_IMAGE_JAVA).toBe("kumiwork-sandbox-java:local");
+  });
+
   it("returns the node image when repoFullName is undefined", async () => {
     await expect(resolveSandboxImage(1, undefined)).resolves.toBe(SANDBOX_IMAGE_NODE);
     expect(resolveDetectedLanguageMock).not.toHaveBeenCalled();
