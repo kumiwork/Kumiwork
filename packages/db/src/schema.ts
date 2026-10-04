@@ -281,7 +281,7 @@ export const sessions = pgTable(
     // `id` collides with an unrelated session's id, which does happen: `id` is only unique
     // within this one database, but the branch name has to stay unique on whatever GitHub repo
     // the session's tasks target, and more than one database can point sandboxes at the same
-    // repo (a second local dev DB, a reseed that reassigns an id — see T-051). Nullable because
+    // repo (a second local dev DB, a reseed that reassigns an id). Nullable because
     // sessions created before this column existed have no token; sessionBranchName falls back to
     // the bare id-only name for those.
     branchToken: text("branch_token"),

@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   // Creating a task with a codebase is the most common way a repository first becomes relevant,
   // and it was the one entry point that did not warm the map — PATCH /api/tasks/[taskId] and all
-  // four agent/team routes already do this. On task T-070 the map for the task's codebase was
+  // four agent/team routes already do this. In one observed run the map for the task's codebase was
   // generated 54 seconds into an 8-minute run and never read, because nothing scheduled it until
   // the run itself missed the cache.
   //

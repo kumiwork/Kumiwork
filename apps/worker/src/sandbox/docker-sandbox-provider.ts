@@ -36,7 +36,7 @@ function memoryHostConfig(mb: number): { Memory: number; MemorySwap: number } {
 
 // Polls a running container's live memory usage for the duration of one exec() call and grows
 // its cap (doubling, capped at MEMORY_MAX_MB) before the kernel OOM-kills the process inside it —
-// this is what T-165 hit with the old fixed 512MB cap. Best-effort: a failure here is logged and
+// which happened in practice with the old fixed 512MB cap. Best-effort: a failure here is logged and
 // swallowed, never allowed to interrupt the command actually running in the sandbox. Returns a
 // stop function the caller must invoke once the exec() it was watching has finished.
 function watchMemory(container: Docker.Container, id: string): () => void {
