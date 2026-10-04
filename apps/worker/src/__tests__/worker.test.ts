@@ -107,6 +107,8 @@ vi.mock("../sandbox-image-select", () => ({
   SANDBOX_IMAGE_NODE: "arata-sandbox-node:local",
   SANDBOX_IMAGE_PYTHON: "arata-sandbox-python:local",
   SANDBOX_IMAGE_JAVA: "arata-sandbox-java:local",
+  LEGACY_SANDBOX_IMAGE_NODE: "legacy-node:local",
+  isNodeBaseImage: (image: string | null | undefined) => image === "arata-sandbox-node:local" || image === "legacy-node:local",
 }));
 
 vi.mock("../sandbox-image-check", () => ({
@@ -230,6 +232,18 @@ describe("ensureSandbox", () => {
 
     expect(h.sandbox.destroy).toHaveBeenCalledWith("existing-sandbox");
     expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-java:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^arata-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
+    expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "arata-sandbox-java:local");
+    expect(sandboxId).toBe("upgraded-sandbox");
+  });
+
+  it("destroys and recreates a sandbox created under the legacy node image tag once the repo's language becomes known", async () => {
+    const session = fakeSession({ sandboxId: "existing-sandbox", sandboxImage: "legacy-node:local" });
+    resolveSandboxImageMock.mockResolvedValue("arata-sandbox-java:local");
+    h.sandbox.create.mockResolvedValue({ id: "upgraded-sandbox" });
+
+    const sandboxId = await ensureSandbox(session, 5, "acme/widgets", "acme/widgets");
+
+    expect(h.sandbox.destroy).toHaveBeenCalledWith("existing-sandbox");
     expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "arata-sandbox-java:local");
     expect(sandboxId).toBe("upgraded-sandbox");
   });

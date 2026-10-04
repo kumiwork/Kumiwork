@@ -3,6 +3,11 @@ import { resolveDetectedLanguage } from "./scm-provider";
 export const SANDBOX_IMAGE_NODE = process.env.SANDBOX_IMAGE_NODE ?? "arata-sandbox-node:local";
 export const SANDBOX_IMAGE_PYTHON = process.env.SANDBOX_IMAGE_PYTHON ?? "arata-sandbox-python:local";
 export const SANDBOX_IMAGE_JAVA = process.env.SANDBOX_IMAGE_JAVA ?? "arata-sandbox-java:local";
+export const LEGACY_SANDBOX_IMAGE_NODE = "arata-sandbox-node:local";
+
+export function isNodeBaseImage(image: string | null | undefined): boolean {
+  return image === SANDBOX_IMAGE_NODE || image === LEGACY_SANDBOX_IMAGE_NODE;
+}
 
 const LANGUAGE_IMAGE_MAP: Record<string, string> = {
   JavaScript: SANDBOX_IMAGE_NODE,

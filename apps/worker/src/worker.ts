@@ -112,7 +112,7 @@ import {
 import { resolveEscalation } from "./model-escalation";
 import { ensureRepoMap, warmRepoMap } from "./repo-map";
 import { runDependencySetup, type DependencySetupOutcome } from "./dependency-setup";
-import { resolveSandboxImage, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_PYTHON } from "./sandbox-image-select";
+import { isNodeBaseImage, resolveSandboxImage, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_PYTHON } from "./sandbox-image-select";
 import { dependencyCacheEnv, dependencyCacheVolume } from "./sandbox-cache";
 import { issueSandboxModelCredential, startModelProxy } from "./sandbox-model-access";
 import { buildRetrievalQuery, retrieveContext, type RetrievedContext } from "./context-retrieval";
@@ -157,7 +157,7 @@ export async function ensureSandbox(
 ): Promise<string> {
   const hasWarmSandbox = Boolean(session.sandboxId) && (await sandboxProvider.exists(session.sandboxId!));
 
-  if (hasWarmSandbox && session.sandboxImage !== SANDBOX_IMAGE_NODE) {
+  if (hasWarmSandbox && !isNodeBaseImage(session.sandboxImage)) {
     return session.sandboxId!;
   }
 

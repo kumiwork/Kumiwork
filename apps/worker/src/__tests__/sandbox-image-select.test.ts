@@ -5,7 +5,7 @@ vi.mock("../scm-provider", () => ({
   resolveDetectedLanguage: (orgId: number, repoFullName: string) => resolveDetectedLanguageMock(orgId, repoFullName),
 }));
 
-const { resolveSandboxImage, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_PYTHON } = await import(
+const { isNodeBaseImage, LEGACY_SANDBOX_IMAGE_NODE, resolveSandboxImage, SANDBOX_IMAGE_NODE, SANDBOX_IMAGE_JAVA, SANDBOX_IMAGE_PYTHON } = await import(
   "../sandbox-image-select"
 );
 
@@ -48,5 +48,16 @@ describe("resolveSandboxImage", () => {
   it("returns the node image for an unmapped language", async () => {
     resolveDetectedLanguageMock.mockResolvedValue("Go");
     await expect(resolveSandboxImage(1, "acme/widgets")).resolves.toBe(SANDBOX_IMAGE_NODE);
+  });
+});
+
+describe("isNodeBaseImage", () => {
+  it.each([
+    [SANDBOX_IMAGE_NODE, true],
+    [LEGACY_SANDBOX_IMAGE_NODE, true],
+    [SANDBOX_IMAGE_PYTHON, false],
+    [null, false],
+  ])("%s → %s", (image, expected) => {
+    expect(isNodeBaseImage(image)).toBe(expected);
   });
 });
