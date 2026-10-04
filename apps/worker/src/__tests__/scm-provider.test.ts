@@ -780,7 +780,7 @@ describe("pushChangesIfDirty", () => {
 
     await pushChangesIfDirty(sandbox, "sandbox-1", target, "msg", "Code reviewer");
 
-    const checkIndex = script.indexOf('--get-regexp "$ARATA_UNSAFE_GIT_CONFIG"');
+    const checkIndex = script.indexOf('--get-regexp "$KUMIWORK_UNSAFE_GIT_CONFIG"');
     expect(checkIndex).toBeGreaterThan(-1);
     expect(checkIndex).toBeLessThan(script.indexOf("git add -A"));
     expect(checkIndex).toBeLessThan(script.indexOf("$PUSH_TOKEN@"));

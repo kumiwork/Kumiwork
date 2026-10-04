@@ -109,18 +109,18 @@ export const ECOSYSTEMS: Ecosystem[] = [
 
 export const DEPENDENCY_INSTALL_TIMEOUT_SECONDS = 300;
 export const PYTHON_VENV_EXCLUDE_PATTERN = "/.venv/";
-export const DEPENDENCY_MARKER_PATH = ".git/arata-deps-installed";
+export const DEPENDENCY_MARKER_PATH = ".git/kumiwork-deps-installed";
 const OUTPUT_TAIL_CHARS = 1500;
 const MAX_VERIFICATION_COMMANDS = 12;
 const SCRIPT_NAME_PATTERN = /^[\w:.-]{1,64}$/;
 const STEP_OUTPUT_MAX_CHARS = 16 * 1024;
 const PROBE_OUTPUT_MAX_CHARS = 512 * 1024;
 const STEP_STATUSES: ReadonlySet<StepStatus> = new Set(["ok", "failed", "timed_out", "missing_tool"]);
-const EXIT_MARKER = "__ARATA_SETUP_EXIT__:";
-const MISSING_TOOL_MARKER = "__ARATA_SETUP_MISSING_TOOL__";
-const FILE_HASH_MARKER = "__ARATA_FILE__:";
-const INSTALL_MARKER = "__ARATA_MARKER__:";
-const PACKAGE_JSON_MARKER = "__ARATA_PACKAGE_JSON__:";
+const EXIT_MARKER = "__KUMIWORK_SETUP_EXIT__:";
+const MISSING_TOOL_MARKER = "__KUMIWORK_SETUP_MISSING_TOOL__";
+const FILE_HASH_MARKER = "__KUMIWORK_FILE__:";
+const INSTALL_MARKER = "__KUMIWORK_MARKER__:";
+const PACKAGE_JSON_MARKER = "__KUMIWORK_PACKAGE_JSON__:";
 const TIMEOUT_EXIT_CODES = new Set([124, 137]);
 const VERIFICATION_SCRIPT_PATTERN = /type-?check|tsc|lint|test|check|build|format/i;
 
@@ -329,11 +329,11 @@ export async function collectStdout(
 function stepScript(timeoutSeconds: number): string {
   return `
 cd /workspace || { echo "${EXIT_MARKER}1"; exit 0; }
-if [ -n "$ARATA_SETUP_TOOL" ] && ! command -v "$ARATA_SETUP_TOOL" >/dev/null 2>&1; then
+if [ -n "$KUMIWORK_SETUP_TOOL" ] && ! command -v "$KUMIWORK_SETUP_TOOL" >/dev/null 2>&1; then
   echo "${MISSING_TOOL_MARKER}"
   exit 0
 fi
-timeout -k 10 ${timeoutSeconds} sh -c "$ARATA_SETUP_COMMAND" 2>&1
+timeout -k 10 ${timeoutSeconds} sh -c "$KUMIWORK_SETUP_COMMAND" 2>&1
 echo "${EXIT_MARKER}$?"`;
 }
 
@@ -362,7 +362,7 @@ async function runStep(
       sandboxId,
       ["sh", "-c", stepScript(timeoutSeconds)],
       { maxChars: STEP_OUTPUT_MAX_CHARS, keep: "tail" },
-      { ARATA_SETUP_COMMAND: step.command, ARATA_SETUP_TOOL: step.tool ?? "" },
+      { KUMIWORK_SETUP_COMMAND: step.command, KUMIWORK_SETUP_TOOL: step.tool ?? "" },
     );
     const parsed = parseStepOutput(stdout);
     return {
@@ -489,13 +489,13 @@ export async function runDependencySetup(
       result.exitCode === undefined ? { status: result.status } : { status: result.status, exitCode: result.exitCode },
     ),
   };
-  const writeMarker = `[ -d /workspace/.git ] && printf '%s' "$ARATA_SETUP_MARKER" > /workspace/${DEPENDENCY_MARKER_PATH}; exit 0`;
+  const writeMarker = `[ -d /workspace/.git ] && printf '%s' "$KUMIWORK_SETUP_MARKER" > /workspace/${DEPENDENCY_MARKER_PATH}; exit 0`;
   await collectStdout(
     sandboxProvider,
     sandboxId,
     ["sh", "-c", writeMarker],
     { maxChars: 0, keep: "head" },
-    { ARATA_SETUP_MARKER: JSON.stringify(nextMarker) },
+    { KUMIWORK_SETUP_MARKER: JSON.stringify(nextMarker) },
   ).catch(() => "");
   return {
     status: allOk ? "installed" : "failed",

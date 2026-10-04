@@ -146,12 +146,12 @@ describe("fingerprintSetup", () => {
 
 describe("parseStepOutput", () => {
   it("classifies exit codes", () => {
-    expect(parseStepOutput("done\n__ARATA_SETUP_EXIT__:0\n").status).toBe("ok");
-    expect(parseStepOutput("boom\n__ARATA_SETUP_EXIT__:1\n")).toMatchObject({ status: "failed", exitCode: 1, output: "boom\n" });
-    expect(parseStepOutput("__ARATA_SETUP_EXIT__:124\n").status).toBe("timed_out");
-    expect(parseStepOutput("__ARATA_SETUP_MISSING_TOOL__\n").status).toBe("missing_tool");
+    expect(parseStepOutput("done\n__KUMIWORK_SETUP_EXIT__:0\n").status).toBe("ok");
+    expect(parseStepOutput("boom\n__KUMIWORK_SETUP_EXIT__:1\n")).toMatchObject({ status: "failed", exitCode: 1, output: "boom\n" });
+    expect(parseStepOutput("__KUMIWORK_SETUP_EXIT__:124\n").status).toBe("timed_out");
+    expect(parseStepOutput("__KUMIWORK_SETUP_MISSING_TOOL__\n").status).toBe("missing_tool");
     expect(parseStepOutput("killed without a marker").status).toBe("failed");
-    const garbled = parseStepOutput("__ARATA_SETUP_EXIT__:\n");
+    const garbled = parseStepOutput("__KUMIWORK_SETUP_EXIT__:\n");
     expect(garbled.status).toBe("failed");
     expect(garbled.exitCode).toBeUndefined();
   });
@@ -162,9 +162,9 @@ const HASH_B = "b".repeat(64);
 const HASH_C = "c".repeat(64);
 
 function probeOutput(files: Record<string, string>, marker?: SetupMarker, packageJson?: string): string {
-  const lines = Object.entries(files).map(([file, hash]) => `__ARATA_FILE__:${hash}  ${file}`);
-  if (marker) lines.push(`__ARATA_MARKER__:${Buffer.from(JSON.stringify(marker)).toString("base64")}`);
-  if (packageJson) lines.push(`__ARATA_PACKAGE_JSON__:${Buffer.from(packageJson).toString("base64")}`);
+  const lines = Object.entries(files).map(([file, hash]) => `__KUMIWORK_FILE__:${hash}  ${file}`);
+  if (marker) lines.push(`__KUMIWORK_MARKER__:${Buffer.from(JSON.stringify(marker)).toString("base64")}`);
+  if (packageJson) lines.push(`__KUMIWORK_PACKAGE_JSON__:${Buffer.from(packageJson).toString("base64")}`);
   return `${lines.join("\n")}\n`;
 }
 
@@ -203,10 +203,10 @@ describe("collectStdout", () => {
   }
 
   it("keeps only the tail when asked, so a flood of output cannot grow without bound", async () => {
-    const chunks = [...Array.from({ length: 1000 }, () => "y\n".repeat(1000)), "__ARATA_SETUP_EXIT__:0\n"];
+    const chunks = [...Array.from({ length: 1000 }, () => "y\n".repeat(1000)), "__KUMIWORK_SETUP_EXIT__:0\n"];
     const stdout = await collectStdout(streamingSandbox(chunks), "sbx", ["sh"], { maxChars: 100, keep: "tail" });
     expect(stdout).toHaveLength(100);
-    expect(stdout.endsWith("__ARATA_SETUP_EXIT__:0\n")).toBe(true);
+    expect(stdout.endsWith("__KUMIWORK_SETUP_EXIT__:0\n")).toBe(true);
   });
 
   it("keeps only the head when asked", async () => {
@@ -223,7 +223,7 @@ describe("parseProbeOutput", () => {
   });
 
   it("ignores a marker it cannot decode", () => {
-    const probe = parseProbeOutput("__ARATA_MARKER__:bm90IGpzb24=\n");
+    const probe = parseProbeOutput("__KUMIWORK_MARKER__:bm90IGpzb24=\n");
     expect(probe.marker).toBeUndefined();
   });
 });
@@ -249,8 +249,8 @@ function fakeSandbox(respond: (script: string, env?: Record<string, string>) => 
   return { provider, calls };
 }
 
-const isProbe = (script: string) => script.includes("__ARATA_FILE__");
-const isStep = (env?: Record<string, string>) => Boolean(env?.ARATA_SETUP_COMMAND);
+const isProbe = (script: string) => script.includes("__KUMIWORK_FILE__");
+const isStep = (env?: Record<string, string>) => Boolean(env?.KUMIWORK_SETUP_COMMAND);
 
 describe("runDependencySetup", () => {
   const packageJson = JSON.stringify({ scripts: { typecheck: "tsc", lint: "eslint ." } });
@@ -258,7 +258,7 @@ describe("runDependencySetup", () => {
   it("installs, writes the marker, and reports verification commands", async () => {
     const { provider, calls } = fakeSandbox((script, env) => {
       if (isProbe(script)) return probeOutput({ "package.json": HASH_B, "pnpm-lock.yaml": HASH_A }, undefined, packageJson);
-      if (isStep(env)) return "Packages: +12\n__ARATA_SETUP_EXIT__:0\n";
+      if (isStep(env)) return "Packages: +12\n__KUMIWORK_SETUP_EXIT__:0\n";
       return "";
     });
 
@@ -270,7 +270,7 @@ describe("runDependencySetup", () => {
       expect.objectContaining({ label: "pnpm", command: "pnpm install --frozen-lockfile", status: "ok" }),
     ]);
     expect(outcome.verificationCommands).toEqual(["pnpm typecheck", "pnpm lint"]);
-    const written = JSON.parse(calls.find((call) => call.env?.ARATA_SETUP_MARKER)?.env?.ARATA_SETUP_MARKER ?? "{}");
+    const written = JSON.parse(calls.find((call) => call.env?.KUMIWORK_SETUP_MARKER)?.env?.KUMIWORK_SETUP_MARKER ?? "{}");
     expect(written.fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(written.steps).toEqual([expect.objectContaining({ status: "ok" })]);
   });
@@ -311,7 +311,7 @@ describe("runDependencySetup", () => {
   it("retries after a failure once the lockfile changes", async () => {
     const { provider, calls } = fakeSandbox((script, env) => {
       if (isProbe(script)) return probeOutput({ "pnpm-lock.yaml": HASH_B }, { fingerprint: HASH_C, steps: [{ status: "failed" }] });
-      if (isStep(env)) return "__ARATA_SETUP_EXIT__:0\n";
+      if (isStep(env)) return "__KUMIWORK_SETUP_EXIT__:0\n";
       return "";
     });
 
@@ -324,7 +324,7 @@ describe("runDependencySetup", () => {
   it("reports a failed step with its output and remembers the failure", async () => {
     const { provider, calls } = fakeSandbox((script, env) => {
       if (isProbe(script)) return probeOutput({ "pnpm-lock.yaml": HASH_A });
-      if (isStep(env)) return "ERR_PNPM_OUTDATED_LOCKFILE\n__ARATA_SETUP_EXIT__:1\n";
+      if (isStep(env)) return "ERR_PNPM_OUTDATED_LOCKFILE\n__KUMIWORK_SETUP_EXIT__:1\n";
       return "";
     });
 
@@ -333,14 +333,14 @@ describe("runDependencySetup", () => {
     expect(outcome.status).toBe("failed");
     expect(outcome.steps[0]).toMatchObject({ status: "failed", exitCode: 1, outputTail: "ERR_PNPM_OUTDATED_LOCKFILE" });
     expect(outcome.verificationCommands).toEqual([]);
-    const written = JSON.parse(calls.find((call) => call.env?.ARATA_SETUP_MARKER)?.env?.ARATA_SETUP_MARKER ?? "{}");
+    const written = JSON.parse(calls.find((call) => call.env?.KUMIWORK_SETUP_MARKER)?.env?.KUMIWORK_SETUP_MARKER ?? "{}");
     expect(written.steps).toEqual([expect.objectContaining({ status: "failed" })]);
   });
 
   it("reports a timeout", async () => {
     const { provider } = fakeSandbox((script, env) => {
       if (isProbe(script)) return probeOutput({ "pom.xml": HASH_A });
-      if (isStep(env)) return "__ARATA_SETUP_EXIT__:124\n";
+      if (isStep(env)) return "__KUMIWORK_SETUP_EXIT__:124\n";
       return "";
     });
 
@@ -362,14 +362,14 @@ describe("runDependencySetup", () => {
   it("runs the override instead of the detected install", async () => {
     const { provider, calls } = fakeSandbox((script, env) => {
       if (isProbe(script)) return probeOutput({ "pnpm-lock.yaml": HASH_A }, undefined, packageJson);
-      if (isStep(env)) return "__ARATA_SETUP_EXIT__:0\n";
+      if (isStep(env)) return "__KUMIWORK_SETUP_EXIT__:0\n";
       return "";
     });
 
     const outcome = await runDependencySetup(provider, "sbx", { overrideCommand: "./scripts/bootstrap.sh" });
 
     expect(outcome).toMatchObject({ status: "installed", source: "override" });
-    const commands = calls.filter((call) => isStep(call.env)).map((call) => call.env?.ARATA_SETUP_COMMAND);
+    const commands = calls.filter((call) => isStep(call.env)).map((call) => call.env?.KUMIWORK_SETUP_COMMAND);
     expect(commands).toEqual(["./scripts/bootstrap.sh"]);
     expect(outcome.verificationCommands).toEqual(["pnpm typecheck", "pnpm lint"]);
   });
