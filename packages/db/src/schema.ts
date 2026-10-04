@@ -193,7 +193,7 @@ export const connections = pgTable("connections", {
 });
 
 // A single-use, time-limited code an admin hands to a teammate so they can authorize their
-// Telegram (or, per #269, future Slack) account without the admin needing to know their handle
+// Telegram (or, in future, Slack) account without the admin needing to know their handle
 // ahead of time. Redemption is a single atomic UPDATE (see channel-invite-codes.ts) guarded by
 // `redeemedAt IS NULL AND expiresAt > now()` — that's what makes "single-use" race-safe.
 export const channelInviteCodes = pgTable("channel_invite_codes", {
