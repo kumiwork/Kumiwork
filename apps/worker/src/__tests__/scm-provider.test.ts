@@ -275,7 +275,7 @@ describe("cloneIntoSandbox", () => {
 
     const script = captured[2];
     expect(script).toContain(".git/info/exclude");
-    expect(script).toContain("/.agentfactory/");
+    expect(script).toContain("/.kumiwork/");
     expect(script).toContain("ensure_context_dir_excluded");
   });
 

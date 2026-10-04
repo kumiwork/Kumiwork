@@ -496,11 +496,11 @@ describe("formatEnvironmentForPrompt", () => {
   it("names the attached documents and says they are complete", () => {
     const result = formatEnvironmentForPrompt({
       workspacePath: "/workspace",
-      taskDocuments: { written: [".agentfactory/context/spec.md"], omitted: [] },
+      taskDocuments: { written: [".kumiwork/context/spec.md"], omitted: [] },
     });
 
-    expect(result).toContain("/workspace/.agentfactory/context");
-    expect(result).toContain("`.agentfactory/context/spec.md`");
+    expect(result).toContain("/workspace/.kumiwork/context");
+    expect(result).toContain("`.kumiwork/context/spec.md`");
     expect(result).toContain("complete files");
     expect(result).toContain("rather than searching");
   });
@@ -508,7 +508,7 @@ describe("formatEnvironmentForPrompt", () => {
   it("frames attached files as things to open, so an image reads correctly alongside a document", () => {
     const result = formatEnvironmentForPrompt({
       workspacePath: "/workspace",
-      taskDocuments: { written: [".agentfactory/context/screenshot.png"], omitted: [] },
+      taskDocuments: { written: [".kumiwork/context/screenshot.png"], omitted: [] },
     });
 
     expect(result).toContain("open them directly");
@@ -521,7 +521,7 @@ describe("formatEnvironmentForPrompt", () => {
   it("tells the agent the files are untracked so they stay out of its commits", () => {
     const result = formatEnvironmentForPrompt({
       workspacePath: "/workspace",
-      taskDocuments: { written: [".agentfactory/context/spec.md"], omitted: [] },
+      taskDocuments: { written: [".kumiwork/context/spec.md"], omitted: [] },
     });
 
     expect(result).toContain("excluded from git");
@@ -530,7 +530,7 @@ describe("formatEnvironmentForPrompt", () => {
   it("names documents that did not fit, so the directory is not read as the whole set", () => {
     const result = formatEnvironmentForPrompt({
       workspacePath: "/workspace",
-      taskDocuments: { written: [".agentfactory/context/small.md"], omitted: ["huge.md"] },
+      taskDocuments: { written: [".kumiwork/context/small.md"], omitted: ["huge.md"] },
     });
 
     expect(result).toContain('"huge.md"');
@@ -545,7 +545,7 @@ describe("formatEnvironmentForPrompt", () => {
     });
 
     for (const result of [noneWritten, emptyResult]) {
-      expect(result).not.toContain(".agentfactory");
+      expect(result).not.toContain(".kumiwork");
       expect(result).not.toContain("attached");
     }
   });
@@ -553,10 +553,10 @@ describe("formatEnvironmentForPrompt", () => {
   // No checkout means no /workspace to have written into, so claiming a path would be a lie.
   it("never claims a document path for a session with no checkout", () => {
     const result = formatEnvironmentForPrompt({
-      taskDocuments: { written: [".agentfactory/context/spec.md"], omitted: [] },
+      taskDocuments: { written: [".kumiwork/context/spec.md"], omitted: [] },
     });
 
-    expect(result).not.toContain(".agentfactory");
+    expect(result).not.toContain(".kumiwork");
   });
 
   it("still ends with a separator so the next section cannot read as part of it", () => {
