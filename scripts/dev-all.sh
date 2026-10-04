@@ -6,7 +6,34 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-docker compose up -d --wait
+port_open() {
+  (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null
+}
+
+report_port_holders() {
+  for port in 5432 6379; do
+    holders=$(docker ps --filter "publish=$port" --format '{{.Names}}')
+    if [ -n "$holders" ]; then
+      echo "Port $port is held by container(s): $holders" >&2
+    fi
+  done
+  echo "Stop them (docker stop <name>) and re-run pnpm dev:all." >&2
+}
+
+if ! docker compose up -d --wait; then
+  docker compose down
+  report_port_holders
+  exit 1
+fi
+
+if ! port_open 5432 || ! port_open 6379; then
+  echo "Postgres/Redis are healthy but their ports are not reachable; recreating containers..." >&2
+  docker compose up -d --wait --force-recreate
+  if ! port_open 5432 || ! port_open 6379; then
+    echo "Ports 5432/6379 still unreachable after recreating the containers." >&2
+    exit 1
+  fi
+fi
 
 # Matches docker-compose.yml's own service config exactly (the standard local-dev connection
 # string documented in the root .env.example) — passed explicitly rather than relying on a
