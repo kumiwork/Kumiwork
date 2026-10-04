@@ -424,16 +424,16 @@ describe("TASK_DOCUMENT_EXCLUDE_PATTERN against real git", () => {
     expect(git(dir, "diff", "--cached", "--name-only").trim()).toBe("src.ts");
   });
 
-  // The anchor matters: a repository that happens to have its own .agentfactory/ directory
+  // The anchor matters: a repository that happens to have its own .kumiwork/ directory
   // somewhere in its tree must keep it, or we would silently drop the user's own files.
   it("ignores only the checkout root, not a same-named directory nested in the repo", () => {
     const dir = repoWithCommit();
     excludeTaskDocuments(dir);
-    writeTaskDocument(dir, join("src", ".agentfactory", "context"));
+    writeTaskDocument(dir, join("src", ".kumiwork", "context"));
 
     git(dir, "add", "-A");
 
-    expect(git(dir, "diff", "--cached", "--name-only").trim()).toBe("src/.agentfactory/context/spec.md");
+    expect(git(dir, "diff", "--cached", "--name-only").trim()).toBe("src/.kumiwork/context/spec.md");
   });
 
   // .git/info/exclude is per-clone and never committed. A .gitignore would itself show up in the

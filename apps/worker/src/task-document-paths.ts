@@ -6,9 +6,9 @@
 
 // Where a task's attached documents land inside the checkout, relative to /workspace. A
 // dot-directory alongside the repo's own files, so the agent finds it where it already looks.
-export const TASK_DOCUMENT_DIR = ".agentfactory/context";
+export const TASK_DOCUMENT_DIR = ".kumiwork/context";
 
 // What cloneIntoSandbox appends to .git/info/exclude. Anchored with a leading slash so it only
 // ever matches the directory at the checkout root, never a same-named directory nested inside
 // the repository being worked on.
-export const TASK_DOCUMENT_EXCLUDE_PATTERN = "/.agentfactory/";
+export const TASK_DOCUMENT_EXCLUDE_PATTERN = "/.kumiwork/";
