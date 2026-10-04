@@ -1,6 +1,6 @@
 import Docker from "dockerode";
 import type { CacheVolumeInfo, CacheVolumeStore } from "../dependency-cache-reap";
-import { DEPENDENCY_CACHE_VOLUME_PREFIX } from "../sandbox-cache";
+import { isDependencyCacheVolumeName } from "../sandbox-cache";
 
 interface DockerDiskUsageVolume {
   Name: string;
@@ -24,7 +24,7 @@ export class DockerCacheVolumeStore implements CacheVolumeStore {
   async list(): Promise<CacheVolumeInfo[]> {
     const usage = (await this.docker.df()) as { Volumes?: DockerDiskUsageVolume[] | null };
     return (usage.Volumes ?? [])
-      .filter((volume) => volume.Name.startsWith(DEPENDENCY_CACHE_VOLUME_PREFIX))
+      .filter((volume) => isDependencyCacheVolumeName(volume.Name))
       .map(toCacheVolumeInfo);
   }
 

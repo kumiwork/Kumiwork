@@ -21,7 +21,7 @@ export interface CacheVolumeStore {
   remove(name: string): Promise<void>;
 }
 
-export type CacheVolumeRemovalReason = "org_deleted" | "legacy_org_wide" | "expired" | "oversized";
+export type CacheVolumeRemovalReason = "org_deleted" | "legacy_prefix" | "legacy_org_wide" | "expired" | "oversized";
 
 export interface CacheVolumeRemoval {
   name: string;
@@ -43,13 +43,15 @@ export function selectCacheVolumesToRemove(volumes: CacheVolumeInfo[], policy: C
     if (!parsed) continue;
     const reason: CacheVolumeRemovalReason | undefined = !policy.orgExists(parsed.orgId)
       ? "org_deleted"
-      : !parsed.perRepo
-        ? "legacy_org_wide"
-        : policy.now - volume.createdAt.getTime() > policy.maxAgeMs
-          ? "expired"
-          : volume.sizeBytes !== undefined && volume.sizeBytes > policy.maxSizeBytes
-            ? "oversized"
-            : undefined;
+      : parsed.legacyPrefix
+        ? "legacy_prefix"
+        : !parsed.perRepo
+          ? "legacy_org_wide"
+          : policy.now - volume.createdAt.getTime() > policy.maxAgeMs
+            ? "expired"
+            : volume.sizeBytes !== undefined && volume.sizeBytes > policy.maxSizeBytes
+              ? "oversized"
+              : undefined;
     if (reason) removals.push({ name: volume.name, reason });
   }
   return removals;
