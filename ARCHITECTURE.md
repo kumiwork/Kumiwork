@@ -515,8 +515,7 @@ job in order. "Host" means the worker process; "sandbox" means inside the sessio
 **Model calls that don't go through a sandbox.** The eval judge (`eval-judge.ts`) and the memory retrospective
 (`memory-retrospective.ts`) call the Anthropic API from the host with `@anthropic-ai/sdk` and the platform key from
 the worker's environment. They bypass the proxy and its request log. Moving them behind the proxy with a
-provider-neutral call is designed in or-borco/ArataContext
-`superpowers/specs/2026-09-24-host-model-calls-via-proxy-design.md`.
+provider-neutral call is designed separately.
 
 ### Public API: a separate `apps/api`, deferred until there's a real caller
 
@@ -718,8 +717,7 @@ uses the default runtime's optional `repoMap` generator (`AgentRuntime.repoMap`,
 therefore its provider), so `repo-map.ts` never names an SDK. `anthropic` and `openai` exist today; a run token is bound to one provider and rejected on the other's route. That
 `resolveCredentials` (`sandbox-model-access.ts`) is a stub returning the platform key for the provider from the
 worker's environment. There is no BYO-key connection kind, no per-run metering into `usage_records`, and no
-budget check before dispatch; the proxy is the intended place for all three. Design:
-or-borco/ArataContext `superpowers/specs/2026-09-23-sandbox-model-proxy-design.md`.
+budget check before dispatch; the proxy is the intended place for all three.
 
 ---
 
