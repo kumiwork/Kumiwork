@@ -2,10 +2,10 @@
 
 ## Reporting a vulnerability
 
-If you discover a security vulnerability in AgentFactory, please report it responsibly. **Do not
+If you discover a security vulnerability in Kumiwork, please report it responsibly. **Do not
 open a public GitHub issue for security vulnerabilities.**
 
-Email **security@agentfactory.dev** with:
+Email **eran@kumiwork.com** with:
 
 - A description of the vulnerability
 - Steps to reproduce
@@ -20,7 +20,7 @@ Email **security@agentfactory.dev** with:
 
 ## Scope
 
-This policy covers the AgentFactory codebase and its official deployments. Third-party dependencies
+This policy covers the Kumiwork codebase and its official deployments. Third-party dependencies
 should be reported to their respective maintainers.
 
 ## Supported versions
