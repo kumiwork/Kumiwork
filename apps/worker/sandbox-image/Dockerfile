@@ -39,7 +39,7 @@ WORKDIR /workspace
 # run-turn-*.ts and friends is reported as stale instead of silently running old code. The python
 # and java stages inherit the label from this stage.
 ARG SANDBOX_SOURCE_HASH=unknown
-LABEL arata.sandbox.source-hash=$SANDBOX_SOURCE_HASH
+LABEL kumiwork.sandbox.source-hash=$SANDBOX_SOURCE_HASH
 
 # Idle keep-alive: the actual agent turn runs as a `docker exec` (see
 # docker-sandbox-provider.ts), not as this container's main process, so the same container can
