@@ -182,7 +182,7 @@ describe("ensureSandbox", () => {
 
     expect(sandboxId).toBe("new-sandbox");
     expect(resolveSandboxImageMock).toHaveBeenCalledWith(5, "acme/widgets");
-    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-python:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^arata-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
+    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-python:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
     expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "new-sandbox", "arata-sandbox-python:local");
   });
 
@@ -231,7 +231,7 @@ describe("ensureSandbox", () => {
     const sandboxId = await ensureSandbox(session, 5, "acme/widgets", "acme/widgets");
 
     expect(h.sandbox.destroy).toHaveBeenCalledWith("existing-sandbox");
-    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-java:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^arata-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
+    expect(h.sandbox.create).toHaveBeenCalledWith({ image: "arata-sandbox-java:local", env: expect.any(Object), volumes: [expect.objectContaining({ name: expect.stringMatching(/^kumiwork-deps-cache-org-5-acme-widgets-[0-9a-f]{12}$/), target: "/cache" })] });
     expect(setSessionSandboxMock).toHaveBeenCalledWith(10, "upgraded-sandbox", "arata-sandbox-java:local");
     expect(sandboxId).toBe("upgraded-sandbox");
   });

@@ -2,7 +2,8 @@ import { createHash } from "node:crypto";
 import type { SandboxVolume } from "./sandbox/types";
 
 export const DEPENDENCY_CACHE_DIR = "/cache";
-export const DEPENDENCY_CACHE_VOLUME_PREFIX = "arata-deps-cache-org-";
+export const DEPENDENCY_CACHE_VOLUME_PREFIX = "kumiwork-deps-cache-org-";
+export const LEGACY_DEPENDENCY_CACHE_VOLUME_PREFIX = "arata-deps-cache-org-";
 const REPO_SLUG_MAX_CHARS = 40;
 
 export function dependencyCacheVolume(orgId: number, repoFullName: string): SandboxVolume {
@@ -15,13 +16,23 @@ export function dependencyCacheVolume(orgId: number, repoFullName: string): Sand
 export interface ParsedCacheVolumeName {
   orgId: number;
   perRepo: boolean;
+  legacyPrefix: boolean;
+}
+
+function cacheVolumePrefixOf(name: string): string | undefined {
+  return [DEPENDENCY_CACHE_VOLUME_PREFIX, LEGACY_DEPENDENCY_CACHE_VOLUME_PREFIX].find((prefix) => name.startsWith(prefix));
+}
+
+export function isDependencyCacheVolumeName(name: string): boolean {
+  return cacheVolumePrefixOf(name) !== undefined;
 }
 
 export function parseDependencyCacheVolumeName(name: string): ParsedCacheVolumeName | undefined {
-  if (!name.startsWith(DEPENDENCY_CACHE_VOLUME_PREFIX)) return undefined;
-  const match = /^(\d+)(-.+)?$/.exec(name.slice(DEPENDENCY_CACHE_VOLUME_PREFIX.length));
+  const prefix = cacheVolumePrefixOf(name);
+  if (!prefix) return undefined;
+  const match = /^(\d+)(-.+)?$/.exec(name.slice(prefix.length));
   if (!match) return undefined;
-  return { orgId: Number(match[1]), perRepo: Boolean(match[2]) };
+  return { orgId: Number(match[1]), perRepo: Boolean(match[2]), legacyPrefix: prefix === LEGACY_DEPENDENCY_CACHE_VOLUME_PREFIX };
 }
 
 export function dependencyCacheEnv(): Record<string, string> {
