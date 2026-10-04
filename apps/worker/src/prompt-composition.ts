@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { ChatMessage, PromptSegment } from "@agentfactory/core";
+import type { ChatMessage, PromptSegment } from "@kumiwork/core";
 import { TASK_DOCUMENT_DIR } from "./task-document-paths";
 import type { DependencySetupOutcome } from "./dependency-setup";
 import type { PullRequestFeedbackComment } from "./scm-provider";

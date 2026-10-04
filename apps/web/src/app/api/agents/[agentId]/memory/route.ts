@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAgent, readAgentMemoryEntries } from "@agentfactory/db";
+import { getAgent, readAgentMemoryEntries } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // List-only: creation flows exclusively through the `remember` sandbox tool and the

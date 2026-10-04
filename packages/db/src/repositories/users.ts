@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { User } from "@agentfactory/core";
+import type { User } from "@kumiwork/core";
 import { db } from "../client";
 import { users } from "../schema";
 

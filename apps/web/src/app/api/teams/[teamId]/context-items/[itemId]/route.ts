@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteTeamContextItemForOrg } from "@agentfactory/db";
+import { deleteTeamContextItemForOrg } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ teamId: string; itemId: string }> }) {

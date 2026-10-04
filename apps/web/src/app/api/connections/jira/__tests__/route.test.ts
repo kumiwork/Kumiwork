@@ -8,9 +8,9 @@ const getConnectionMock = vi.fn();
 const updateConnectionMock = vi.fn();
 
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMock() }));
-// @agentfactory/db throws at import when DATABASE_URL is unset, which it is in the unit test env
+// @kumiwork/db throws at import when DATABASE_URL is unset, which it is in the unit test env
 // — mock it out, same pattern as apps/web/src/app/api/tasks/__tests__/route.test.ts.
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listConnections: (...args: unknown[]) => listConnectionsMock(...args),
   createConnection: (...args: unknown[]) => createConnectionMock(...args),
   createConnectionSecret: (...args: unknown[]) => createConnectionSecretMock(...args),

@@ -3,19 +3,19 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync, appendFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { TaskContextItem } from "@agentfactory/core";
+import type { TaskContextItem } from "@kumiwork/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
 
 // task-documents reaches for the db package (whose client throws at import without DATABASE_URL)
 // and the storage package (whose createBlobStore reads env). The unit project has neither, and
 // .husky/pre-push runs it, so both are mocked at import — same pattern as context-retrieval.test.ts.
 const listTaskContextItemsForOrgMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listTaskContextItemsForOrg: (...args: unknown[]) => listTaskContextItemsForOrgMock(...args),
 }));
 
 const createBlobStoreMock = vi.fn();
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => createBlobStoreMock(),
 }));
 

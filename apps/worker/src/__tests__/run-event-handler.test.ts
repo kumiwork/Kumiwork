@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   CURRENT_KEY_VERSION: 1,
   createEvent: vi.fn(),
   encryptSecret: vi.fn(),

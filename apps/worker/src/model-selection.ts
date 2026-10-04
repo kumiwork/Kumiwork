@@ -1,4 +1,4 @@
-import type { Agent, ChatMessage, ModelSpec, Task } from "@agentfactory/core";
+import type { Agent, ChatMessage, ModelSpec, Task } from "@kumiwork/core";
 
 export interface ModelSelectionContext {
   agent: Agent;

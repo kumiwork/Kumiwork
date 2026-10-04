@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import "@agentfactory/db/src/__tests__/setup.js";
-import { insertOrg, insertAgent, insertUser, insertMembership, insertTask, insertSession } from "@agentfactory/db/src/__tests__/fixtures.js";
+import "@kumiwork/db/src/__tests__/setup.js";
+import { insertOrg, insertAgent, insertUser, insertMembership, insertTask, insertSession } from "@kumiwork/db/src/__tests__/fixtures.js";
 import {
   createConnection,
   createConnectionSecret,
@@ -15,14 +15,14 @@ import {
   listMessages,
   listTasks,
   setActiveTask,
-} from "@agentfactory/db";
+} from "@kumiwork/db";
 // Namespace import alongside the named one above so individual repository functions can be
 // spied on for the "an internal error must never surface as a non-200" regression test — this
-// route test deliberately runs against the real @agentfactory/db (see the file-level note in
+// route test deliberately runs against the real @kumiwork/db (see the file-level note in
 // task-10-brief.md), so simulating a transient failure means stubbing one real export, not
 // swapping in a mock module.
-import * as db from "@agentfactory/db";
-import { createRun } from "@agentfactory/db/src/repositories/runs.js";
+import * as db from "@kumiwork/db";
+import { createRun } from "@kumiwork/db/src/repositories/runs.js";
 import { POST } from "../[webhookSecret]/route";
 
 // The adapter's own send()/sendMenu()/sendTyping() hit the real Telegram API — stubbed here so
@@ -40,8 +40,8 @@ const { mockSend, mockSendMenu, mockSendTyping, mockAnswerCallbackQuery } = vi.h
   mockSendTyping: vi.fn().mockResolvedValue(undefined),
   mockAnswerCallbackQuery: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock("@agentfactory/integrations", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@agentfactory/integrations")>();
+vi.mock("@kumiwork/integrations", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@kumiwork/integrations")>();
   const realAdapter = new actual.TelegramChannelAdapter({ botToken: "test-token" });
   return {
     ...actual,
@@ -55,12 +55,12 @@ vi.mock("@agentfactory/integrations", async (importOriginal) => {
   };
 });
 
-vi.mock("@agentfactory/queue", () => ({ enqueueRunJob: vi.fn(), enqueueRepoMapWarmJob: vi.fn() }));
+vi.mock("@kumiwork/queue", () => ({ enqueueRunJob: vi.fn(), enqueueRepoMapWarmJob: vi.fn() }));
 
 const mockResolveScmConnection = vi.fn();
 const mockPostReview = vi.fn();
-vi.mock("@agentfactory/scm", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@agentfactory/scm")>();
+vi.mock("@kumiwork/scm", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@kumiwork/scm")>();
   return {
     ...actual,
     resolveScmConnection: (...args: unknown[]) => mockResolveScmConnection(...args),
@@ -544,7 +544,7 @@ describe("POST /api/webhooks/telegram/[webhookSecret]", () => {
       });
 
       expect(mockSend).toHaveBeenCalledWith("1", expect.stringContaining("already running elsewhere"));
-      const { enqueueRunJob } = await import("@agentfactory/queue");
+      const { enqueueRunJob } = await import("@kumiwork/queue");
       expect(enqueueRunJob).not.toHaveBeenCalled();
       const messagesAfter = await listMessages(started.session.id);
       expect(messagesAfter).toHaveLength(1); // only the original web-side brief — nothing forwarded in
@@ -570,7 +570,7 @@ describe("POST /api/webhooks/telegram/[webhookSecret]", () => {
       });
 
       expect(mockSend).toHaveBeenCalledWith("2", expect.stringContaining("already running elsewhere"));
-      const { enqueueRunJob } = await import("@agentfactory/queue");
+      const { enqueueRunJob } = await import("@kumiwork/queue");
       expect(enqueueRunJob).not.toHaveBeenCalled();
       const messagesAfter = await listMessages(started.session.id);
       expect(messagesAfter.map((m) => m.content)).not.toContain("let me help with this");
@@ -654,7 +654,7 @@ describe("POST /api/webhooks/telegram/[webhookSecret]", () => {
       });
 
       expect(res.status).toBe(200);
-      const { enqueueRunJob } = await import("@agentfactory/queue");
+      const { enqueueRunJob } = await import("@kumiwork/queue");
       expect(enqueueRunJob).toHaveBeenCalled();
       const messagesAfter = await listMessages(started.session.id);
       expect(messagesAfter.map((m) => m.content)).toContain("keep going");

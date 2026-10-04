@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import type { Run, RunStatus } from "@agentfactory/core";
-import { createRunEval, getAgent, getRun, getSession, listEvalsForRun } from "@agentfactory/db";
-import { enqueueEvalJob } from "@agentfactory/queue";
+import type { Run, RunStatus } from "@kumiwork/core";
+import { createRunEval, getAgent, getRun, getSession, listEvalsForRun } from "@kumiwork/db";
+import { enqueueEvalJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
 
 // Same three terminal statuses RunContextPanel treats as final.

@@ -1,7 +1,7 @@
-import type { PrReview, Session } from "@agentfactory/core";
-import { getConnectionCredentialRef, getTaskBySessionId, listConnections, readConnectionSecret, setConnectionHealth } from "@agentfactory/db";
-import { createChannelAdapter } from "@agentfactory/integrations";
-import { createLogger } from "@agentfactory/logger";
+import type { PrReview, Session } from "@kumiwork/core";
+import { getConnectionCredentialRef, getTaskBySessionId, listConnections, readConnectionSecret, setConnectionHealth } from "@kumiwork/db";
+import { createChannelAdapter } from "@kumiwork/integrations";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("channel-notify");
 const TYPING_REFRESH_MS = 4_000;

@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Modal } from "@/components/Modal";
-import { Button, GroupedSelect, TextInput } from "@agentfactory/shared";
+import { Button, GroupedSelect, TextInput } from "@kumiwork/shared";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
-import type { AgentMode } from "@agentfactory/core";
-import type { RepoOption } from "@agentfactory/scm";
+import type { AgentMode } from "@kumiwork/core";
+import type { RepoOption } from "@kumiwork/scm";
 
 export interface AgentFormValues {
   name: string;

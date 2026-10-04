@@ -1,6 +1,6 @@
-import type { RunCommitRange } from "@agentfactory/core";
-import { getScmProvider, parseIssueReferenceAcrossProviders, resolveScmConnection } from "@agentfactory/scm";
-import type { CloneTarget, OpenedPullRequest, PullRequestFeedbackComment, ScmIssue } from "@agentfactory/scm";
+import type { RunCommitRange } from "@kumiwork/core";
+import { getScmProvider, parseIssueReferenceAcrossProviders, resolveScmConnection } from "@kumiwork/scm";
+import type { CloneTarget, OpenedPullRequest, PullRequestFeedbackComment, ScmIssue } from "@kumiwork/scm";
 import type { SandboxProvider } from "./sandbox/types";
 import { TASK_DOCUMENT_EXCLUDE_PATTERN } from "./task-document-paths";
 import { SKILL_EXCLUDE_PATTERNS } from "./skill-paths";

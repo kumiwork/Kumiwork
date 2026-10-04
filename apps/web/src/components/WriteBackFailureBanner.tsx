@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@agentfactory/shared";
+import { Button } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { apiFetch } from "@/lib/api-client";
-import type { Task } from "@agentfactory/core";
+import type { Task } from "@kumiwork/core";
 import confirmationStyles from "./ConfirmationBanner.module.css";
 
 interface WriteBackFailureBannerProps {

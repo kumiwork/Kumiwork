@@ -1,5 +1,5 @@
 import { asc, eq, and } from "drizzle-orm";
-import type { Membership, OrgMember } from "@agentfactory/core";
+import type { Membership, OrgMember } from "@kumiwork/core";
 import { db } from "../client";
 import { memberships, users } from "../schema";
 

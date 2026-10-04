@@ -4,7 +4,7 @@
     {
       "name": "web",
       "runtimeExecutable": "/opt/homebrew/bin/node",
-      "runtimeArgs": ["/opt/homebrew/bin/pnpm", "--filter", "@agentfactory/web", "dev"],
+      "runtimeArgs": ["/opt/homebrew/bin/pnpm", "--filter", "@kumiwork/web", "dev"],
       "port": 3000,
       "autoPort": true,
       "env": {

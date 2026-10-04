@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSkillWithDraft, listSkillsForOrg } from "@agentfactory/db";
+import { createSkillWithDraft, listSkillsForOrg } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET() {

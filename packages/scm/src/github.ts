@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import { ScmInstallIncompleteError } from "./types";
 import type { CloneTarget, PullRequestFeedbackComment, RepoRef, ScmProvider } from "./types";
 

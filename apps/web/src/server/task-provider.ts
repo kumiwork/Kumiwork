@@ -1,7 +1,7 @@
-import type { Connection } from "@agentfactory/core";
-import { getConnectionCredentialRef, listConnections, readConnectionSecret } from "@agentfactory/db";
-import { createTaskProvider, type TaskProvider } from "@agentfactory/integrations";
-import { createLogger } from "@agentfactory/logger";
+import type { Connection } from "@kumiwork/core";
+import { getConnectionCredentialRef, listConnections, readConnectionSecret } from "@kumiwork/db";
+import { createTaskProvider, type TaskProvider } from "@kumiwork/integrations";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("task-provider");
 

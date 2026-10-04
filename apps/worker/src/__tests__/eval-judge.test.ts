@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import type { EvalRetrievalResult, PromptSegment, RunEvalResult } from "@agentfactory/core";
-import type { EvalLayerResult } from "@agentfactory/core";
+import type { EvalRetrievalResult, PromptSegment, RunEvalResult } from "@kumiwork/core";
+import type { EvalLayerResult } from "@kumiwork/core";
 import type { EvalArtefact } from "../eval-artefact";
 import {
   JUDGE_SYSTEM_PROMPT,
@@ -990,7 +990,7 @@ describe("buildReportEvalTool", () => {
   });
 });
 
-// logRetrievalCoverageGaps logs through @agentfactory/logger (pino), which writes JSON lines to
+// logRetrievalCoverageGaps logs through @kumiwork/logger (pino), which writes JSON lines to
 // stdout — spy there and parse the line rather than on console.warn, which the logger never calls.
 function loggedWarning(spy: Mock<typeof process.stdout.write>) {
   const call = spy.mock.calls.at(-1);

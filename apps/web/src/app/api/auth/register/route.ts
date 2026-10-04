@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { createMembership, createOrg, createUser, getUserByEmail, hashPassword } from "@agentfactory/db";
+import { createMembership, createOrg, createUser, getUserByEmail, hashPassword } from "@kumiwork/db";
 import { createSession } from "@/server/auth";
 
 function slugify(input: string): string {

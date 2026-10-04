@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 
 vi.mock("@/server/auth", () => ({ requireAuthContext: vi.fn(async () => ({ orgId: 1 })) }));
 const listConnectionsMock = vi.fn<(orgId: number) => Promise<Connection[]>>();
-vi.mock("@agentfactory/db", () => ({ listConnections: (orgId: number) => listConnectionsMock(orgId) }));
+vi.mock("@kumiwork/db", () => ({ listConnections: (orgId: number) => listConnectionsMock(orgId) }));
 const getScmProviderMock = vi.fn();
-vi.mock("@agentfactory/scm", () => ({ getScmProvider: (id: string) => getScmProviderMock(id) }));
+vi.mock("@kumiwork/scm", () => ({ getScmProvider: (id: string) => getScmProviderMock(id) }));
 
 const { GET } = await import("../route");
 

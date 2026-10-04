@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSession as createChatSession, listSessions } from "@agentfactory/db";
+import { createSession as createChatSession, listSessions } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(request: Request) {

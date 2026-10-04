@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, TooltipBubble } from "@agentfactory/shared";
+import { Button, TooltipBubble } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { ConfirmDialog } from "@/components/ConfirmDialog";

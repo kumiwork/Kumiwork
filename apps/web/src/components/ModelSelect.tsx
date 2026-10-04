@@ -1,7 +1,7 @@
 "use client";
 
-import { MODEL_CATALOG, type ModelProvider } from "@agentfactory/core";
-import { GroupedSelect } from "@agentfactory/shared";
+import { MODEL_CATALOG, type ModelProvider } from "@kumiwork/core";
+import { GroupedSelect } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 
 interface ModelSelectProps {

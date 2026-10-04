@@ -9,9 +9,9 @@ const getTaskBySessionId = vi.fn();
 const updateTask = vi.fn();
 const enqueueRunJob = vi.fn();
 
-// The real @agentfactory/db throws at import when DATABASE_URL is unset (client.ts), and
-// @agentfactory/queue does the same without REDIS_URL — factory mocks keep both from loading.
-vi.mock("@agentfactory/db", () => ({
+// The real @kumiwork/db throws at import when DATABASE_URL is unset (client.ts), and
+// @kumiwork/queue does the same without REDIS_URL — factory mocks keep both from loading.
+vi.mock("@kumiwork/db", () => ({
   createMessage: (...args: unknown[]) => createMessage(...args),
   touchSessionActivity: (...args: unknown[]) => touchSessionActivity(...args),
   getSession: (...args: unknown[]) => getSession(...args),
@@ -20,7 +20,7 @@ vi.mock("@agentfactory/db", () => ({
   updateTask: (...args: unknown[]) => updateTask(...args),
   listMessages: (...args: unknown[]) => vi.fn()(...args),
 }));
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueRunJob: (...args: unknown[]) => enqueueRunJob(...args),
 }));
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContext() }));

@@ -1,5 +1,5 @@
-import { recordWorkerJobOutcome, type NewWorkerJobOutcome } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+import { recordWorkerJobOutcome, type NewWorkerJobOutcome } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("job-outcome");
 

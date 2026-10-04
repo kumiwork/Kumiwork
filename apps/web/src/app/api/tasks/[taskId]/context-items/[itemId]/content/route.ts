@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getTaskContextItemForOrg } from "@agentfactory/db";
-import { createBlobStore } from "@agentfactory/storage";
+import { getTaskContextItemForOrg } from "@kumiwork/db";
+import { createBlobStore } from "@kumiwork/storage";
 import { requireAuthContext } from "@/server/auth";
 
 let blobStore: ReturnType<typeof createBlobStore> | undefined;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listOrgMembers } from "@agentfactory/db";
+import { listOrgMembers } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET() {

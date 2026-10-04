@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getRun } from "@agentfactory/db";
+import { getRun } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // Requires a logged-in user but doesn't yet verify runId belongs to their org — same

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getOrg } from "@agentfactory/db";
+import { getOrg } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 import { SettingsView } from "./SettingsView";
 

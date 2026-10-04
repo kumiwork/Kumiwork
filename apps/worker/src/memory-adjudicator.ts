@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { MAX_MEMORY_CONTENT_CHARS } from "@agentfactory/core";
+import { MAX_MEMORY_CONTENT_CHARS } from "@kumiwork/core";
 import { escapeTimelineText } from "./session-timeline";
 
 export const ADJUDICATOR_MODEL = "claude-haiku-4-5";

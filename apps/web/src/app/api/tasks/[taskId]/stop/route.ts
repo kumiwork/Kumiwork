@@ -1,7 +1,7 @@
 // Tenant-isolation gap: see /api/tasks/route.ts for the documented caveat.
 import { NextResponse } from "next/server";
-import { cancelRun, getLatestNonTerminalRun, getTask } from "@agentfactory/db";
-import { enqueueRunCancelJob } from "@agentfactory/queue";
+import { cancelRun, getLatestNonTerminalRun, getTask } from "@kumiwork/db";
+import { enqueueRunCancelJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
 
 // Backs the Stop button (TaskRowActions and the task detail page). Cancelling here means two

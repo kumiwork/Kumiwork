@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Modal } from "@/components/Modal";
-import { Button } from "@agentfactory/shared";
+import { Button } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
-import type { Task } from "@agentfactory/core";
-import type { ExternalIssue } from "@agentfactory/integrations";
+import type { Task } from "@kumiwork/core";
+import type { ExternalIssue } from "@kumiwork/integrations";
 
 interface TaskStaleDialogProps {
   task: Task;

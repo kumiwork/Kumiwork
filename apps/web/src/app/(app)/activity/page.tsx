@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PageHeader } from "@agentfactory/shared";
+import { PageHeader } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import { StatusPill } from "@/components/StatusPill";

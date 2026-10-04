@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, EmptyState, PageHeader, TooltipBubble } from "@agentfactory/shared";
+import { Button, EmptyState, PageHeader, TooltipBubble } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import { StatusPill } from "@/components/StatusPill";

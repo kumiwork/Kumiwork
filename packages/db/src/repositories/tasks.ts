@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import type { Session, SessionOrigin, Task, TaskExternalRef, TaskStatus } from "@agentfactory/core";
+import type { Session, SessionOrigin, Task, TaskExternalRef, TaskStatus } from "@kumiwork/core";
 import { db } from "../client";
 import { messages, sessions, tasks } from "../schema";
 import { toSession } from "./sessions";

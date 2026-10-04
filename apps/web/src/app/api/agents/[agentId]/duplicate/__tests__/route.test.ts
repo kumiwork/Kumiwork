@@ -6,14 +6,14 @@ const getTeamForOrg = vi.fn();
 const duplicateAgent = vi.fn();
 const enqueueRepoMapWarmJob = vi.fn();
 
-// The real @agentfactory/db throws at import when DATABASE_URL is unset (client.ts), and
-// @agentfactory/queue does the same without REDIS_URL — factory mocks keep both from loading.
-vi.mock("@agentfactory/db", () => ({
+// The real @kumiwork/db throws at import when DATABASE_URL is unset (client.ts), and
+// @kumiwork/queue does the same without REDIS_URL — factory mocks keep both from loading.
+vi.mock("@kumiwork/db", () => ({
   getAgent: (...args: unknown[]) => getAgent(...args),
   getTeamForOrg: (...args: unknown[]) => getTeamForOrg(...args),
   duplicateAgent: (...args: unknown[]) => duplicateAgent(...args),
 }));
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueRepoMapWarmJob: (...args: unknown[]) => enqueueRepoMapWarmJob(...args),
 }));
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContext() }));

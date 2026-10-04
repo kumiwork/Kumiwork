@@ -1,5 +1,5 @@
 import { and, count, eq, gte, inArray } from "drizzle-orm";
-import type { TeamContextItem } from "@agentfactory/core";
+import type { TeamContextItem } from "@kumiwork/core";
 import { db } from "../client";
 import { contextChunks, runContextRetrievals, teamContextItems } from "../schema";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, TextInput } from "@agentfactory/shared";
+import { Button, Card, TextInput } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { ChevronDownIcon } from "@/lib/icons";

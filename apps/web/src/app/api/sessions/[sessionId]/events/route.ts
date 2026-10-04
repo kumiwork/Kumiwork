@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listEventsForSession } from "@agentfactory/db";
+import { listEventsForSession } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ sessionId: string }> }) {

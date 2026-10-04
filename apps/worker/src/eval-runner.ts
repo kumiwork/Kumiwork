@@ -1,4 +1,4 @@
-import type { PromptSegment, Run, RunEval, RunEvalResult, Session, Task } from "@agentfactory/core";
+import type { PromptSegment, Run, RunEval, RunEvalResult, Session, Task } from "@kumiwork/core";
 import {
   completeEval,
   failEval,
@@ -9,10 +9,10 @@ import {
   getSession,
   getTaskBySessionId,
   markEvalRunning,
-} from "@agentfactory/db";
+} from "@kumiwork/db";
 import { ArtefactUnavailableError, type EvalArtefact, resolveEvalArtefact } from "./eval-artefact";
 import { judgeCompliance, selectHumanSegments } from "./eval-judge";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("eval-runner");
 

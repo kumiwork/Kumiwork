@@ -19,7 +19,7 @@ import {
   type RunJobData,
   type SandboxTeardownJobData,
   type TaskContextIngestJobData,
-} from "@agentfactory/queue";
+} from "@kumiwork/queue";
 import {
   type ModelSpec,
   type PromptSegment,
@@ -27,7 +27,7 @@ import {
   buildModelSpec,
   formatSharedContextForPrompt,
   runtimeForModel,
-} from "@agentfactory/core";
+} from "@kumiwork/core";
 import {
   clearSessionSandbox,
   createEvent,
@@ -55,8 +55,8 @@ import {
   updateRunStatus,
   updateRunWorkspace,
   updateTask,
-} from "@agentfactory/db";
-import { parsePullRequestReferenceAcrossProviders, resolveScmConnection } from "@agentfactory/scm";
+} from "@kumiwork/db";
+import { parsePullRequestReferenceAcrossProviders, resolveScmConnection } from "@kumiwork/scm";
 import { SANDBOX_REAP_INTERVAL_MS, scanForIdleSandboxes } from "./sandbox-reap";
 import { reapDependencyCaches } from "./dependency-cache-reap";
 import { DockerCacheVolumeStore } from "./sandbox/docker-cache-volumes";
@@ -127,7 +127,7 @@ import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicato
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
 import { localChecksPassed } from "./local-checks";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 import { findProblemImages, resolveSandboxImageCheckMode, runSandboxImageCheck } from "./sandbox-image-check";
 
 const log = createLogger("worker");
@@ -946,7 +946,7 @@ const runWorker = new Worker<RunJobData>(
       // was this stdout line, gone the moment the worker's logs rotate or the process restarts.
       const message = err instanceof Error ? err.message : String(err);
       // Classified so the web app can show a specific, safe message instead of its generic
-      // "couldn't reply" fallback (see ErrorCode in @agentfactory/core) — without this, an
+      // "couldn't reply" fallback (see ErrorCode in @kumiwork/core) — without this, an
       // exhausted Claude API account and every other failure looked identical to the user.
       const code = err instanceof InsufficientCreditError ? "insufficient_credit" : undefined;
       await createEvent(runId, seq++, "error", { message: maskSecrets(message, runSecrets), ...(code ? { code } : {}) });

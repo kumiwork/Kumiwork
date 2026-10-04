@@ -1,5 +1,5 @@
 import { and, asc, desc, eq } from "drizzle-orm";
-import type { ChatMessage } from "@agentfactory/core";
+import type { ChatMessage } from "@kumiwork/core";
 import { db } from "../client";
 import { messages } from "../schema";
 

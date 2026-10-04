@@ -1,5 +1,5 @@
 import type { Server } from "node:http";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 import type { ModelEndpoint } from "./agent-runtime/types";
 import { createModelProxy, modelProxyRoutePrefix } from "./model-proxy";
 import { recordRunUsage } from "./usage-metering";

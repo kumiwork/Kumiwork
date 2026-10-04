@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { Agent } from "@agentfactory/core";
-import { Badge, MultiSelectCheckboxList, type MultiSelectItem } from "@agentfactory/shared";
+import type { Agent } from "@kumiwork/core";
+import { Badge, MultiSelectCheckboxList, type MultiSelectItem } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 

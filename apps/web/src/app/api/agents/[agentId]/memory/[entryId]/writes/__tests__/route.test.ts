@@ -5,7 +5,7 @@ const getAgent = vi.fn();
 const memoryEntryBelongsToAgent = vi.fn();
 const listMemoryEntryWrites = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getAgent: (...args: unknown[]) => getAgent(...args),
   memoryEntryBelongsToAgent: (...args: unknown[]) => memoryEntryBelongsToAgent(...args),
   listMemoryEntryWrites: (...args: unknown[]) => listMemoryEntryWrites(...args),

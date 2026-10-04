@@ -1,5 +1,5 @@
 import { asc, eq } from "drizzle-orm";
-import type { ContextItemKind, RunContextRetrieval } from "@agentfactory/core";
+import type { ContextItemKind, RunContextRetrieval } from "@kumiwork/core";
 import { db } from "../client";
 import { runContextRetrievals } from "../schema";
 

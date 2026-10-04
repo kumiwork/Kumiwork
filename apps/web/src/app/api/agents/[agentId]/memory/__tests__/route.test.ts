@@ -4,7 +4,7 @@ const requireAuthContext = vi.fn();
 const getAgent = vi.fn();
 const readAgentMemoryEntries = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getAgent: (...args: unknown[]) => getAgent(...args),
   readAgentMemoryEntries: (...args: unknown[]) => readAgentMemoryEntries(...args),
 }));

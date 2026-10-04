@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Connection, Task } from "@agentfactory/core";
+import type { Connection, Task } from "@kumiwork/core";
 
 const listConnectionsMock = vi.fn<(orgId: number) => Promise<Connection[]>>();
 const getConnectionCredentialRefMock = vi.fn<(orgId: number, id: number) => Promise<number | null | undefined>>();
@@ -7,7 +7,7 @@ const readConnectionSecretMock = vi.fn<(orgId: number, id: number) => Promise<Re
 const setConnectionHealthMock = vi.fn();
 const updateTaskMock = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listConnections: (orgId: number) => listConnectionsMock(orgId),
   getConnectionCredentialRef: (orgId: number, id: number) => getConnectionCredentialRefMock(orgId, id),
   readConnectionSecret: (orgId: number, id: number) => readConnectionSecretMock(orgId, id),
@@ -30,7 +30,7 @@ class FakeProviderError extends Error {
   }
 }
 
-vi.mock("@agentfactory/integrations", () => ({
+vi.mock("@kumiwork/integrations", () => ({
   createTaskProvider: (...args: unknown[]) => createTaskProviderMock(...args),
   ProviderError: FakeProviderError,
 }));

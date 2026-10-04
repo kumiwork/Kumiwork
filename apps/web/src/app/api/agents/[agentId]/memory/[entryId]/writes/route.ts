@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAgent, listMemoryEntryWrites, memoryEntryBelongsToAgent } from "@agentfactory/db";
+import { getAgent, listMemoryEntryWrites, memoryEntryBelongsToAgent } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(

@@ -1,4 +1,4 @@
-import type { RuntimeKind } from "@agentfactory/core";
+import type { RuntimeKind } from "@kumiwork/core";
 import { claudeCodeRuntime } from "./claude-code-runtime";
 import { codexRuntime } from "./codex-runtime";
 import type { AgentRuntime } from "./types";

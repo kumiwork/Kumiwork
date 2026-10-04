@@ -1,4 +1,4 @@
-import type { CloneTarget } from "@agentfactory/scm";
+import type { CloneTarget } from "@kumiwork/scm";
 import type { SandboxProvider } from "./sandbox/types";
 import {
   platformGitEnv,

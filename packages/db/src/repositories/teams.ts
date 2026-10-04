@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import type { Team } from "@agentfactory/core";
+import type { Team } from "@kumiwork/core";
 import { db } from "../client";
 import { teams } from "../schema";
 

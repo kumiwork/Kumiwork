@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthCard } from "@/components/AuthCard";
-import { Button, TextInput } from "@agentfactory/shared";
+import { Button, TextInput } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { ArrowRightIcon, LockIcon, MailIcon } from "@/lib/icons";

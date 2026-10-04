@@ -4,9 +4,9 @@ import {
   getTeam,
   insertContentBlob,
   listTeamContextItemsForOrg,
-} from "@agentfactory/db";
-import { enqueueTeamContextIngestJob } from "@agentfactory/queue";
-import { createBlobStore } from "@agentfactory/storage";
+} from "@kumiwork/db";
+import { enqueueTeamContextIngestJob } from "@kumiwork/queue";
+import { createBlobStore } from "@kumiwork/storage";
 import { requireAuthContext } from "@/server/auth";
 
 // Nothing else caps an upload. Next.js 16 Route Handlers have no request body limit of their own

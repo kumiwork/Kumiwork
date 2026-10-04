@@ -9,13 +9,13 @@ const enqueueRepoMapWarmJob = vi.fn();
 const enqueueMemoryRetrospectiveJob = vi.fn();
 const getRunsForSession = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (...args: unknown[]) => getTask(...args),
   updateTask: (...args: unknown[]) => updateTask(...args),
   deleteTask: (...args: unknown[]) => deleteTask(...args),
   getRunsForSession: (...args: unknown[]) => getRunsForSession(...args),
 }));
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueSandboxTeardownJob: (...args: unknown[]) => enqueueSandboxTeardownJob(...args),
   enqueueRepoMapWarmJob: (...args: unknown[]) => enqueueRepoMapWarmJob(...args),
   enqueueMemoryRetrospectiveJob: (...args: unknown[]) => enqueueMemoryRetrospectiveJob(...args),

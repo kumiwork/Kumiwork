@@ -1,5 +1,5 @@
-import type { EvalArtefactKind, Run, RunCommitRange, Session, Task } from "@agentfactory/core";
-import { getFinalAssistantMessageForRun } from "@agentfactory/db";
+import type { EvalArtefactKind, Run, RunCommitRange, Session, Task } from "@kumiwork/core";
+import { getFinalAssistantMessageForRun } from "@kumiwork/db";
 import { type CloneTarget, fetchCommitRangeDiff, resolveCloneTarget, sessionBranchName } from "./scm-provider";
 
 export interface EvalArtefact {

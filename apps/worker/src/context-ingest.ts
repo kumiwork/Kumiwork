@@ -1,5 +1,5 @@
-import { TASK_CONTEXT_MIME_CONFIG } from "@agentfactory/core";
-import type { TaskContextItem, TeamContextItem } from "@agentfactory/core";
+import { TASK_CONTEXT_MIME_CONFIG } from "@kumiwork/core";
+import type { TaskContextItem, TeamContextItem } from "@kumiwork/core";
 import {
   deleteTaskChunksForItem,
   deleteTeamChunksForItem,
@@ -15,9 +15,9 @@ import {
   markTeamContextItemIndexing,
   type NewContextChunk,
   type NewTaskContextChunk,
-} from "@agentfactory/db";
-import { createBlobStore, type BlobStore } from "@agentfactory/storage";
-import { createLogger } from "@agentfactory/logger";
+} from "@kumiwork/db";
+import { createBlobStore, type BlobStore } from "@kumiwork/storage";
+import { createLogger } from "@kumiwork/logger";
 import { chunkDocument } from "./chunker";
 import { getEmbedder, type Embedder } from "./embedder";
 import { extractText } from "./text-extract";

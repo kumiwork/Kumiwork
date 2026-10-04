@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { DependencyInstallStep } from "@agentfactory/core";
+import type { DependencyInstallStep } from "@kumiwork/core";
 import type { SandboxProvider } from "./sandbox/types";
 
 export type StepResult = DependencyInstallStep;

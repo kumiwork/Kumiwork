@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { and, eq, inArray, isNotNull, lt, notExists } from "drizzle-orm";
-import type { Session, SessionOrigin } from "@agentfactory/core";
+import type { Session, SessionOrigin } from "@kumiwork/core";
 import { db } from "../client";
 import { runs, sessions } from "../schema";
 import { NON_TERMINAL_RUN_STATUSES } from "./runs";
@@ -52,7 +52,7 @@ export async function createSession(
       title,
       origin: opts.origin ?? "web",
       externalThreadRef: opts.externalThreadRef,
-      // See Session.branchToken in @agentfactory/core for why this needs to be unique beyond
+      // See Session.branchToken in @kumiwork/core for why this needs to be unique beyond
       // just this row's own id.
       branchToken: randomBytes(4).toString("hex"),
     })

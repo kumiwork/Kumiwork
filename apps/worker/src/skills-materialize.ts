@@ -1,5 +1,5 @@
-import { listAgentSkills, getSkillVersion, getSkillVersionMarkdown } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+import { listAgentSkills, getSkillVersion, getSkillVersionMarkdown } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import type { SandboxProvider } from "./sandbox/types";
 import { SKILL_DIR } from "./skill-paths";
 

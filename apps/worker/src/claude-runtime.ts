@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ChatMessage } from "@agentfactory/core";
+import type { ChatMessage } from "@kumiwork/core";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 

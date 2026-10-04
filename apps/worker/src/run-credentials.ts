@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { ModelProvider } from "@agentfactory/core";
+import type { ModelProvider } from "@kumiwork/core";
 
 export type RunCredentialPurpose = "run" | "repo-map";
 

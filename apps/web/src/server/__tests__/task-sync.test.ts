@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Task, TaskExternalRef } from "@agentfactory/core";
-import type { ExternalIssue } from "@agentfactory/integrations";
+import type { Task, TaskExternalRef } from "@kumiwork/core";
+import type { ExternalIssue } from "@kumiwork/integrations";
 
 const resolveTaskProviderMock = vi.fn();
 vi.mock("../task-provider", () => ({

@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { Agent } from "@agentfactory/core";
+import type { Agent } from "@kumiwork/core";
 import { I18nProvider } from "../../lib/i18n/context";
 import { AssigneeSelect } from "../AssigneeSelect";
 

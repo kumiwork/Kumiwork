@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateInviteCode, getConnection, listInviteCodes } from "@agentfactory/db";
+import { generateInviteCode, getConnection, listInviteCodes } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 function isOwnedTelegramConnection(orgId: number, connection: Awaited<ReturnType<typeof getConnection>>): boolean {

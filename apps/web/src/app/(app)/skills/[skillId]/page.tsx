@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import type { Skill, SkillVersion } from "@agentfactory/core";
-import { Badge, Breadcrumb, Button, Card, TextInput, Textarea } from "@agentfactory/shared";
+import type { Skill, SkillVersion } from "@kumiwork/core";
+import { Badge, Breadcrumb, Button, Card, TextInput, Textarea } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { relativeTime } from "@/lib/relative-time";

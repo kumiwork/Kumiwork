@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { discardPrReview, getPrReview } from "@agentfactory/db";
+import { discardPrReview, getPrReview } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {

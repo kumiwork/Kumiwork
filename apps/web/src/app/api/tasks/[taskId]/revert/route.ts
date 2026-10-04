@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getTask, revertTaskFromDone } from "@agentfactory/db";
-import { resolveScmConnection } from "@agentfactory/scm";
+import { getTask, revertTaskFromDone } from "@kumiwork/db";
+import { resolveScmConnection } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:tasks:[taskId]:revert");
 

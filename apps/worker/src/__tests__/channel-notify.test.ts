@@ -1,20 +1,20 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import type { Session } from "@agentfactory/core";
+import type { Session } from "@kumiwork/core";
 
 const mockSend = vi.fn();
 const mockSendTyping = vi.fn(async () => {});
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listConnections: vi.fn(async () => [{ id: 1, orgId: 9, kind: "channel", provider: "telegram", config: {}, credentialRef: 5, agentId: 1 }]),
   getConnectionCredentialRef: vi.fn(async () => 5),
   readConnectionSecret: vi.fn(async () => ({ botToken: "t" })),
   setConnectionHealth: vi.fn(),
   getTaskBySessionId: vi.fn(),
 }));
-vi.mock("@agentfactory/integrations", () => ({
+vi.mock("@kumiwork/integrations", () => ({
   createChannelAdapter: () => ({ send: mockSend, sendTyping: mockSendTyping }),
 }));
 
-import { getTaskBySessionId } from "@agentfactory/db";
+import { getTaskBySessionId } from "@kumiwork/db";
 import { notifySessionOfReply, startTypingIndicator } from "../channel-notify";
 
 function webSession(): Session {

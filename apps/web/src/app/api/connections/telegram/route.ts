@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { createConnection, createConnectionSecret, getAgent } from "@agentfactory/db";
+import { createConnection, createConnectionSecret, getAgent } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 interface TelegramMeResponse {

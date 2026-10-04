@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import type { Skill, SkillVersion } from "@agentfactory/core";
+import type { Skill, SkillVersion } from "@kumiwork/core";
 import { db } from "../client";
 import { agentSkills, skills } from "../schema";
 import { getDraftForSkill, getSkillVersionsForSkill, insertDraftVersion, markPublished } from "./skill-versions";

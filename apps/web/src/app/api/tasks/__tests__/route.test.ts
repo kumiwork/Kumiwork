@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ExternalAttachment } from "@agentfactory/integrations";
+import type { ExternalAttachment } from "@kumiwork/integrations";
 
 const requireAuthContext = vi.fn();
 const createTask = vi.fn();
@@ -12,19 +12,19 @@ const resolveTaskProvider = vi.fn();
 const blobPut = vi.fn();
 const fetchAttachment = vi.fn();
 
-// The real @agentfactory/db throws at import when DATABASE_URL is unset (client.ts), and
-// @agentfactory/queue does the same without REDIS_URL — factory mocks keep both from loading.
-vi.mock("@agentfactory/db", () => ({
+// The real @kumiwork/db throws at import when DATABASE_URL is unset (client.ts), and
+// @kumiwork/queue does the same without REDIS_URL — factory mocks keep both from loading.
+vi.mock("@kumiwork/db", () => ({
   createTask: (...args: unknown[]) => createTask(...args),
   listTasks: (...args: unknown[]) => listTasks(...args),
   insertContentBlob: (...args: unknown[]) => insertContentBlob(...args),
   createTaskContextItem: (...args: unknown[]) => createTaskContextItem(...args),
 }));
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueRepoMapWarmJob: (...args: unknown[]) => enqueueRepoMapWarmJob(...args),
   enqueueTaskContextIngestJob: (...args: unknown[]) => enqueueTaskContextIngestJob(...args),
 }));
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => ({ put: (...args: unknown[]) => blobPut(...args) }),
 }));
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContext() }));

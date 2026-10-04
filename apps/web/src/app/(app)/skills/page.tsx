@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { Skill } from "@agentfactory/core";
-import { Badge, Button, CardLink, EmptyState, PageHeader } from "@agentfactory/shared";
+import type { Skill } from "@kumiwork/core";
+import { Badge, Button, CardLink, EmptyState, PageHeader } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { SparklesIcon } from "@/lib/icons";

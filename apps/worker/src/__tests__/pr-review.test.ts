@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ExecOptions, OutputChunk, SandboxProvider } from "../sandbox/types";
-import type { CloneTarget } from "@agentfactory/scm";
+import type { CloneTarget } from "@kumiwork/scm";
 import {
   MAX_REVIEW_DIFF_CHARS,
   REVIEW_OUTPUT_SCHEMA,

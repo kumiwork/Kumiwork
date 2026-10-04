@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { RunContextRetrieval } from "@agentfactory/core";
+import type { RunContextRetrieval } from "@kumiwork/core";
 
 const requireAuthContext = vi.fn();
 const getRun = vi.fn();
@@ -7,9 +7,9 @@ const getSession = vi.fn();
 const getAgent = vi.fn();
 const listRunContextRetrievals = vi.fn();
 
-// The real @agentfactory/db throws at import when DATABASE_URL is unset (client.ts), and the
+// The real @kumiwork/db throws at import when DATABASE_URL is unset (client.ts), and the
 // unit project has no database — a factory mock keeps the module from ever loading.
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getRun: (...args: unknown[]) => getRun(...args),
   getSession: (...args: unknown[]) => getSession(...args),
   getAgent: (...args: unknown[]) => getAgent(...args),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@agentfactory/shared";
+import { Button } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import type { RepoMapWaitGate } from "@/lib/use-repo-map-wait-gate";
 import type { TranslationKey } from "@/lib/i18n/paths";

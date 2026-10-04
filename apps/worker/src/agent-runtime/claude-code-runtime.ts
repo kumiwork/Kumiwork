@@ -2,7 +2,7 @@ import type { SandboxProvider } from "../sandbox/types";
 import { SKILL_DIR } from "../skill-paths";
 import { readAgentTurnOutput } from "./marker-protocol";
 import { AGENT_GIT_EMAIL } from "../platform-git";
-import { buildModelSpec } from "@agentfactory/core";
+import { buildModelSpec } from "@kumiwork/core";
 import type {
   AgentRuntime,
   AgentTurnResult,

@@ -4,10 +4,10 @@ import {
   getTask,
   insertContentBlob,
   listTaskContextItemsForOrg,
-} from "@agentfactory/db";
-import { enqueueTaskContextIngestJob } from "@agentfactory/queue";
-import { createBlobStore } from "@agentfactory/storage";
-import { isTaskClosed, isTaskContextMimeAllowed, taskContextExtensionMime } from "@agentfactory/core";
+} from "@kumiwork/db";
+import { enqueueTaskContextIngestJob } from "@kumiwork/queue";
+import { createBlobStore } from "@kumiwork/storage";
+import { isTaskClosed, isTaskContextMimeAllowed, taskContextExtensionMime } from "@kumiwork/core";
 import { requireAuthContext } from "@/server/auth";
 
 // Mirrors apps/web/src/app/api/teams/[teamId]/context-items/route.ts exactly — see that file's

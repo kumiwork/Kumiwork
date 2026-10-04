@@ -4,7 +4,7 @@ const deleteTaskContextItemForOrgMock = vi.fn();
 const getTaskContextItemForOrgMock = vi.fn();
 const getTaskMock = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   deleteTaskContextItemForOrg: (...args: unknown[]) => deleteTaskContextItemForOrgMock(...args),
   getTaskContextItemForOrg: (...args: unknown[]) => getTaskContextItemForOrgMock(...args),
   getTask: (...args: unknown[]) => getTaskMock(...args),

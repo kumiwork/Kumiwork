@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@agentfactory/db", () => ({ addRunUsage: vi.fn() }));
-vi.mock("@agentfactory/logger", () => {
+vi.mock("@kumiwork/db", () => ({ addRunUsage: vi.fn() }));
+vi.mock("@kumiwork/logger", () => {
   const log = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
   return { createLogger: () => log };
 });

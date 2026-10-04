@@ -1,7 +1,7 @@
-import type { Task } from "@agentfactory/core";
-import { getConnectionCredentialRef, listConnections, readConnectionSecret, setConnectionHealth, updateTask } from "@agentfactory/db";
-import { createTaskProvider, ProviderError } from "@agentfactory/integrations";
-import { createLogger } from "@agentfactory/logger";
+import type { Task } from "@kumiwork/core";
+import { getConnectionCredentialRef, listConnections, readConnectionSecret, setConnectionHealth, updateTask } from "@kumiwork/db";
+import { createTaskProvider, ProviderError } from "@kumiwork/integrations";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("task-notify");
 

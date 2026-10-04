@@ -1,4 +1,4 @@
-import type { Connection, ConnectionProvider, RunCommitRange } from "@agentfactory/core";
+import type { Connection, ConnectionProvider, RunCommitRange } from "@kumiwork/core";
 
 // The clone/push handle a resolved repo produces. `cloneUrl` is credential-embedded and
 // single-use (minted fresh per clone); `remoteUrl` is the plain, credential-free URL the

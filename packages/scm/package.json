@@ -1,5 +1,5 @@
 {
-  "name": "@agentfactory/scm",
+  "name": "@kumiwork/scm",
   "version": "0.0.0",
   "private": true,
   "license": "Apache-2.0",
@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agentfactory/core": "workspace:*",
-    "@agentfactory/db": "workspace:*",
+    "@kumiwork/core": "workspace:*",
+    "@kumiwork/db": "workspace:*",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {

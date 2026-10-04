@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ContextChunkMatch, TaskContextChunkMatch } from "@agentfactory/db";
+import type { ContextChunkMatch, TaskContextChunkMatch } from "@kumiwork/db";
 
 // context-retrieval reaches for the db package (whose client throws at import without
 // DATABASE_URL) and the embedder (which pulls in onnxruntime and would download a model on a
@@ -9,7 +9,7 @@ const countIndexedTeamContextItemsMock = vi.fn();
 const countIndexedTaskContextItemsMock = vi.fn();
 const searchTeamContextChunksMock = vi.fn();
 const searchTaskContextChunksMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   countIndexedTeamContextItems: (...args: unknown[]) => countIndexedTeamContextItemsMock(...args),
   countIndexedTaskContextItems: (...args: unknown[]) => countIndexedTaskContextItemsMock(...args),
   searchTeamContextChunks: (...args: unknown[]) => searchTeamContextChunksMock(...args),

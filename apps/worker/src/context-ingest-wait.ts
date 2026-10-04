@@ -1,5 +1,5 @@
-import { countPendingTaskContextItems, countPendingTeamContextItems } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+import { countPendingTaskContextItems, countPendingTeamContextItems } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("context-ingest-wait");
 

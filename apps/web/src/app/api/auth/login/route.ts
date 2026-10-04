@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserByEmail, verifyPassword } from "@agentfactory/db";
+import { getUserByEmail, verifyPassword } from "@kumiwork/db";
 import { createSession } from "@/server/auth";
 
 export async function POST(request: Request) {

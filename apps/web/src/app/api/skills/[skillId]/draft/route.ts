@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { decomposeSkillMarkdown, getDraftForSkill, getSkillForOrg, getSkillVersionMarkdown, updateDraft } from "@agentfactory/db";
+import { decomposeSkillMarkdown, getDraftForSkill, getSkillForOrg, getSkillVersionMarkdown, updateDraft } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // The skill detail page's edit form needs the draft's actual instructions text to pre-fill

@@ -2,7 +2,7 @@ import type { Readable } from "node:stream";
 import { PassThrough } from "node:stream";
 import Docker from "dockerode";
 import { extract, pack } from "tar-stream";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 import type { ExecOptions, OutputChunk, Sandbox, SandboxProvider, SandboxSpec } from "./types.js";
 
 const log = createLogger("docker-sandbox-provider");

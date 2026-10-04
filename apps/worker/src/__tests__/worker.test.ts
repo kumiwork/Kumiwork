@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Session } from "@agentfactory/core";
+import type { Session } from "@kumiwork/core";
 
 const h = vi.hoisted(() => {
   const workers: Array<{ name: string; processor: (job: { data: unknown }) => Promise<unknown> }> = [];
@@ -29,7 +29,7 @@ vi.mock("bullmq", () => ({
   },
 }));
 
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   RUN_QUEUE_NAME: "runs",
   RUN_CANCEL_QUEUE_NAME: "run-cancel",
   SANDBOX_TEARDOWN_QUEUE_NAME: "sandbox-teardown",
@@ -43,7 +43,7 @@ vi.mock("@agentfactory/queue", () => ({
 }));
 
 const setSessionSandboxMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   CURRENT_KEY_VERSION: 1,
   clearSessionSandbox: vi.fn(),
   createEvent: vi.fn(),
@@ -76,7 +76,7 @@ vi.mock("@agentfactory/db", () => ({
   updateTask: vi.fn(),
 }));
 
-vi.mock("@agentfactory/scm", () => ({
+vi.mock("@kumiwork/scm", () => ({
   parsePullRequestReferenceAcrossProviders: vi.fn(() => undefined),
   resolveScmConnection: vi.fn(),
 }));

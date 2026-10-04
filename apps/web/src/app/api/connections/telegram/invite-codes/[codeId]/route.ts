@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getConnection, revokeInviteCode } from "@agentfactory/db";
+import { getConnection, revokeInviteCode } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ codeId: string }> }) {

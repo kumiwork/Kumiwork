@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeKind } from "@agentfactory/core";
+import type { RuntimeKind } from "@kumiwork/core";
 import { claudeCodeRuntime } from "../agent-runtime/claude-code-runtime";
 import { codexRuntime } from "../agent-runtime/codex-runtime";
 import { getAgentRuntime, getDefaultAgentRuntime } from "../agent-runtime/registry";

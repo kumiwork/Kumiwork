@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { approvePrReview, getPrReview } from "@agentfactory/db";
-import { resolveScmConnection } from "@agentfactory/scm";
+import { approvePrReview, getPrReview } from "@kumiwork/db";
+import { resolveScmConnection } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
 
 // The one place a review actually reaches GitHub — the worker only ever drafts a "pending" row

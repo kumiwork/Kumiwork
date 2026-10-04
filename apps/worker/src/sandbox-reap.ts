@@ -1,5 +1,5 @@
-import { listIdleSandboxSessions } from "@agentfactory/db";
-import { enqueueSandboxTeardownJob } from "@agentfactory/queue";
+import { listIdleSandboxSessions } from "@kumiwork/db";
+import { enqueueSandboxTeardownJob } from "@kumiwork/queue";
 
 // A session's sandbox is torn down after this long without activity, even if nothing ever
 // explicitly finished or deleted its task (the other two teardown triggers, in apps/web's

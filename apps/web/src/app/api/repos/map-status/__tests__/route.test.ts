@@ -7,14 +7,14 @@ const getRepoMapMock = vi.fn();
 const enqueueRepoMapWarmJobMock = vi.fn();
 
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMock() }));
-vi.mock("@agentfactory/scm", () => ({
+vi.mock("@kumiwork/scm", () => ({
   resolveScmConnection: (...args: unknown[]) => resolveScmConnectionMock(...args),
 }));
-// @agentfactory/db and @agentfactory/queue both throw at import when their env vars are unset,
+// @kumiwork/db and @kumiwork/queue both throw at import when their env vars are unset,
 // which they are in the unit test env — mock both out, same pattern as
 // apps/web/src/app/api/tasks/__tests__/route.test.ts.
-vi.mock("@agentfactory/db", () => ({ getRepoMap: (...args: unknown[]) => getRepoMapMock(...args) }));
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/db", () => ({ getRepoMap: (...args: unknown[]) => getRepoMapMock(...args) }));
+vi.mock("@kumiwork/queue", () => ({
   enqueueRepoMapWarmJob: (...args: unknown[]) => enqueueRepoMapWarmJobMock(...args),
 }));
 

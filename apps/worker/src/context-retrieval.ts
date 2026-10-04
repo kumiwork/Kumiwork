@@ -1,12 +1,12 @@
-import type { ContextItemKind, PromptOmissionReason } from "@agentfactory/core";
+import type { ContextItemKind, PromptOmissionReason } from "@kumiwork/core";
 import {
   countIndexedTaskContextItems,
   countIndexedTeamContextItems,
   searchTaskContextChunks,
   searchTeamContextChunks,
-} from "@agentfactory/db";
-import type { ContextChunkMatch, NewRunContextRetrieval, TaskContextChunkMatch } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+} from "@kumiwork/db";
+import type { ContextChunkMatch, NewRunContextRetrieval, TaskContextChunkMatch } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import { getEmbedder } from "./embedder";
 import type { Embedder } from "./embedder";
 

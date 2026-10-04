@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { updateTeam } from "@agentfactory/db";
-import { enqueueRepoMapWarmJob } from "@agentfactory/queue";
+import { updateTeam } from "@kumiwork/db";
+import { enqueueRepoMapWarmJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:teams:[teamId]");
 

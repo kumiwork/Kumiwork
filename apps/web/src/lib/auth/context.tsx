@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@agentfactory/core";
+import type { User } from "@kumiwork/core";
 import { apiFetch } from "@/lib/api-client";
 
 interface AuthValue {

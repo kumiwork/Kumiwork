@@ -1,4 +1,4 @@
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import { TelegramChannelAdapter } from "./telegram/telegram-channel-adapter";
 
 export interface InboundMessage {

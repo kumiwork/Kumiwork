@@ -1,6 +1,6 @@
 import { and, eq, isNull } from "drizzle-orm";
-import type { SkillVersion } from "@agentfactory/core";
-import { createBlobStore } from "@agentfactory/storage";
+import type { SkillVersion } from "@kumiwork/core";
+import { createBlobStore } from "@kumiwork/storage";
 import { db } from "../client";
 import { skillVersions } from "../schema";
 import { insertContentBlob } from "./content-blobs";

@@ -4,7 +4,7 @@ import { repoMaps } from "../schema";
 
 const CONTENT_MAX_CHARS = 16384;
 
-// Worker-internal shape, not part of @agentfactory/core — nothing outside apps/worker reads a
+// Worker-internal shape, not part of @kumiwork/core — nothing outside apps/worker reads a
 // repo map today, same reasoning as SandboxSpec/Sandbox in apps/worker/src/sandbox/types.ts.
 export interface RepoMap {
   id: number;

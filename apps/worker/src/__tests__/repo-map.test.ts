@@ -1,21 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RuntimeKind } from "@agentfactory/core";
+import type { RuntimeKind } from "@kumiwork/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
 import { runtimes } from "../agent-runtime/registry";
 
 const getRepoMapMock = vi.fn();
 const insertRepoMapMock = vi.fn();
 const recordWorkerJobOutcomeMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   recordWorkerJobOutcome: (...args: unknown[]) => recordWorkerJobOutcomeMock(...args),
   getRepoMap: (...args: unknown[]) => getRepoMapMock(...args),
   insertRepoMap: (...args: unknown[]) => insertRepoMapMock(...args),
 }));
 
 // repo-map.ts now imports the warm queue, whose module body throws unless REDIS_URL is set —
-// mocked here so this stays a unit test with no Redis dependency, the same way @agentfactory/db is.
+// mocked here so this stays a unit test with no Redis dependency, the same way @kumiwork/db is.
 const enqueueRepoMapWarmJobMock = vi.fn();
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueRepoMapWarmJob: (...args: unknown[]) => enqueueRepoMapWarmJobMock(...args),
 }));
 

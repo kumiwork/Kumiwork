@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getRunsForSession } from "@agentfactory/db";
+import { getRunsForSession } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(

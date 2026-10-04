@@ -9,7 +9,7 @@ const getSkillVersionMock = vi.fn();
 const getSkillVersionMarkdownMock = vi.fn();
 const deleteSkillForOrgMock = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getSkillForOrg: (id: number, orgId: number) => getSkillForOrgMock(id, orgId),
   getSkillVersionsForSkill: (skillId: number) => getSkillVersionsForSkillMock(skillId),
   getSkillVersion: (id: number) => getSkillVersionMock(id),

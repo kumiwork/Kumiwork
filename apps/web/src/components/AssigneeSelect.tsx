@@ -1,7 +1,7 @@
 "use client";
 
-import type { Agent } from "@agentfactory/core";
-import { inlineSelectStyle, Select } from "@agentfactory/shared";
+import type { Agent } from "@kumiwork/core";
+import { inlineSelectStyle, Select } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 
 interface AssigneeSelectProps {

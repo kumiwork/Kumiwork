@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDraftForSkill, getSkillForOrg, publishDraft } from "@agentfactory/db";
+import { getDraftForSkill, getSkillForOrg, publishDraft } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function POST(_request: Request, { params }: { params: Promise<{ skillId: string }> }) {

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import type { ScmProvider } from "../types";
 
 const listConnectionsMock = vi.fn<(orgId: number) => Promise<Connection[]>>();
-vi.mock("@agentfactory/db", () => ({ listConnections: (orgId: number) => listConnectionsMock(orgId) }));
+vi.mock("@kumiwork/db", () => ({ listConnections: (orgId: number) => listConnectionsMock(orgId) }));
 
 // jsonwebtoken is mocked to avoid needing a real asymmetric key for tests
 vi.mock("jsonwebtoken", () => ({ default: { sign: vi.fn(() => "fake.app.jwt") } }));
