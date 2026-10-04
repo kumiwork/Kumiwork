@@ -39,11 +39,11 @@ fi
 # string documented in the root .env.example) — passed explicitly rather than relying on a
 # developer's own .env.local, so migrations and seeding always target the Postgres this script
 # just started regardless of what else might be configured.
-DATABASE_URL="postgres://agentfactory:agentfactory@localhost:5432/agentfactory" \
+DATABASE_URL="postgres://kumiwork:kumiwork@localhost:5432/kumiwork" \
   pnpm --filter @agentfactory/db db:migrate
 
 # Idempotent (onConflictDoNothing on every insert) — safe to run against an already-seeded DB.
-DATABASE_URL="postgres://agentfactory:agentfactory@localhost:5432/agentfactory" \
+DATABASE_URL="postgres://kumiwork:kumiwork@localhost:5432/kumiwork" \
   pnpm --filter @agentfactory/db db:seed
 
 exec pnpm --parallel --filter @agentfactory/web --filter @agentfactory/worker dev

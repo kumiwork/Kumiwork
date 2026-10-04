@@ -1,17 +1,19 @@
+name: kumiwork
+
 services:
   postgres:
     image: pgvector/pgvector:pg16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: agentfactory
-      POSTGRES_PASSWORD: agentfactory
-      POSTGRES_DB: agentfactory
+      POSTGRES_USER: kumiwork
+      POSTGRES_PASSWORD: kumiwork
+      POSTGRES_DB: kumiwork
     ports:
       - "5432:5432"
     volumes:
-      - agentfactory_pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agentfactory -d agentfactory"]
+      test: ["CMD-SHELL", "pg_isready -U kumiwork -d kumiwork"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -22,7 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - agentfactory_redisdata:/data
+      - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -30,5 +32,5 @@ services:
       retries: 10
 
 volumes:
-  agentfactory_pgdata:
-  agentfactory_redisdata:
+  pgdata:
+  redisdata:
