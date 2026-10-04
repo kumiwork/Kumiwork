@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, TextInput } from "@agentfactory/shared";
+import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, TextInput } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
-import type { Agent, OverflowPolicy, Team } from "@agentfactory/core";
-import { DEFAULT_MODEL_ID } from "@agentfactory/core";
-import type { RepoOption } from "@agentfactory/scm";
+import type { Agent, OverflowPolicy, Team } from "@kumiwork/core";
+import { DEFAULT_MODEL_ID } from "@kumiwork/core";
+import type { RepoOption } from "@kumiwork/scm";
 import { parseSharedContext, serializeSharedContext } from "@/lib/shared-context";
 import { SharedContextPanels } from "@/components/SharedContextPanels";
 import { ContextDocumentsPanel } from "@/components/ContextDocumentsPanel";

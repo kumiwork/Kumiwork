@@ -1,8 +1,8 @@
 // Tenant-isolation gap: see /api/tasks/route.ts for the documented caveat.
 import { NextResponse } from "next/server";
-import { createRun, getTask, startTaskSession } from "@agentfactory/db";
-import { enqueueRunJob } from "@agentfactory/queue";
-import { isTaskClosed } from "@agentfactory/core";
+import { createRun, getTask, startTaskSession } from "@kumiwork/db";
+import { enqueueRunJob } from "@kumiwork/queue";
+import { isTaskClosed } from "@kumiwork/core";
 import { requireAuthContext } from "@/server/auth";
 import { checkTaskSync } from "@/server/task-sync";
 import { formatTaskBrief } from "@/server/task-brief";

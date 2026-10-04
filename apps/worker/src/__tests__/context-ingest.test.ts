@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { TeamContextItem } from "@agentfactory/core";
-import type { BlobStore } from "@agentfactory/storage";
+import type { TeamContextItem } from "@kumiwork/core";
+import type { BlobStore } from "@kumiwork/storage";
 import type { Chunk } from "../chunker";
 import type { Embedder } from "../embedder";
 
-// @agentfactory/db opens a Postgres client in its module body; the unit project has no
+// @kumiwork/db opens a Postgres client in its module body; the unit project has no
 // database. Every export the handler binds as a default dep has to exist on the mock, even
 // though every test injects a stub over it.
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTeamContextItem: vi.fn(),
   markTeamContextItemIndexing: vi.fn(),
   markTeamContextItemIndexed: vi.fn(),
@@ -28,12 +28,12 @@ vi.mock("@agentfactory/db", () => ({
 
 // Same reason repo-map.test.ts mocks it: packages/queue/src/index.ts throws at import when
 // REDIS_URL is unset, and this file runs in the pre-push suite.
-vi.mock("@agentfactory/queue", () => ({}));
+vi.mock("@kumiwork/queue", () => ({}));
 
 // Both of these throw rather than returning a stub: the handler resolving either one instead
 // of the injected dependency is the failure this test exists to catch — getEmbedder() would
 // pull ~130MB of model weights from the Hugging Face hub on the first push after a clone.
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => {
     throw new Error("createBlobStore must not be called when a blobStore is injected");
   },

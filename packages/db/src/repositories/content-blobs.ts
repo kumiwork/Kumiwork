@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../client";
 import { contentBlobs } from "../schema";
 
-// Not part of @agentfactory/core: nothing outside the upload route and the ingest worker reads a
+// Not part of @kumiwork/core: nothing outside the upload route and the ingest worker reads a
 // blob row, the same reasoning as RepoMap in repositories/repo-maps.ts.
 
 // No-ops on a re-upload of identical bytes within the org. Content addressing makes that the

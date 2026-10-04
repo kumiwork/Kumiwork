@@ -6,9 +6,9 @@ import {
   getSkillVersion,
   getSkillVersionMarkdown,
   getSkillVersionsForSkill,
-} from "@agentfactory/db";
+} from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:skills:[skillId]");
 

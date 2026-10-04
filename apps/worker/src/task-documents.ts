@@ -1,8 +1,8 @@
-import { TASK_CONTEXT_MIME_CONFIG } from "@agentfactory/core";
-import type { TaskContextItem } from "@agentfactory/core";
-import { listTaskContextItemsForOrg } from "@agentfactory/db";
-import { createBlobStore, type BlobStore } from "@agentfactory/storage";
-import { createLogger } from "@agentfactory/logger";
+import { TASK_CONTEXT_MIME_CONFIG } from "@kumiwork/core";
+import type { TaskContextItem } from "@kumiwork/core";
+import { listTaskContextItemsForOrg } from "@kumiwork/db";
+import { createBlobStore, type BlobStore } from "@kumiwork/storage";
+import { createLogger } from "@kumiwork/logger";
 import type { SandboxProvider } from "./sandbox/types";
 import { TASK_DOCUMENT_DIR } from "./task-document-paths";
 

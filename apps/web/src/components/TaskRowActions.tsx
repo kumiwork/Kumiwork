@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Task } from "@agentfactory/core";
-import { TooltipBubble } from "@agentfactory/shared";
+import type { Task } from "@kumiwork/core";
+import { TooltipBubble } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EditIcon, RunIcon, StopIcon, CheckIcon, TrashIcon } from "@/lib/icons";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ComponentPropsWithoutRef } from "react";
-import { Textarea } from "@agentfactory/shared";
+import { Textarea } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ContentViewer, type ContentViewerProps } from "./LazyContentViewer";
 import styles from "./ContentViewer.module.css";

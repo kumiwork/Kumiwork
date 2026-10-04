@@ -11,7 +11,7 @@ pnpm install
 # Run the web app in dev mode
 pnpm dev
 # or directly:
-pnpm --filter @agentfactory/web dev
+pnpm --filter @kumiwork/web dev
 
 # Run the worker in dev mode (consumes the BullMQ `runs` queue)
 pnpm dev:worker

@@ -40,10 +40,10 @@ fi
 # developer's own .env.local, so migrations and seeding always target the Postgres this script
 # just started regardless of what else might be configured.
 DATABASE_URL="postgres://kumiwork:kumiwork@localhost:5432/kumiwork" \
-  pnpm --filter @agentfactory/db db:migrate
+  pnpm --filter @kumiwork/db db:migrate
 
 # Idempotent (onConflictDoNothing on every insert) — safe to run against an already-seeded DB.
 DATABASE_URL="postgres://kumiwork:kumiwork@localhost:5432/kumiwork" \
-  pnpm --filter @agentfactory/db db:seed
+  pnpm --filter @kumiwork/db db:seed
 
-exec pnpm --parallel --filter @agentfactory/web --filter @agentfactory/worker dev
+exec pnpm --parallel --filter @kumiwork/web --filter @kumiwork/worker dev

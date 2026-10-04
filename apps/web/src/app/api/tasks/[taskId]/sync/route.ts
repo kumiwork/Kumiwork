@@ -2,16 +2,16 @@
 // apps/web/src/app/api/tasks/[taskId]/context-items/route.ts (a task in another org must not be
 // distinguishable from one that isn't there).
 import { NextResponse } from "next/server";
-import type { ExternalIssue, ExternalAttachment } from "@agentfactory/integrations";
-import type { Task } from "@agentfactory/core";
-import { createTaskContextItem, getTask, insertContentBlob, updateTask } from "@agentfactory/db";
-import { enqueueTaskContextIngestJob } from "@agentfactory/queue";
-import { createBlobStore } from "@agentfactory/storage";
+import type { ExternalIssue, ExternalAttachment } from "@kumiwork/integrations";
+import type { Task } from "@kumiwork/core";
+import { createTaskContextItem, getTask, insertContentBlob, updateTask } from "@kumiwork/db";
+import { enqueueTaskContextIngestJob } from "@kumiwork/queue";
+import { createBlobStore } from "@kumiwork/storage";
 import { requireAuthContext } from "@/server/auth";
 import { resolveTaskProvider } from "@/server/task-provider";
 import { checkTaskSync } from "@/server/task-sync";
 import { MAX_UPLOAD_BYTES } from "@/app/api/tasks/[taskId]/context-items/route";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:tasks:[taskId]:sync");
 

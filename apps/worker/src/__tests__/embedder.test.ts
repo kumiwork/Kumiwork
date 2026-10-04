@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The real module is never loaded: pipeline() downloads ~130MB from the Hugging Face hub on
 // first call, and this suite is what .husky/pre-push runs. Same shape as repo-map.test.ts's
-// @agentfactory/queue mock — the dependency is replaced at import, not stubbed after the fact.
+// @kumiwork/queue mock — the dependency is replaced at import, not stubbed after the fact.
 const pipelineMock = vi.fn();
 vi.mock("@huggingface/transformers", () => ({
   pipeline: (...args: unknown[]) => pipelineMock(...args),

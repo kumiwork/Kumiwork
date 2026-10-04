@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import "../setup.js";
-import type { RunEvalResult } from "@agentfactory/core";
+import type { RunEvalResult } from "@kumiwork/core";
 import { createRun } from "../../repositories/runs.js";
 import {
   completeEval,

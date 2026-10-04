@@ -1,5 +1,5 @@
-import { CURRENT_KEY_VERSION, createEvent as createEventDefault, encryptSecret as encryptSecretDefault } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+import { CURRENT_KEY_VERSION, createEvent as createEventDefault, encryptSecret as encryptSecretDefault } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import type { RuntimeEvent, ThinkingDeltaRuntimeEvent, ToolResultRuntimeEvent } from "./agent-runtime/types";
 import { writeMemoryEntry as writeMemoryEntryDefault } from "./memory-write";
 import { MAX_MASK_INPUT_CHARS, keepTail, maskSecrets, truncateMiddle } from "./secret-masking";

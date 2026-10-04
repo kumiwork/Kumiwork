@@ -77,7 +77,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @agentfactory/db db:migrate
+      - run: pnpm --filter @kumiwork/db db:migrate
       - run: pnpm test:db
 
   queue-integration-test:
@@ -117,7 +117,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @agentfactory/db db:migrate
+      - run: pnpm --filter @kumiwork/db db:migrate
       - run: pnpm test:queue
 
   e2e-test:
@@ -156,8 +156,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @agentfactory/db db:migrate
-      - run: pnpm --filter @agentfactory/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @kumiwork/db db:migrate
+      - run: pnpm --filter @kumiwork/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
 
   all-tests:

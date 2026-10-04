@@ -6,7 +6,7 @@ import {
   getSkillVersion,
   getSkillVersionMarkdown,
   updateDraft,
-} from "@agentfactory/db";
+} from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // Starts a new draft branched off the currently published version.

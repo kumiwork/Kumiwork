@@ -1,6 +1,6 @@
 "use client";
 
-import { PageHeader, Badge, Card } from "@agentfactory/shared";
+import { PageHeader, Badge, Card } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { OrgIcon, GithubIcon } from "@/lib/icons";
 import { ConnectionsList } from "@/components/ConnectionsList";

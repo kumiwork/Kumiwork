@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
 
 const recordWorkerJobOutcomeMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   recordWorkerJobOutcome: (...args: unknown[]) => recordWorkerJobOutcomeMock(...args),
   getAgent: vi.fn(),
   getRunPrompt: vi.fn(),
@@ -22,7 +22,7 @@ vi.mock("@agentfactory/db", () => ({
 
 const mockLog = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn(), child: vi.fn() };
 mockLog.child.mockReturnValue(mockLog);
-vi.mock("@agentfactory/logger", () => ({
+vi.mock("@kumiwork/logger", () => ({
   createLogger: vi.fn(() => mockLog),
 }));
 

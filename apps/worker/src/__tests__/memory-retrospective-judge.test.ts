@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getAgent: vi.fn(),
   getRunPrompt: vi.fn(),
   getSession: vi.fn(),

@@ -1,7 +1,7 @@
 import { createServer, type IncomingHttpHeaders, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 import type { ReadableStream as WebReadableStream } from "node:stream/web";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 import { createUsageExtractor, type ModelUsage } from "./model-usage";
 import type { ModelProvider, RunCredentialContext, RunCredentialStore } from "./run-credentials";
 

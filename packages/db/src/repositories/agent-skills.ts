@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import type { AgentSkill } from "@agentfactory/core";
+import type { AgentSkill } from "@kumiwork/core";
 import { db } from "../client";
 import { agentSkills, agents, skillVersions, skills } from "../schema";
 

@@ -4,7 +4,7 @@ const requireAuthContextMock = vi.fn(async (): Promise<{ orgId: number } | undef
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMock() }));
 const listCodebaseSettingsMock = vi.fn();
 const setCodebaseSetupCommandMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   CODEBASE_SETUP_COMMAND_MAX_CHARS: 4096,
   listCodebaseSettings: (...args: unknown[]) => listCodebaseSettingsMock(...args),
   setCodebaseSetupCommand: (...args: unknown[]) => setCodebaseSetupCommandMock(...args),

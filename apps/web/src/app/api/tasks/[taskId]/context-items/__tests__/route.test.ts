@@ -9,18 +9,18 @@ const enqueueTaskContextIngestJobMock = vi.fn();
 
 // Mirrors apps/web/src/app/api/teams/[teamId]/context-items/__tests__/route.test.ts exactly —
 // same mocking strategy, same cases, scoped to tasks instead of teams.
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => ({ put: putMock, get: vi.fn() }),
 }));
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (...args: unknown[]) => getTaskMock(...args),
   insertContentBlob: (...args: unknown[]) => insertContentBlobMock(...args),
   createTaskContextItem: (...args: unknown[]) => createTaskContextItemMock(...args),
   listTaskContextItemsForOrg: (...args: unknown[]) => listTaskContextItemsForOrgMock(...args),
 }));
-// @agentfactory/queue throws at module load when REDIS_URL is unset, which it is in the unit
+// @kumiwork/queue throws at module load when REDIS_URL is unset, which it is in the unit
 // test env — mock it out so the route's import of enqueueTaskContextIngestJob doesn't touch Redis.
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueTaskContextIngestJob: (...args: unknown[]) => enqueueTaskContextIngestJobMock(...args),
 }));
 const requireAuthContextMock = vi.fn();

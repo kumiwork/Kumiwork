@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import type { ChatMessage, PromptSegment } from "@agentfactory/core";
+import type { ChatMessage, PromptSegment } from "@kumiwork/core";
 import {
   PLATFORM_PREAMBLE,
   REMEMBER_REMINDER,

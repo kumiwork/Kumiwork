@@ -5,7 +5,7 @@ vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMo
 
 const getTaskMock = vi.fn();
 const listPrReviewsForTaskMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (id: number) => getTaskMock(id),
   listPrReviewsForTask: (taskId: number, orgId: number) => listPrReviewsForTaskMock(taskId, orgId),
 }));

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import type { Agent, AgentMode, OverflowPolicy } from "@agentfactory/core";
-import { buildModelSpec, runtimeForModel } from "@agentfactory/core";
+import type { Agent, AgentMode, OverflowPolicy } from "@kumiwork/core";
+import { buildModelSpec, runtimeForModel } from "@kumiwork/core";
 import { db } from "../client";
 import { agents, agentSkills } from "../schema";
 
@@ -48,7 +48,7 @@ export interface NewAgentInput {
   systemPrompt: string;
   mode: AgentMode;
   teamId?: number;
-  /** Model catalog id (see @agentfactory/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
+  /** Model catalog id (see @kumiwork/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
   model?: string;
   onContextOverflow?: OverflowPolicy;
   defaultCodebase?: string;
@@ -81,7 +81,7 @@ export interface AgentPatch
   extends Partial<
     Pick<Agent, "name" | "description" | "systemPrompt" | "mode" | "teamId" | "areaMap" | "defaultCodebase" | "onContextOverflow">
   > {
-  /** Model catalog id (see @agentfactory/core MODEL_CATALOG). */
+  /** Model catalog id (see @kumiwork/core MODEL_CATALOG). */
   model?: string;
 }
 

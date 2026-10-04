@@ -43,10 +43,10 @@ if pgrep -f "next dev" >/dev/null 2>&1; then
   exit 1
 fi
 
-pnpm --filter @agentfactory/db db:migrate
+pnpm --filter @kumiwork/db db:migrate
 
 if [ "$headed" = true ]; then
-  pnpm --filter @agentfactory/web exec playwright test --headed "${args[@]:-}"
+  pnpm --filter @kumiwork/web exec playwright test --headed "${args[@]:-}"
 else
-  pnpm --filter @agentfactory/web exec playwright test "${args[@]:-}"
+  pnpm --filter @kumiwork/web exec playwright test "${args[@]:-}"
 fi

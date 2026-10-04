@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Embedder } from "../embedder";
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   findSimilarMemoryEntries: vi.fn(),
   insertMemoryEntryWithWrite: vi.fn(),
   reinforceMemoryEntryWithWrite: vi.fn(),
   replaceMemoryEntryWithWrite: vi.fn(),
 }));
-vi.mock("@agentfactory/logger", () => {
+vi.mock("@kumiwork/logger", () => {
   const log = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() };
   return { createLogger: () => log };
 });

@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Session } from "@agentfactory/core";
+import type { Session } from "@kumiwork/core";
 
 const listIdleSandboxSessionsMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listIdleSandboxSessions: (...args: unknown[]) => listIdleSandboxSessionsMock(...args),
 }));
 
-// @agentfactory/queue's module body throws unless REDIS_URL is set — mocked here so this stays
+// @kumiwork/queue's module body throws unless REDIS_URL is set — mocked here so this stays
 // a unit test with no Redis dependency, same as repo-map.test.ts.
 const enqueueSandboxTeardownJobMock = vi.fn();
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueSandboxTeardownJob: (...args: unknown[]) => enqueueSandboxTeardownJobMock(...args),
 }));
 

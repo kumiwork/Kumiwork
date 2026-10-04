@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CODEBASE_SETUP_COMMAND_MAX_CHARS, listCodebaseSettings, setCodebaseSetupCommand } from "@agentfactory/db";
+import { CODEBASE_SETUP_COMMAND_MAX_CHARS, listCodebaseSettings, setCodebaseSetupCommand } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 const REPO_FULL_NAME_PATTERN = /^[\w.-]+\/[\w.-]+$/;

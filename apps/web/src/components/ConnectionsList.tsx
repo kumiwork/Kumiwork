@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, Button, TextInput, Card } from "@agentfactory/shared";
+import { Badge, Button, TextInput, Card } from "@kumiwork/shared";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Modal } from "@/components/Modal";
 import { apiFetch } from "@/lib/api-client";
@@ -9,7 +9,7 @@ import { useTranslation } from "@/lib/i18n/context";
 import { AlertIcon, LinkIcon, TrashIcon } from "@/lib/icons";
 import { useAppData } from "@/lib/app-data/context";
 import type { TranslationKey } from "@/lib/i18n/paths";
-import type { Connection, ConnectionHealth, ConnectionKind } from "@agentfactory/core";
+import type { Connection, ConnectionHealth, ConnectionKind } from "@kumiwork/core";
 
 type Translate = (key: TranslationKey, vars?: Record<string, string | number>) => string;
 

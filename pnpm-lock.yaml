@@ -26,28 +26,28 @@ importers:
 
   apps/web:
     dependencies:
-      '@agentfactory/core':
+      '@kumiwork/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@agentfactory/db':
+      '@kumiwork/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@agentfactory/integrations':
+      '@kumiwork/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations
-      '@agentfactory/logger':
+      '@kumiwork/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      '@agentfactory/queue':
+      '@kumiwork/queue':
         specifier: workspace:*
         version: link:../../packages/queue
-      '@agentfactory/scm':
+      '@kumiwork/scm':
         specifier: workspace:*
         version: link:../../packages/scm
-      '@agentfactory/shared':
+      '@kumiwork/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@agentfactory/storage':
+      '@kumiwork/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       '@phosphor-icons/react':
@@ -111,27 +111,6 @@ importers:
 
   apps/worker:
     dependencies:
-      '@agentfactory/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@agentfactory/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@agentfactory/integrations':
-        specifier: workspace:*
-        version: link:../../packages/integrations
-      '@agentfactory/logger':
-        specifier: workspace:*
-        version: link:../../packages/logger
-      '@agentfactory/queue':
-        specifier: workspace:*
-        version: link:../../packages/queue
-      '@agentfactory/scm':
-        specifier: workspace:*
-        version: link:../../packages/scm
-      '@agentfactory/storage':
-        specifier: workspace:*
-        version: link:../../packages/storage
       '@anthropic-ai/claude-agent-sdk':
         specifier: ^0.3.220
         version: 0.3.220(@anthropic-ai/sdk@0.115.0(zod@4.4.3))(@modelcontextprotocol/sdk@1.30.0(supports-color@7.2.0)(zod@4.4.3))(zod@4.4.3)
@@ -141,6 +120,27 @@ importers:
       '@huggingface/transformers':
         specifier: ^3.7.0
         version: 3.8.1
+      '@kumiwork/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@kumiwork/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@kumiwork/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
+      '@kumiwork/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@kumiwork/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
+      '@kumiwork/scm':
+        specifier: workspace:*
+        version: link:../../packages/scm
+      '@kumiwork/storage':
+        specifier: workspace:*
+        version: link:../../packages/storage
       bullmq:
         specifier: ^5.81.2
         version: 5.81.2(supports-color@7.2.0)
@@ -178,10 +178,10 @@ importers:
 
   packages/db:
     dependencies:
-      '@agentfactory/core':
+      '@kumiwork/core':
         specifier: workspace:*
         version: link:../core
-      '@agentfactory/storage':
+      '@kumiwork/storage':
         specifier: workspace:*
         version: link:../storage
       drizzle-orm:
@@ -209,7 +209,7 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@agentfactory/core':
+      '@kumiwork/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -257,10 +257,10 @@ importers:
 
   packages/scm:
     dependencies:
-      '@agentfactory/core':
+      '@kumiwork/core':
         specifier: workspace:*
         version: link:../core
-      '@agentfactory/db':
+      '@kumiwork/db':
         specifier: workspace:*
         version: link:../db
       jsonwebtoken:

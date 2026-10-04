@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { EvalRequirement, Run, RunEval, RunStatus } from "@agentfactory/core";
-import { compactSelectStyle, EmptyState, Select } from "@agentfactory/shared";
+import type { EvalRequirement, Run, RunEval, RunStatus } from "@kumiwork/core";
+import { compactSelectStyle, EmptyState, Select } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/paths";

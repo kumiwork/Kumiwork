@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import { ScmInstallIncompleteError } from "../types";
 import { githubScmProvider, repoScope } from "../github";
 

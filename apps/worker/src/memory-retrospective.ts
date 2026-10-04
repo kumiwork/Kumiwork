@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { DEFAULT_MODEL_ID } from "@agentfactory/core";
+import { DEFAULT_MODEL_ID } from "@kumiwork/core";
 import {
   decryptSecret,
   getAgent,
@@ -12,8 +12,8 @@ import {
   readAgentMemoryEntries,
   reinforceMemoryEntryWithWrite,
   type MemoryWriteInput,
-} from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+} from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import { checkLessonEvidence } from "./lesson-evidence";
 import { appliedLessonIds, findLessonApplications } from "./lesson-application";
 import { writeMemoryEntry as writeMemoryEntryDefault } from "./memory-write";

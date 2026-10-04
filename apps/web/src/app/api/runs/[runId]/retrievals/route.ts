@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import type { Run } from "@agentfactory/core";
-import { getAgent, getRun, getSession, listRunContextRetrievals } from "@agentfactory/db";
+import type { Run } from "@kumiwork/core";
+import { getAgent, getRun, getSession, listRunContextRetrievals } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // The Context tab's second data source: which team documents each retrieved excerpt came from.

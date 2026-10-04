@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { AuthCard } from "@/components/AuthCard";
-import { Button, TextInput } from "@agentfactory/shared";
+import { Button, TextInput } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ArrowLeftIcon, CheckIcon, MailIcon } from "@/lib/icons";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@agentfactory/db",
+  "name": "@kumiwork/db",
   "version": "0.0.0",
   "private": true,
   "license": "Apache-2.0",
@@ -13,8 +13,8 @@
     "db:seed": "tsx src/seed.ts"
   },
   "dependencies": {
-    "@agentfactory/core": "workspace:*",
-    "@agentfactory/storage": "workspace:*",
+    "@kumiwork/core": "workspace:*",
+    "@kumiwork/storage": "workspace:*",
     "drizzle-orm": "0.45.2",
     "postgres": "3.4.9"
   },

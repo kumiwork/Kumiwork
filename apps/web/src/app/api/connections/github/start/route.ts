@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { randomBytes } from "node:crypto";
-import { getScmProvider } from "@agentfactory/scm";
+import { getScmProvider } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
 
 const STATE_COOKIE = "gh_connect_state";

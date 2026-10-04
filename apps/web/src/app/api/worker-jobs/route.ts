@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listWorkerJobOutcomes, type WorkerJobStatus, type WorkerJobType } from "@agentfactory/db";
+import { listWorkerJobOutcomes, type WorkerJobStatus, type WorkerJobType } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 const JOB_TYPES: readonly WorkerJobType[] = ["repo_map_warm", "memory_retrospective"];

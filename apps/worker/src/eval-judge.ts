@@ -8,9 +8,9 @@ import {
   type EvalVerdict,
   type PromptSegment,
   type RunEvalResult,
-} from "@agentfactory/core";
+} from "@kumiwork/core";
 import type { EvalArtefact } from "./eval-artefact";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("eval-judge");
 

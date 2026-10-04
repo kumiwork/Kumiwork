@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const requireAuthContextMock = vi.fn(async (): Promise<{ orgId: number } | undefined> => ({ orgId: 1 }));
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMock() }));
 const listWorkerJobOutcomesMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listWorkerJobOutcomes: (...args: unknown[]) => listWorkerJobOutcomesMock(...args),
 }));
 

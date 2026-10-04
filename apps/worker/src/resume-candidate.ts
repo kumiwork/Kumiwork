@@ -1,5 +1,5 @@
-import { runtimeForModel, type RuntimeKind } from "@agentfactory/core";
-import type { ResumeCandidate } from "@agentfactory/db";
+import { runtimeForModel, type RuntimeKind } from "@kumiwork/core";
+import type { ResumeCandidate } from "@kumiwork/db";
 
 export function resumableSessionRef(
   candidate: ResumeCandidate | undefined,

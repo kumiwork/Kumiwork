@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import type { Skill, SkillVersion } from "@agentfactory/core";
-import { Breadcrumb, Button, PageHeader, TextInput, Textarea } from "@agentfactory/shared";
+import type { Skill, SkillVersion } from "@kumiwork/core";
+import { Breadcrumb, Button, PageHeader, TextInput, Textarea } from "@kumiwork/shared";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";

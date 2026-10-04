@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const getTaskContextItemForOrgMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTaskContextItemForOrg: (...args: unknown[]) => getTaskContextItemForOrgMock(...args),
 }));
 const getBlobMock = vi.fn();
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => ({ put: vi.fn(), get: (...args: unknown[]) => getBlobMock(...args) }),
 }));
 const requireAuthContextMock = vi.fn();

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listConnections } from "@agentfactory/db";
+import { listConnections } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET() {

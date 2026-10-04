@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteConnection, deleteConnectionSecret, getConnection, getConnectionCredentialRef } from "@agentfactory/db";
+import { deleteConnection, deleteConnectionSecret, getConnection, getConnectionCredentialRef } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // Deletes Kumiwork's record of the connection. Doesn't uninstall the GitHub App on

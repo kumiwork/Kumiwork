@@ -2,15 +2,15 @@
 // their orgId, but does not yet verify resource-level ownership (same documented gap as
 // /api/runs/[runId] and /api/sessions/[sessionId]/messages).
 import { NextResponse } from "next/server";
-import { createTask, createTaskContextItem, insertContentBlob, listTasks } from "@agentfactory/db";
-import { enqueueRepoMapWarmJob, enqueueTaskContextIngestJob } from "@agentfactory/queue";
-import { buildModelSpec, isValidModelId, type AcceptanceCriterion } from "@agentfactory/core";
-import type { ExternalAttachment } from "@agentfactory/integrations";
-import { createBlobStore } from "@agentfactory/storage";
+import { createTask, createTaskContextItem, insertContentBlob, listTasks } from "@kumiwork/db";
+import { enqueueRepoMapWarmJob, enqueueTaskContextIngestJob } from "@kumiwork/queue";
+import { buildModelSpec, isValidModelId, type AcceptanceCriterion } from "@kumiwork/core";
+import type { ExternalAttachment } from "@kumiwork/integrations";
+import { createBlobStore } from "@kumiwork/storage";
 import { requireAuthContext } from "@/server/auth";
 import { resolveTaskProvider } from "@/server/task-provider";
 import { MAX_UPLOAD_BYTES } from "@/app/api/tasks/[taskId]/context-items/route";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:tasks");
 

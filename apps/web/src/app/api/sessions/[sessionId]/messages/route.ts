@@ -7,9 +7,9 @@ import {
   listMessages,
   touchSessionActivity,
   updateTask,
-} from "@agentfactory/db";
-import { enqueueRunJob } from "@agentfactory/queue";
-import { isTaskClosed } from "@agentfactory/core";
+} from "@kumiwork/db";
+import { enqueueRunJob } from "@kumiwork/queue";
+import { isTaskClosed } from "@kumiwork/core";
 import { requireAuthContext } from "@/server/auth";
 
 // Requires a logged-in user but doesn't yet verify sessionId belongs to their org — same

@@ -21,7 +21,7 @@ import {
 } from "../../repositories/runs.js";
 import { createTask, startTaskSession } from "../../repositories/tasks.js";
 import { insertAgent, insertOrg, insertSession, insertUser } from "../fixtures.js";
-import type { Session } from "@agentfactory/core";
+import type { Session } from "@kumiwork/core";
 
 async function setupSession(): Promise<Session> {
   const org = await insertOrg();

@@ -1,9 +1,9 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { TASK_CONTEXT_MIME_CONFIG, isTaskContextMimeAllowed, taskContextExtensionMime } from "@agentfactory/core";
-import type { OrgMember, TaskContextItem, TeamContextItem } from "@agentfactory/core";
-import { Badge, EmptyState } from "@agentfactory/shared";
+import { TASK_CONTEXT_MIME_CONFIG, isTaskContextMimeAllowed, taskContextExtensionMime } from "@kumiwork/core";
+import type { OrgMember, TaskContextItem, TeamContextItem } from "@kumiwork/core";
+import { Badge, EmptyState } from "@kumiwork/shared";
 import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { apiFetch } from "@/lib/api-client";
 import {

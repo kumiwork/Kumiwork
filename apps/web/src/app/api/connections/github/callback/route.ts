@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createConnection } from "@agentfactory/db";
-import { getScmProvider, ScmInstallIncompleteError } from "@agentfactory/scm";
+import { createConnection } from "@kumiwork/db";
+import { getScmProvider, ScmInstallIncompleteError } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
 
 const STATE_COOKIE = "gh_connect_state";

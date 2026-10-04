@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { listConnections } from "@agentfactory/db";
-import { getScmProvider } from "@agentfactory/scm";
-import type { RepoOption } from "@agentfactory/scm";
+import { listConnections } from "@kumiwork/db";
+import { getScmProvider } from "@kumiwork/scm";
+import type { RepoOption } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
 
 // Merges repo lists from every one of the org's scm connections, across every registered

@@ -1,4 +1,4 @@
-import type { TaskStatus } from "@agentfactory/core";
+import type { TaskStatus } from "@kumiwork/core";
 
 export const STATUS_STYLES: Record<TaskStatus, { bg: string; color: string; border: string; label: string }> = {
   open:         { bg: "rgba(147,151,171,0.1)",  color: "var(--color-neutral-400)", border: "rgba(147,151,171,0.2)",   label: "Open" },

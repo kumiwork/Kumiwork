@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Skill, SkillVersion } from "@agentfactory/core";
+import type { Skill, SkillVersion } from "@kumiwork/core";
 import { I18nProvider } from "@/lib/i18n/context";
 import SkillDetailPage from "../page";
 

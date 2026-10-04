@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getRepoMap } from "@agentfactory/db";
-import { enqueueRepoMapWarmJob } from "@agentfactory/queue";
-import { resolveScmConnection } from "@agentfactory/scm";
+import { getRepoMap } from "@kumiwork/db";
+import { enqueueRepoMapWarmJob } from "@kumiwork/queue";
+import { resolveScmConnection } from "@kumiwork/scm";
 import { requireAuthContext } from "@/server/auth";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:repos:map-status");
 

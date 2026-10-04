@@ -1,4 +1,4 @@
-import type { ContextItemStatus } from "@agentfactory/core";
+import type { ContextItemStatus } from "@kumiwork/core";
 import type { TranslationKey } from "@/lib/i18n/paths";
 
 // Keyed on the status union, so adding a fifth ContextItemStatus is a compile error here

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAgent, getRun, getRunPrompt, getSession } from "@agentfactory/db";
+import { getAgent, getRun, getRunPrompt, getSession } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 // The Context tab's data source — fetched lazily on tab open, never polled.

@@ -6,14 +6,14 @@ vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMo
 const getTaskMock = vi.fn();
 const getLatestNonTerminalRunMock = vi.fn();
 const cancelRunMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (id: number) => getTaskMock(id),
   getLatestNonTerminalRun: (sessionId: number) => getLatestNonTerminalRunMock(sessionId),
   cancelRun: (id: number) => cancelRunMock(id),
 }));
 
 const enqueueRunCancelJobMock = vi.fn();
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueRunCancelJob: (...args: unknown[]) => enqueueRunCancelJobMock(...args),
 }));
 

@@ -1,5 +1,5 @@
 import { and, count, eq, gte, inArray } from "drizzle-orm";
-import type { TaskContextItem } from "@agentfactory/core";
+import type { TaskContextItem } from "@kumiwork/core";
 import { db } from "../client";
 import { runContextRetrievals, taskContextChunks, taskContextItems } from "../schema";
 

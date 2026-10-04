@@ -1,6 +1,6 @@
-import type { Task } from "@agentfactory/core";
-import type { ExternalIssue } from "@agentfactory/integrations";
-import { createLogger } from "@agentfactory/logger";
+import type { Task } from "@kumiwork/core";
+import type { ExternalIssue } from "@kumiwork/integrations";
+import { createLogger } from "@kumiwork/logger";
 import { resolveTaskProvider } from "./task-provider";
 
 const log = createLogger("task-sync");

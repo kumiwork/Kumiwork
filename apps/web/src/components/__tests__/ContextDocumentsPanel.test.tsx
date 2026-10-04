@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OrgMember, TaskContextItem, TeamContextItem } from "@agentfactory/core";
+import type { OrgMember, TaskContextItem, TeamContextItem } from "@kumiwork/core";
 import { I18nProvider } from "../../lib/i18n/context";
 import { ContextDocumentsPanel, type ContextDocumentsScope } from "../ContextDocumentsPanel";
 

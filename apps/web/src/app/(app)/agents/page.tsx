@@ -1,7 +1,7 @@
 "use client";
 
-import type { Agent } from "@agentfactory/core";
-import { Badge, CardLink, EmptyState, PageHeader, Truncate } from "@agentfactory/shared";
+import type { Agent } from "@kumiwork/core";
+import { Badge, CardLink, EmptyState, PageHeader, Truncate } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import { BotIcon } from "@/lib/icons";

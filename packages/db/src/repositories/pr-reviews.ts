@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { PrReview, PrReviewComment, ReviewVerdict } from "@agentfactory/core";
+import type { PrReview, PrReviewComment, ReviewVerdict } from "@kumiwork/core";
 import { db } from "../client";
 import { prReviews } from "../schema";
 

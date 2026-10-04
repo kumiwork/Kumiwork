@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getConnection, revokeAuthorizedUser } from "@agentfactory/db";
+import { getConnection, revokeAuthorizedUser } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ userId: string }> }) {

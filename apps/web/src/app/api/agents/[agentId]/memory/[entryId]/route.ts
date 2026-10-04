@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { MAX_MEMORY_CONTENT_CHARS } from "@agentfactory/core";
-import { deleteMemoryEntry, getAgent, memoryEntryBelongsToAgent, updateMemoryEntryContent } from "@agentfactory/db";
+import { MAX_MEMORY_CONTENT_CHARS } from "@kumiwork/core";
+import { deleteMemoryEntry, getAgent, memoryEntryBelongsToAgent, updateMemoryEntryContent } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function PATCH(

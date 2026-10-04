@@ -9,18 +9,18 @@ const enqueueTeamContextIngestJobMock = vi.fn();
 
 // The route builds its store once at module scope; mocking the module hands it this spy, which
 // is how "the blob store was never touched" becomes an assertion rather than a hope.
-vi.mock("@agentfactory/storage", () => ({
+vi.mock("@kumiwork/storage", () => ({
   createBlobStore: () => ({ put: putMock, get: vi.fn() }),
 }));
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTeam: (...args: unknown[]) => getTeamMock(...args),
   insertContentBlob: (...args: unknown[]) => insertContentBlobMock(...args),
   createTeamContextItem: (...args: unknown[]) => createTeamContextItemMock(...args),
   listTeamContextItemsForOrg: (...args: unknown[]) => listTeamContextItemsForOrgMock(...args),
 }));
-// @agentfactory/queue throws at module load when REDIS_URL is unset, which it is in the unit
+// @kumiwork/queue throws at module load when REDIS_URL is unset, which it is in the unit
 // test env — mock it out so the route's import of enqueueTeamContextIngestJob doesn't touch Redis.
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   enqueueTeamContextIngestJob: (...args: unknown[]) => enqueueTeamContextIngestJobMock(...args),
 }));
 const requireAuthContextMock = vi.fn();

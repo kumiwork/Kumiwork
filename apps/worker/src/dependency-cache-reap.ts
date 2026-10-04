@@ -1,4 +1,4 @@
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 import { parseDependencyCacheVolumeName } from "./sandbox-cache";
 
 const log = createLogger("dependency-cache-reap");

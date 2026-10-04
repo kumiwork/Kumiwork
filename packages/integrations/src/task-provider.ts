@@ -1,4 +1,4 @@
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import { JiraTaskProvider } from "./jira/jira-task-provider";
 
 export interface ExternalAttachment {

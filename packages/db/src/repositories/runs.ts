@@ -1,5 +1,5 @@
 import { and, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
-import type { ModelSpec, PromptSegment, Run, RunCommitRange, RunPrompt, RunStatus } from "@agentfactory/core";
+import type { ModelSpec, PromptSegment, Run, RunCommitRange, RunPrompt, RunStatus } from "@kumiwork/core";
 import { db } from "../client";
 import { runs } from "../schema";
 

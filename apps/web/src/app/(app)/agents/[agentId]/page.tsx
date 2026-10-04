@@ -6,7 +6,7 @@ import { AgentFormModal, type AgentFormValues } from "@/components/AgentFormModa
 import { AgentMemorySection } from "@/components/AgentMemorySection";
 import { AgentSkillsSection } from "@/components/AgentSkillsSection";
 import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
-import { Badge, Breadcrumb, Button, Card, CardLink, Truncate } from "@agentfactory/shared";
+import { Badge, Breadcrumb, Button, Card, CardLink, Truncate } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ArrowLeftIcon, ChatIcon, PlusIcon, SettingsIcon } from "@/lib/icons";
 import { useAppData } from "@/lib/app-data/context";

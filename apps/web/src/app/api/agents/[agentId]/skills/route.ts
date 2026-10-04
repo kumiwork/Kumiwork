@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { assignSkillToAgent, getAgent, getSkillForOrg, listAgentSkills } from "@agentfactory/db";
+import { assignSkillToAgent, getAgent, getSkillForOrg, listAgentSkills } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ agentId: string }> }) {

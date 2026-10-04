@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import type { Agent, ChatMessage, Connection, OrgMember, OverflowPolicy, Run, Session, Task, Team, TaskExternalRef } from "@agentfactory/core";
-import type { ExternalAttachment, ExternalIssue } from "@agentfactory/integrations";
+import type { Agent, ChatMessage, Connection, OrgMember, OverflowPolicy, Run, Session, Task, Team, TaskExternalRef } from "@kumiwork/core";
+import type { ExternalAttachment, ExternalIssue } from "@kumiwork/integrations";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { TranslationKey, TranslationVars } from "@/lib/i18n/paths";
@@ -38,7 +38,7 @@ interface NewAgentInput {
   systemPrompt: string;
   mode: "manual" | "automatic";
   teamId?: number;
-  /** Model catalog id (see @agentfactory/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
+  /** Model catalog id (see @kumiwork/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
   model?: string;
   onContextOverflow?: OverflowPolicy;
   defaultCodebase?: string;

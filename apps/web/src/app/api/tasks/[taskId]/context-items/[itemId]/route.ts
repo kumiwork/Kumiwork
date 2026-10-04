@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { deleteTaskContextItemForOrg, getTask, getTaskContextItemForOrg } from "@agentfactory/db";
-import { isTaskClosed } from "@agentfactory/core";
+import { deleteTaskContextItemForOrg, getTask, getTaskContextItemForOrg } from "@kumiwork/db";
+import { isTaskClosed } from "@kumiwork/core";
 import { requireAuthContext } from "@/server/auth";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ taskId: string; itemId: string }> }) {

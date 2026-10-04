@@ -28,12 +28,12 @@ import {
   startTaskSession,
   touchSessionActivity,
   updateTask,
-} from "@agentfactory/db";
-import { createChannelAdapter, type ChannelAdapter } from "@agentfactory/integrations";
-import { enqueueRepoMapWarmJob, enqueueRunJob } from "@agentfactory/queue";
-import { getScmProvider, resolveScmConnection, type RepoOption } from "@agentfactory/scm";
-import type { Agent, Connection, Session, Task, TaskStatus } from "@agentfactory/core";
-import { createLogger } from "@agentfactory/logger";
+} from "@kumiwork/db";
+import { createChannelAdapter, type ChannelAdapter } from "@kumiwork/integrations";
+import { enqueueRepoMapWarmJob, enqueueRunJob } from "@kumiwork/queue";
+import { getScmProvider, resolveScmConnection, type RepoOption } from "@kumiwork/scm";
+import type { Agent, Connection, Session, Task, TaskStatus } from "@kumiwork/core";
+import { createLogger } from "@kumiwork/logger";
 import { formatTaskBrief } from "@/server/task-brief";
 
 const log = createLogger("webhooks:telegram");

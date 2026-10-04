@@ -1,10 +1,10 @@
 // Tenant-isolation gap: see /api/tasks/route.ts for the documented caveat.
 import { NextResponse } from "next/server";
-import { deleteTask, getRunsForSession, getTask, updateTask } from "@agentfactory/db";
-import { enqueueMemoryRetrospectiveJob, enqueueRepoMapWarmJob, enqueueSandboxTeardownJob } from "@agentfactory/queue";
+import { deleteTask, getRunsForSession, getTask, updateTask } from "@kumiwork/db";
+import { enqueueMemoryRetrospectiveJob, enqueueRepoMapWarmJob, enqueueSandboxTeardownJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
-import type { TaskStatus } from "@agentfactory/core";
-import { createLogger } from "@agentfactory/logger";
+import type { TaskStatus } from "@kumiwork/core";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:tasks:[taskId]");
 

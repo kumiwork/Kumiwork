@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge, Button, Card } from "@agentfactory/shared";
+import { Badge, Button, Card } from "@kumiwork/shared";
 import { ContentViewer } from "@/components/content-viewer/LazyContentViewer";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
@@ -10,7 +10,7 @@ import { useTranslation } from "@/lib/i18n/context";
 
 // Mirrors the AgentMemoryEntry & { content: string } shape GET /api/agents/[agentId]/memory
 // returns (packages/db/src/repositories/agent-memory.ts). Kept local rather than imported from
-// @agentfactory/db since client components only pull domain shapes from @agentfactory/core, and
+// @kumiwork/db since client components only pull domain shapes from @kumiwork/core, and
 // `content` is deliberately not part of AgentMemoryEntry there.
 interface MemoryEntry {
   id: number;

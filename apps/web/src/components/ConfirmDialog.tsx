@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/components/Modal";
-import { Button } from "@agentfactory/shared";
+import { Button } from "@kumiwork/shared";
 
 export function ConfirmDialog({
   title,

@@ -8,7 +8,7 @@ import {
   HardDrives,
   PencilSimple,
 } from "@phosphor-icons/react";
-import { Button, Badge, TextInput } from "@agentfactory/shared";
+import { Button, Badge, TextInput } from "@kumiwork/shared";
 import { ChevronDownIcon, XIcon } from "@/lib/icons";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { useTranslation } from "@/lib/i18n/context";

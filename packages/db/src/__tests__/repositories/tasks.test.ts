@@ -1,4 +1,4 @@
-import type { TaskExternalRef } from "@agentfactory/core";
+import type { TaskExternalRef } from "@kumiwork/core";
 import { describe, expect, it } from "vitest";
 import "../setup.js";
 import {

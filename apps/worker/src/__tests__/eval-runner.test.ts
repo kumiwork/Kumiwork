@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import type { PromptSegment, RunEval, RunEvalResult } from "@agentfactory/core";
+import type { PromptSegment, RunEval, RunEvalResult } from "@kumiwork/core";
 import type { EvalRunnerDeps } from "../eval-runner";
 
 // eval-runner.ts (directly, and transitively via eval-artefact.ts/scm-provider.ts) imports
-// from "@agentfactory/db", whose client throws at import time if DATABASE_URL isn't set —
+// from "@kumiwork/db", whose client throws at import time if DATABASE_URL isn't set —
 // true for the unit project, which runs with no database. This test drives processEvalJob
 // entirely through the deps seam and never touches the real db module, so a lightweight
 // mock (matching the pattern already used in eval-artefact.test.ts / scm-provider.test.ts)
 // is enough to make the module graph loadable here.
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getRunEval: vi.fn(),
   getRun: vi.fn(),
   getRunPrompt: vi.fn(),
@@ -195,7 +195,7 @@ describe("processEvalJob", () => {
   // eval, and must never become a failure code of its own.
   it("completes normally when the triggering message lookup throws", async () => {
     const deps = makeDeps({ getTriggeringMessage: vi.fn().mockRejectedValue(new Error("connection refused")) });
-    // eval-runner logs through @agentfactory/logger (pino), which writes JSON lines to stdout —
+    // eval-runner logs through @kumiwork/logger (pino), which writes JSON lines to stdout —
     // spy there rather than on console.error, which the logger never calls.
     const logged = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     await expect(processEvalJob(1, deps)).resolves.toBeUndefined();

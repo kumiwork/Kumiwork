@@ -532,7 +532,7 @@ Two needs get conflated under "we need a REST API" and should stay separate:
    UI's deploy. This is the part that would need a new app.
 
 If (2) becomes real, it's a new workspace package, `apps/api`, following the same shape `apps/worker` already
-establishes: it imports `@agentfactory/core` and `@agentfactory/db` via `workspace:*` and deploys independently.
+establishes: it imports `@kumiwork/core` and `@kumiwork/db` via `workspace:*` and deploys independently.
 This is mechanical specifically because the repositories in `packages/db` sit behind a plain function boundary
 (`getAgent`, `createTeam`, ...) rather than being called ad hoc from route files — a second HTTP layer in front of
 them is additive, not a rewrite. `apps/api` can be Route Handlers again or a leaner non-Next server (Fastify/Hono/

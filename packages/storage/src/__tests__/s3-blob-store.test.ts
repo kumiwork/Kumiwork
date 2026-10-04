@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // The SDK is replaced wholesale so this stays a unit test with no credentials and no network,
-// the same technique apps/worker/src/__tests__/repo-map.test.ts uses for @agentfactory/db.
+// the same technique apps/worker/src/__tests__/repo-map.test.ts uses for @kumiwork/db.
 const sendMock = vi.fn();
 vi.mock("@aws-sdk/client-s3", () => ({
   S3Client: class {

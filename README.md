@@ -97,8 +97,8 @@ where the old one was musl, and Postgres cannot detect the collation-provider ch
 ## 4. Run database migrations and seed data
 
 ```bash
-pnpm --filter @agentfactory/db db:migrate
-pnpm --filter @agentfactory/db db:seed
+pnpm --filter @kumiwork/db db:migrate
+pnpm --filter @kumiwork/db db:seed
 ```
 
 Seeding creates a demo org/team/agents and a login you can use immediately:
@@ -133,7 +133,7 @@ Read on for the individual steps if you'd rather run pieces separately.
 pnpm dev
 ```
 
-This runs `next dev` for `@agentfactory/web` at [http://localhost:3000](http://localhost:3000).
+This runs `next dev` for `@kumiwork/web` at [http://localhost:3000](http://localhost:3000).
 Log in with the demo credentials above.
 
 ## 6. Run the worker (optional)
@@ -232,7 +232,7 @@ The defaults point at the same `docker-compose.yml` Postgres/Redis, but at the
 `test:e2e` uses Playwright and needs browsers installed once:
 
 ```bash
-pnpm --filter @agentfactory/web exec playwright install --with-deps chromium
+pnpm --filter @kumiwork/web exec playwright install --with-deps chromium
 ```
 
 It boots its own `next dev` instance on port 3100 (see `apps/web/playwright.config.ts`), so it

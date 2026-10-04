@@ -1,4 +1,4 @@
-import type { Task } from "@agentfactory/core";
+import type { Task } from "@kumiwork/core";
 
 export function formatTaskBrief(task: Task): string {
   const lines: string[] = [task.description];

@@ -6,7 +6,7 @@ import { sessions } from "../../schema.js";
 import { createRun, hasNonTerminalRun, updateRunStatus } from "../../repositories/runs.js";
 import { listIdleSandboxSessions, setSessionSandbox } from "../../repositories/sessions.js";
 import { insertAgent, insertOrg, insertSession } from "../fixtures.js";
-import type { Session } from "@agentfactory/core";
+import type { Session } from "@kumiwork/core";
 
 const HOUR = 60 * 60 * 1000;
 

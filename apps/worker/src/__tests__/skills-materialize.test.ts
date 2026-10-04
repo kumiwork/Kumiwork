@@ -7,7 +7,7 @@ import type { OutputChunk, SandboxProvider } from "../sandbox/types";
 const listAgentSkillsMock = vi.fn();
 const getSkillVersionMock = vi.fn();
 const getSkillVersionMarkdownMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   listAgentSkills: (...args: unknown[]) => listAgentSkillsMock(...args),
   getSkillVersion: (...args: unknown[]) => getSkillVersionMock(...args),
   getSkillVersionMarkdown: (...args: unknown[]) => getSkillVersionMarkdownMock(...args),

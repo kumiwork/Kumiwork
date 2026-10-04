@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PrReview, ReviewVerdict } from "@agentfactory/core";
+import type { PrReview, ReviewVerdict } from "@kumiwork/core";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import type { TranslationKey } from "@/lib/i18n/paths";

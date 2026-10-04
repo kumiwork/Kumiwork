@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "../../lib/i18n/context";
 import { WriteBackFailureBanner } from "../WriteBackFailureBanner";
-import type { Task } from "@agentfactory/core";
+import type { Task } from "@kumiwork/core";
 
 const apiFetchMock = vi.fn();
 vi.mock("@/lib/api-client", () => ({ apiFetch: (...args: unknown[]) => apiFetchMock(...args) }));

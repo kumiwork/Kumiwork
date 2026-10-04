@@ -1,5 +1,5 @@
-import { listConnections } from "@agentfactory/db";
-import type { Connection, ConnectionProvider } from "@agentfactory/core";
+import { listConnections } from "@kumiwork/db";
+import type { Connection, ConnectionProvider } from "@kumiwork/core";
 import { githubScmProvider } from "./github";
 import type { ScmProvider } from "./types";
 

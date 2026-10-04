@@ -1,4 +1,4 @@
-import type { ModelSpec, RuntimeKind } from "@agentfactory/core";
+import type { ModelSpec, RuntimeKind } from "@kumiwork/core";
 import type { SandboxProvider } from "../sandbox/types";
 
 export interface AgentTurnResult {
@@ -7,7 +7,7 @@ export interface AgentTurnResult {
   structuredOutput?: unknown;
 }
 
-// Named RuntimeEvent, not RunEvent, to avoid colliding with @agentfactory/core's RunEvent (the
+// Named RuntimeEvent, not RunEvent, to avoid colliding with @kumiwork/core's RunEvent (the
 // persisted event row, with id/runId/seq/createdAt) — this is the raw shape a runtime emits
 // before worker.ts wraps it into a stored event via createEvent().
 export interface ThinkingDeltaRuntimeEvent {

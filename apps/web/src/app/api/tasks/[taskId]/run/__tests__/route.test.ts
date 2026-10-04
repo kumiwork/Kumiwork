@@ -6,7 +6,7 @@ vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContextMo
 const getTaskMock = vi.fn();
 const startTaskSessionMock = vi.fn();
 const createRunMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (id: number) => getTaskMock(id),
   startTaskSession: (...args: unknown[]) => startTaskSessionMock(...args),
   createRun: (...args: unknown[]) => createRunMock(...args),
@@ -16,7 +16,7 @@ const checkTaskSyncMock = vi.fn();
 vi.mock("@/server/task-sync", () => ({ checkTaskSync: (...args: unknown[]) => checkTaskSyncMock(...args) }));
 
 const enqueueRunJobMock = vi.fn();
-vi.mock("@agentfactory/queue", () => ({ enqueueRunJob: (...args: unknown[]) => enqueueRunJobMock(...args) }));
+vi.mock("@kumiwork/queue", () => ({ enqueueRunJob: (...args: unknown[]) => enqueueRunJobMock(...args) }));
 
 const { POST } = await import("../route");
 

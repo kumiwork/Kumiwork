@@ -1,15 +1,15 @@
 import { describe, expect, it, vi, afterAll, afterEach } from "vitest";
 import { Queue } from "bullmq";
-import "@agentfactory/db/src/__tests__/setup.js";
-import { insertOrg, insertAgent, insertUser, insertMembership } from "@agentfactory/db/src/__tests__/fixtures.js";
-import { createConnection, createConnectionSecret, generateInviteCode } from "@agentfactory/db";
-import { RUN_QUEUE_NAME, queueConnection } from "@agentfactory/queue";
+import "@kumiwork/db/src/__tests__/setup.js";
+import { insertOrg, insertAgent, insertUser, insertMembership } from "@kumiwork/db/src/__tests__/fixtures.js";
+import { createConnection, createConnectionSecret, generateInviteCode } from "@kumiwork/db";
+import { RUN_QUEUE_NAME, queueConnection } from "@kumiwork/queue";
 import { POST } from "../[webhookSecret]/route";
 
-// Only the Telegram side effects are stubbed here — @agentfactory/queue is deliberately left real
+// Only the Telegram side effects are stubbed here — @kumiwork/queue is deliberately left real
 // (unlike route.test.ts) so enqueueRunJob hits actual Redis.
-vi.mock("@agentfactory/integrations", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@agentfactory/integrations")>();
+vi.mock("@kumiwork/integrations", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@kumiwork/integrations")>();
   const realAdapter = new actual.TelegramChannelAdapter({ botToken: "test-token" });
   return {
     ...actual,

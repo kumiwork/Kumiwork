@@ -6,11 +6,11 @@ const revertTaskFromDone = vi.fn();
 const resolveScmConnection = vi.fn();
 const fetchPullRequest = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getTask: (...args: unknown[]) => getTask(...args),
   revertTaskFromDone: (...args: unknown[]) => revertTaskFromDone(...args),
 }));
-vi.mock("@agentfactory/scm", () => ({
+vi.mock("@kumiwork/scm", () => ({
   resolveScmConnection: (...args: unknown[]) => resolveScmConnection(...args),
 }));
 vi.mock("@/server/auth", () => ({ requireAuthContext: () => requireAuthContext() }));

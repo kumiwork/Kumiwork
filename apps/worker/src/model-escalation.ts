@@ -1,5 +1,5 @@
-import type { OverflowPolicy } from "@agentfactory/core";
-import { nextEscalationTier } from "@agentfactory/core";
+import type { OverflowPolicy } from "@kumiwork/core";
+import { nextEscalationTier } from "@kumiwork/core";
 
 // Given the model a turn just overflowed on and the agent's overflow policy, returns the model
 // id to retry with, or undefined if escalation should stop — either the policy is fail_fast, or

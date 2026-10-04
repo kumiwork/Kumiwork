@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Badge, TooltipBubble } from "@agentfactory/shared";
+import { Badge, TooltipBubble } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import { StatusMenu } from "@/components/StatusMenu";
@@ -19,9 +19,9 @@ import { RunEvalPanel } from "@/components/RunEvalPanel";
 import { PrReviewPanel } from "@/components/PrReviewPanel";
 import { WriteBackFailureBanner } from "@/components/WriteBackFailureBanner";
 import { TaskReplyBar } from "@/components/TaskReplyBar";
-import { isTaskClosed } from "@agentfactory/core";
-import type { Run, TaskContextItem, TaskStatus } from "@agentfactory/core";
-import type { ExternalIssue } from "@agentfactory/integrations";
+import { isTaskClosed } from "@kumiwork/core";
+import type { Run, TaskContextItem, TaskStatus } from "@kumiwork/core";
+import type { ExternalIssue } from "@kumiwork/integrations";
 import { type ThinkStep, humanizeStep } from "@/lib/agent-response";
 import { groupErrorsByRun, unattachedRunErrors } from "@/lib/run-errors";
 

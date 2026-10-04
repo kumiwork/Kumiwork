@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const countPendingTaskContextItemsMock = vi.fn();
 const countPendingTeamContextItemsMock = vi.fn();
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   countPendingTaskContextItems: (...args: unknown[]) => countPendingTaskContextItemsMock(...args),
   countPendingTeamContextItems: (...args: unknown[]) => countPendingTeamContextItemsMock(...args),
 }));

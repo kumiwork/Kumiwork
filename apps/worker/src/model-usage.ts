@@ -1,4 +1,4 @@
-import type { TokenUsage } from "@agentfactory/core";
+import type { TokenUsage } from "@kumiwork/core";
 import type { ModelProvider } from "./run-credentials";
 
 export interface ModelUsage extends TokenUsage {

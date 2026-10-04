@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createConnection, createConnectionSecret, getConnection, listConnections, updateConnection } from "@agentfactory/db";
-import { JiraTaskProvider, ProviderError } from "@agentfactory/integrations";
+import { createConnection, createConnectionSecret, getConnection, listConnections, updateConnection } from "@kumiwork/db";
+import { JiraTaskProvider, ProviderError } from "@kumiwork/integrations";
 import { requireAuthContext } from "@/server/auth";
 
 // Cloud only. Strips a trailing slash (and any path/query the user pasted along with the host)

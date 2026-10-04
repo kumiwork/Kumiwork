@@ -1,6 +1,6 @@
-import { enqueueRepoMapWarmJob } from "@agentfactory/queue";
-import { getRepoMap, insertRepoMap } from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+import { enqueueRepoMapWarmJob } from "@kumiwork/queue";
+import { getRepoMap, insertRepoMap } from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import type { SandboxProvider } from "./sandbox/types";
 import { cloneIntoSandbox, resolveCloneTarget, resolveDefaultBranchSha } from "./scm-provider";
 import { resolveSandboxImage } from "./sandbox-image-select";
@@ -209,7 +209,7 @@ async function generateAndCacheRepoMap(
 type WarmOutcome = Pick<JobOutcomeFields, "status" | "reason" | "error" | "details">;
 
 // Pre-warm path: called when an agent's or team's defaultCodebase is set (apps/web's agent/team
-// routes enqueue this via @agentfactory/queue's repo-map-warm queue). Resolves the default
+// routes enqueue this via @kumiwork/queue's repo-map-warm queue). Resolves the default
 // branch's current sha via the GitHub API alone first — no sandbox needed at all when that
 // commit is already cached. On a miss, provisions a throwaway sandbox solely for this job and
 // always tears it down, even when clone or generation fails partway through, so a failure here

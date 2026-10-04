@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MAX_MEMORY_CONTENT_CHARS } from "@agentfactory/core";
+import { MAX_MEMORY_CONTENT_CHARS } from "@kumiwork/core";
 
 const requireAuthContext = vi.fn();
 const getAgent = vi.fn();
@@ -7,7 +7,7 @@ const memoryEntryBelongsToAgent = vi.fn();
 const updateMemoryEntryContent = vi.fn();
 const deleteMemoryEntry = vi.fn();
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   getAgent: (...args: unknown[]) => getAgent(...args),
   memoryEntryBelongsToAgent: (...args: unknown[]) => memoryEntryBelongsToAgent(...args),
   updateMemoryEntryContent: (...args: unknown[]) => updateMemoryEntryContent(...args),

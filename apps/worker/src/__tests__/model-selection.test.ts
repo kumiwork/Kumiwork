@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Agent, ModelSpec, Task } from "@agentfactory/core";
+import type { Agent, ModelSpec, Task } from "@kumiwork/core";
 import { explicitModelSelector } from "../model-selection";
 
 const agentModel: ModelSpec = { family: "anthropic", id: "claude-sonnet-5", maxTokens: 8192 };

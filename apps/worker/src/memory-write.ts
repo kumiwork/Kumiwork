@@ -1,11 +1,11 @@
-import { MAX_MEMORY_CONTENT_CHARS, type MemorySource } from "@agentfactory/core";
+import { MAX_MEMORY_CONTENT_CHARS, type MemorySource } from "@kumiwork/core";
 import {
   findSimilarMemoryEntries,
   insertMemoryEntryWithWrite,
   reinforceMemoryEntryWithWrite,
   replaceMemoryEntryWithWrite,
-} from "@agentfactory/db";
-import { createLogger } from "@agentfactory/logger";
+} from "@kumiwork/db";
+import { createLogger } from "@kumiwork/logger";
 import { getEmbedder, type Embedder } from "./embedder";
 import { adjudicateMemoryWrite, type Adjudication } from "./memory-adjudicator";
 import { lessonTextProblem } from "./lesson-evidence";
@@ -23,7 +23,7 @@ export const MEMORY_ADJUDICATION_FLOOR = 0.6;
 export const MEMORY_ADJUDICATION_CANDIDATES = 3;
 
 // Re-exported for this module's existing importers (e.g. memory-write.test.ts). The value now
-// lives in @agentfactory/core so apps/web's PATCH .../memory/[entryId] route can enforce the same
+// lives in @kumiwork/core so apps/web's PATCH .../memory/[entryId] route can enforce the same
 // cap without depending on apps/worker.
 export { MAX_MEMORY_CONTENT_CHARS };
 

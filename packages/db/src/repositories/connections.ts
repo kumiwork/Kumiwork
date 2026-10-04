@@ -5,7 +5,7 @@ import type {
   ConnectionHealth,
   ConnectionKind,
   ConnectionProvider,
-} from "@agentfactory/core";
+} from "@kumiwork/core";
 import { db } from "../client";
 import { connections } from "../schema";
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAgent, getSkillForOrg, unassignSkillFromAgent, updateAgentSkillVersion } from "@agentfactory/db";
+import { getAgent, getSkillForOrg, unassignSkillFromAgent, updateAgentSkillVersion } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
 export async function PATCH(

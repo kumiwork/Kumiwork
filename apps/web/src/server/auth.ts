@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import type { User } from "@agentfactory/core";
-import { createAuthSession, deleteAuthSession, getPrimaryMembership, getUserByTokenHash } from "@agentfactory/db";
+import type { User } from "@kumiwork/core";
+import { createAuthSession, deleteAuthSession, getPrimaryMembership, getUserByTokenHash } from "@kumiwork/db";
 
 const COOKIE_NAME = "af_session";
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Connection } from "@agentfactory/core";
+import type { Connection } from "@kumiwork/core";
 import type { OutputChunk, SandboxProvider } from "../sandbox/types";
 import { SKILL_EXCLUDE_PATTERNS } from "../skill-paths";
 import { platformGitEnv, retryOnRepoNotFound } from "../platform-git";
@@ -7,7 +7,7 @@ import { platformGitEnv, retryOnRepoNotFound } from "../platform-git";
 const resolveScmConnectionMock = vi.fn();
 const getScmProviderMock = vi.fn();
 const parseIssueReferenceAcrossProvidersMock = vi.fn();
-vi.mock("@agentfactory/scm", () => ({
+vi.mock("@kumiwork/scm", () => ({
   resolveScmConnection: (orgId: number, repoFullName: string) => resolveScmConnectionMock(orgId, repoFullName),
   getScmProvider: (id: string) => getScmProviderMock(id),
   parseIssueReferenceAcrossProviders: (text: string) => parseIssueReferenceAcrossProvidersMock(text),

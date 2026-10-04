@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Button, Breadcrumb, GroupedSelect, PageHeader, Select, TextInput, Textarea, TooltipBubble } from "@agentfactory/shared";
+import { Button, Breadcrumb, GroupedSelect, PageHeader, Select, TextInput, Textarea, TooltipBubble } from "@kumiwork/shared";
 import { EditablePreview } from "@/components/content-viewer/EditablePreview";
 import { apiFetch } from "@/lib/api-client";
 import { useAppData } from "@/lib/app-data/context";
@@ -16,11 +16,11 @@ import {
   isTaskContextMimeAllowed,
   taskContextExtensionMime,
   type TaskExternalRef,
-} from "@agentfactory/core";
-import type { ExternalAttachment, ExternalIssue } from "@agentfactory/integrations";
+} from "@kumiwork/core";
+import type { ExternalAttachment, ExternalIssue } from "@kumiwork/integrations";
 import { useRepoMapWaitGate } from "@/lib/use-repo-map-wait-gate";
 import { RepoMapWaitBanner } from "@/components/RepoMapWaitBanner";
-import type { RepoOption } from "@agentfactory/scm";
+import type { RepoOption } from "@kumiwork/scm";
 
 interface StagedFile {
   id: number;

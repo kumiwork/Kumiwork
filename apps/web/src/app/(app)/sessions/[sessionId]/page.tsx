@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Truncate } from "@agentfactory/shared";
+import { Truncate } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ArrowLeftIcon, BotIcon, SendIcon } from "@/lib/icons";
 import { useAppData } from "@/lib/app-data/context";

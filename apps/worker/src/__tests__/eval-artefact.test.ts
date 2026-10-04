@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Run, RunCommitRange, Session, Task } from "@agentfactory/core";
+import type { Run, RunCommitRange, Session, Task } from "@kumiwork/core";
 import type { CloneTarget } from "../scm-provider";
 
-// eval-artefact.ts (via scm-provider.ts) statically imports from "@agentfactory/db", whose
+// eval-artefact.ts (via scm-provider.ts) statically imports from "@kumiwork/db", whose
 // client throws at import time if DATABASE_URL isn't set — true for the unit project, which
 // runs with no database. This test drives resolveEvalArtefact entirely through the deps
 // seam and never touches the real db module, so a lightweight mock (matching the pattern
 // already used in scm-provider.test.ts) is enough to make the module graph loadable here.
-vi.mock("@agentfactory/db", () => ({ getFinalAssistantMessageForRun: vi.fn(), listConnections: vi.fn() }));
+vi.mock("@kumiwork/db", () => ({ getFinalAssistantMessageForRun: vi.fn(), listConnections: vi.fn() }));
 
 const { ArtefactUnavailableError, resolveEvalArtefact } = await import("../eval-artefact");
 

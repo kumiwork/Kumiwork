@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ModelSpec } from "@agentfactory/core";
+import type { ModelSpec } from "@kumiwork/core";
 import { resumableSessionRef } from "../resume-candidate";
 
 const claudeModel: ModelSpec = { family: "anthropic", id: "claude-sonnet-5", maxTokens: 8192 };

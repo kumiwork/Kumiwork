@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { RunEval, RunEvalResult } from "@agentfactory/core";
+import type { RunEval, RunEvalResult } from "@kumiwork/core";
 import { db } from "../client";
 import { runEvals } from "../schema";
 

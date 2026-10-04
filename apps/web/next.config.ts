@@ -12,11 +12,11 @@ const workspaceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),
 
 const nextConfig: NextConfig = {
   transpilePackages: [
-    "@agentfactory/core",
-    "@agentfactory/shared",
-    "@agentfactory/db",
-    "@agentfactory/queue",
-    "@agentfactory/storage",
+    "@kumiwork/core",
+    "@kumiwork/shared",
+    "@kumiwork/db",
+    "@kumiwork/queue",
+    "@kumiwork/storage",
   ],
   turbopack: {
     root: workspaceRoot,

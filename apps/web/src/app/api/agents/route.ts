@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { createAgent, listAgents } from "@agentfactory/db";
-import { isValidModelId, isValidOverflowPolicy } from "@agentfactory/core";
-import { enqueueRepoMapWarmJob } from "@agentfactory/queue";
+import { createAgent, listAgents } from "@kumiwork/db";
+import { isValidModelId, isValidOverflowPolicy } from "@kumiwork/core";
+import { enqueueRepoMapWarmJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
-import { createLogger } from "@agentfactory/logger";
+import { createLogger } from "@kumiwork/logger";
 
 const log = createLogger("api:agents");
 

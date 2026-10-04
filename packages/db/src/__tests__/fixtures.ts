@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Agent, AgentMode, Membership, Org, Role, Session, Task, Team, User } from "@agentfactory/core";
+import type { Agent, AgentMode, Membership, Org, Role, Session, Task, Team, User } from "@kumiwork/core";
 import { createAgent } from "../repositories/agents.js";
 import { createMembership } from "../repositories/memberships.js";
 import { createOrg } from "../repositories/orgs.js";

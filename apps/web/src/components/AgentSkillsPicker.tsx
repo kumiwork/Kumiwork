@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Skill, SkillVersion } from "@agentfactory/core";
-import { Badge, inlineSelectStyle, MultiSelectCheckboxList, type MultiSelectItem } from "@agentfactory/shared";
+import type { Skill, SkillVersion } from "@kumiwork/core";
+import { Badge, inlineSelectStyle, MultiSelectCheckboxList, type MultiSelectItem } from "@kumiwork/shared";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 
 // Mirrors the AgentSkillSummary shape returned by GET /api/agents/[agentId]/skills
 // (packages/db/src/repositories/agent-skills.ts). Kept local rather than imported from
-// @agentfactory/db since client components only pull domain shapes from @agentfactory/core.
+// @kumiwork/db since client components only pull domain shapes from @kumiwork/core.
 interface AssignedSkill {
   agentId: number;
   skillId: number;

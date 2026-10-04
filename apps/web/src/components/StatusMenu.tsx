@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { TaskStatus } from "@agentfactory/core";
+import type { TaskStatus } from "@kumiwork/core";
 import { useTranslation } from "@/lib/i18n/context";
 import { STATUS_STYLES } from "@/components/StatusPill";
 

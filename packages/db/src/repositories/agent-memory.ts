@@ -1,5 +1,5 @@
 import { and, cosineDistance, desc, eq, sql } from "drizzle-orm";
-import type { AgentMemoryEntry, MemorySource, MemoryWriteKind } from "@agentfactory/core";
+import type { AgentMemoryEntry, MemorySource, MemoryWriteKind } from "@kumiwork/core";
 import { db } from "../client";
 import { CURRENT_KEY_VERSION, decryptSecret, encryptSecret } from "../crypto";
 import { agentMemoryEntries, agentMemoryWrites, tasks, users } from "../schema";

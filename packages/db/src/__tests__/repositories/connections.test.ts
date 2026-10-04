@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { ConnectionHealth } from "@agentfactory/core";
+import type { ConnectionHealth } from "@kumiwork/core";
 import { describe, expect, it } from "vitest";
 import "../setup.js";
 import { db } from "../../client.js";

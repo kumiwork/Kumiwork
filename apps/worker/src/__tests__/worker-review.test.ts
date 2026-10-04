@@ -44,7 +44,7 @@ vi.mock("bullmq", () => ({
 }));
 
 // Imported for its queue-name constants only; importing it for real opens an ioredis connection.
-vi.mock("@agentfactory/queue", () => ({
+vi.mock("@kumiwork/queue", () => ({
   RUN_QUEUE_NAME: "runs",
   RUN_CANCEL_QUEUE_NAME: "run-cancel",
   SANDBOX_TEARDOWN_QUEUE_NAME: "sandbox-teardown",
@@ -57,7 +57,7 @@ vi.mock("@agentfactory/queue", () => ({
   queueConnection: {},
 }));
 
-vi.mock("@agentfactory/db", () => ({
+vi.mock("@kumiwork/db", () => ({
   CURRENT_KEY_VERSION: 1,
   clearSessionSandbox: vi.fn(),
   createEvent: vi.fn(),
@@ -91,7 +91,7 @@ vi.mock("@agentfactory/db", () => ({
   updateTask: vi.fn(),
 }));
 
-vi.mock("@agentfactory/scm", () => ({
+vi.mock("@kumiwork/scm", () => ({
   parsePullRequestReferenceAcrossProviders: vi.fn(),
   resolveScmConnection: vi.fn(),
 }));
@@ -167,9 +167,9 @@ import {
   getSession,
   getTaskBySessionId,
   updateTask,
-} from "@agentfactory/db";
+} from "@kumiwork/db";
 import { fetchPullRequestFeedback, resolveCloneTarget } from "../scm-provider";
-import { parsePullRequestReferenceAcrossProviders, resolveScmConnection } from "@agentfactory/scm";
+import { parsePullRequestReferenceAcrossProviders, resolveScmConnection } from "@kumiwork/scm";
 import { checkoutPullRequest } from "../pr-review";
 
 const PR_TITLE = "Add exponential backoff to the webhook sender";
