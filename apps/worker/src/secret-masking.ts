@@ -17,8 +17,11 @@ const PEM_BLOCK = /-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----[\s\S]{0,20000}?-----E
 const PEM_UNTERMINATED = /-----BEGIN [A-Z ]{0,40}PRIVATE KEY-----[\s\S]*$/;
 const PEM_HEADLESS = /^[\s\S]*?-----END [A-Z ]{0,40}PRIVATE KEY-----/;
 
+const LEGACY_RUN_TOKEN_PATTERN = /\barata-run-[A-Za-z0-9_-]{20,200}/g;
+
 const TOKEN_PATTERNS: RegExp[] = [
-  /\barata-run-[A-Za-z0-9_-]{20,200}/g,
+  /\bkumiwork-run-[A-Za-z0-9_-]{20,200}/g,
+  LEGACY_RUN_TOKEN_PATTERN,
   /\bgh[pousr]_[A-Za-z0-9]{36,255}\b/g,
   /\bgithub_pat_[A-Za-z0-9_]{22,255}\b/g,
   /\bglpat-[A-Za-z0-9_-]{20,255}/g,

@@ -65,4 +65,8 @@ describe("RunCredentialStore", () => {
     expect(store.resolve("")).toBeUndefined();
     expect(store.resolve(`${RUN_CREDENTIAL_PREFIX}forged`)).toBeUndefined();
   });
+
+  it("issues tokens under the kumiwork prefix", () => {
+    expect(RUN_CREDENTIAL_PREFIX).toBe("kumiwork-run-");
+  });
 });
