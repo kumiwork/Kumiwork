@@ -139,7 +139,7 @@ The worker is what actually executes an agent turn, inside a sandboxed Docker co
 required to click around the UI mock, but is needed for real runs.
 
 Build the sandbox images it uses, one per language (`node`, `python`, `java`), tagged
-`arata-sandbox-<lang>:local`. The build script stamps each image with a hash of
+`kumiwork-sandbox-<lang>:local`. The build script stamps each image with a hash of
 `apps/worker/sandbox-image/`:
 
 ```bash
@@ -150,7 +150,7 @@ To build a single target by hand, pass the same build arg:
 
 ```bash
 docker build --target node --build-arg "SANDBOX_SOURCE_HASH=$(scripts/sandbox-image-hash.sh)" \
-  -t arata-sandbox-node:local apps/worker/sandbox-image
+  -t kumiwork-sandbox-node:local apps/worker/sandbox-image
 ```
 
 Check that all three work with `scripts/verify-sandbox-image.sh`. Rebuild after any change under

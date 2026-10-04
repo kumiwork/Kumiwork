@@ -7,7 +7,7 @@ import { createLogger } from "@agentfactory/logger";
 
 const log = createLogger("sandbox-image-check");
 
-export const SANDBOX_SOURCE_HASH_LABEL = "arata.sandbox.source-hash";
+export const SANDBOX_SOURCE_HASH_LABEL = "kumiwork.sandbox.source-hash";
 export const SANDBOX_IMAGE_SOURCE_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../sandbox-image");
 
 export type SandboxImageStatus = "current" | "stale" | "unlabeled" | "missing";

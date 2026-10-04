@@ -96,3 +96,9 @@ describe("resolveSandboxImageCheckMode", () => {
     expect(resolveSandboxImageCheckMode(value)).toBe(expected);
   });
 });
+
+describe("SANDBOX_SOURCE_HASH_LABEL", () => {
+  it("labels images under the kumiwork namespace", () => {
+    expect(SANDBOX_SOURCE_HASH_LABEL).toBe("kumiwork.sandbox.source-hash");
+  });
+});
