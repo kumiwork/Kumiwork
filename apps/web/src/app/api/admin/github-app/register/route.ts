@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   });
 
   const manifest = {
-    name: `AgentFactory (${origin})`,
+    name: `Kumiwork (${origin})`,
     url: origin,
     redirect_url: `${origin}/api/admin/github-app/callback`,
     setup_url: `${origin}/api/connections/github/callback`,

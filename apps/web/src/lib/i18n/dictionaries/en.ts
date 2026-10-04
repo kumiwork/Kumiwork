@@ -206,7 +206,7 @@ const en = {
     connectGithub: "Connect GitHub",
     disconnect: "Disconnect",
     confirmDisconnectTitle: "Disconnect {label}?",
-    confirmDisconnectMessage: "AgentFactory will no longer be able to use this connection. This doesn't uninstall the GitHub App itself — do that from your GitHub account settings if needed.",
+    confirmDisconnectMessage: "Kumiwork will no longer be able to use this connection. This doesn't uninstall the GitHub App itself — do that from your GitHub account settings if needed.",
     provider: {
       github: "GitHub",
       bitbucket: "Bitbucket",

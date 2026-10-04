@@ -42,7 +42,7 @@ export function LeftPane({ children }: { children: React.ReactNode }) {
             <BotIcon size={13} style={{ color: "var(--color-accent)" }} />
           </div>
           <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--color-text)" }}>
-            AgentFactory
+            Kumiwork
           </span>
         </div>
 
