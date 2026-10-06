@@ -126,6 +126,7 @@ import { notifyIssueOfPullRequest } from "./task-notify";
 import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicator } from "./channel-notify";
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
+import { RunTurnTimeoutError, runTurnTimeoutMs, withRunTurnTimeout } from "./run-timeout";
 import { localChecksPassed } from "./local-checks";
 import { createLogger } from "@kumiwork/logger";
 import { findProblemImages, resolveSandboxImageCheckMode, runSandboxImageCheck } from "./sandbox-image-check";
@@ -705,49 +706,54 @@ const runWorker = new Worker<RunJobData>(
       });
       runSecrets.push(modelCredential.endpoint.token);
       try {
-        for (;;) {
-          try {
-            turnResult = await runtime.runTurn(
-              {
-                systemPrompt,
-                model: attemptModel,
-                userText: (triggeringMessage?.content ?? "") + issueContext + prFeedbackContext,
-                agentName: agent.name,
-                resumeSessionRef,
-                skillNames,
-                outputSchema: review ? REVIEW_OUTPUT_SCHEMA : undefined,
-                // Gates the `remember` MCP tool off inside the sandbox for review turns - see
-                // RunInput.isReviewTurn.
-                isReviewTurn: Boolean(review),
-                modelEndpoint: modelCredential.endpoint,
-              },
-              {
-                sandboxProvider,
-                sandboxId,
-                onEvent: createRunEventHandler({
-                  runId,
-                  orgId: agent.orgId,
-                  agentId: agent.id,
-                  sessionId: session.id,
-                  runSecrets,
-                  nextSeq: () => seq++,
-                }),
-              },
-            );
-            break;
-          } catch (err) {
-            if (!(err instanceof PromptTooLongError)) throw err;
-            const nextModelId = resolveEscalation(attemptModel.id, agent.onContextOverflow);
-            if (!nextModelId) throw err;
-            const nextModel = buildModelSpec(nextModelId);
-            await createEvent(runId, seq++, "model_escalated", {
-              fromModel: attemptModel.id,
-              toModel: nextModel.id,
-              reason: "context_overflow",
-            });
-            attemptModel = nextModel;
-          }
-        }
+        turnResult = await withRunTurnTimeout(
+          runTurnTimeoutMs(),
+          () => sandboxProvider.interrupt(sandboxId),
+          async () => {
+            for (;;) {
+              try {
+                return await runtime.runTurn(
+                  {
+                    systemPrompt,
+                    model: attemptModel!,
+                    userText: (triggeringMessage?.content ?? "") + issueContext + prFeedbackContext,
+                    agentName: agent.name,
+                    resumeSessionRef,
+                    skillNames,
+                    outputSchema: review ? REVIEW_OUTPUT_SCHEMA : undefined,
+                    // Gates the `remember` MCP tool off inside the sandbox for review turns - see
+                    // RunInput.isReviewTurn.
+                    isReviewTurn: Boolean(review),
+                    modelEndpoint: modelCredential.endpoint,
+                  },
+                  {
+                    sandboxProvider,
+                    sandboxId,
+                    onEvent: createRunEventHandler({
+                      runId,
+                      orgId: agent.orgId,
+                      agentId: agent.id,
+                      sessionId: session.id,
+                      runSecrets,
+                      nextSeq: () => seq++,
+                    }),
+                  },
+                );
+              } catch (err) {
+                if (!(err instanceof PromptTooLongError)) throw err;
+                const nextModelId = resolveEscalation(attemptModel!.id, agent.onContextOverflow);
+                if (!nextModelId) throw err;
+                const nextModel = buildModelSpec(nextModelId);
+                await createEvent(runId, seq++, "model_escalated", {
+                  fromModel: attemptModel!.id,
+                  toModel: nextModel.id,
+                  reason: "context_overflow",
+                });
+                attemptModel = nextModel;
+              }
+            }
+          },
+        );
       } finally {
         modelCredential.revoke();
         stopTyping();
@@ -949,8 +955,14 @@ const runWorker = new Worker<RunJobData>(
       // "couldn't reply" fallback (see ErrorCode in @kumiwork/core) — without this, an
       // exhausted Claude API account and every other failure looked identical to the user.
       const code = err instanceof InsufficientCreditError ? "insufficient_credit" : undefined;
+      const timedOut = err instanceof RunTurnTimeoutError;
       await createEvent(runId, seq++, "error", { message: maskSecrets(message, runSecrets), ...(code ? { code } : {}) });
-      await updateRunStatus(runId, "failed", { finishedAt: new Date(), model: attemptModel });
+      if (timedOut) await createEvent(runId, seq++, "done", { reason: "budget_exceeded" });
+      await updateRunStatus(runId, "failed", {
+        finishedAt: new Date(),
+        model: attemptModel,
+        ...(timedOut ? { budgetExceeded: true } : {}),
+      });
       // Surface the failure on the owning task too — otherwise it's stuck at whatever status
       // it had when the run started, and the "failed" StatusPill can never actually show up.
       const task = await getTaskBySessionId(run.sessionId);
