@@ -10,6 +10,7 @@ import {
 } from "../../repositories/run-context-retrievals.js";
 import { createRun } from "../../repositories/runs.js";
 import { deleteTaskContextItemForOrg } from "../../repositories/task-context-items.js";
+import { deleteTask } from "../../repositories/tasks.js";
 import {
   createTeamContextItem,
   deleteTeamContextItemForOrg,
@@ -143,5 +144,64 @@ describe("run-context-retrievals repository", () => {
     rows = await listRunContextRetrievals(run.id);
     expect(rows.find((r) => r.itemKind === "team")?.itemId).toBeUndefined();
     expect(rows.find((r) => r.itemKind === "task")?.itemId).toBeUndefined();
+  });
+
+  it("nulls the deleted task's own task-kind rows when the whole task is deleted, and nothing else", async () => {
+    const org = await insertOrg();
+    const user = await insertUser();
+    const team = await insertTeam(org.id);
+    const agent = await insertAgent(org.id, { teamId: team.id });
+    const session = await insertSession(org.id, agent.id);
+    const run = await createRun(session.id);
+    const deletedTask = await insertTask(org.id, user.id);
+    const keptTask = await insertTask(org.id, user.id);
+    await insertContentBlob(org.id, "a".repeat(64), 128, "text/markdown");
+
+    const SHARED_ID = 5151;
+    const [teamItem] = await db
+      .insert(teamContextItems)
+      .values({
+        id: SHARED_ID, teamId: team.id, orgId: org.id, title: "Team handbook", sizeBytes: 128,
+        sha256: "a".repeat(64), mime: "text/markdown",
+      })
+      .returning();
+    const [deletedTaskItem] = await db
+      .insert(taskContextItems)
+      .values({
+        id: SHARED_ID, taskId: deletedTask.id, orgId: org.id, title: "Deleted task spec", sizeBytes: 128,
+        sha256: "a".repeat(64), mime: "text/markdown",
+      })
+      .returning();
+    const [keptTaskItem] = await db
+      .insert(taskContextItems)
+      .values({
+        taskId: keptTask.id, orgId: org.id, title: "Kept task spec", sizeBytes: 128,
+        sha256: "a".repeat(64), mime: "text/markdown",
+      })
+      .returning();
+
+    await insertRunContextRetrievals([
+      {
+        runId: run.id, itemId: teamItem.id, itemKind: "team", itemTitle: teamItem.title,
+        chunkIdx: 0, rank: 1, score: 0.9,
+      },
+      {
+        runId: run.id, itemId: deletedTaskItem.id, itemKind: "task", itemTitle: deletedTaskItem.title,
+        chunkIdx: 0, rank: 2, score: 0.8,
+      },
+      {
+        runId: run.id, itemId: keptTaskItem.id, itemKind: "task", itemTitle: keptTaskItem.title,
+        chunkIdx: 0, rank: 3, score: 0.7,
+      },
+    ]);
+
+    await deleteTask(deletedTask.id);
+
+    const rows = await listRunContextRetrievals(run.id);
+    expect(rows.map((r) => [r.itemTitle, r.itemId])).toEqual([
+      ["Team handbook", teamItem.id],
+      ["Deleted task spec", undefined],
+      ["Kept task spec", keptTaskItem.id],
+    ]);
   });
 });

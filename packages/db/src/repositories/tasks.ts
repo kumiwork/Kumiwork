@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import type { Session, SessionOrigin, Task, TaskExternalRef, TaskStatus } from "@kumiwork/core";
 import { db } from "../client";
-import { messages, sessions, tasks } from "../schema";
+import { messages, runContextRetrievals, sessions, taskContextItems, tasks } from "../schema";
 import { toSession } from "./sessions";
 
 export function toTask(row: typeof tasks.$inferSelect): Task {
@@ -145,7 +145,21 @@ export async function revertTaskFromDone(
 }
 
 export async function deleteTask(id: number): Promise<void> {
-  await db.delete(tasks).where(eq(tasks.id, id));
+  await db.transaction(async (tx) => {
+    await tx
+      .update(runContextRetrievals)
+      .set({ itemId: null })
+      .where(
+        and(
+          eq(runContextRetrievals.itemKind, "task"),
+          inArray(
+            runContextRetrievals.itemId,
+            tx.select({ id: taskContextItems.id }).from(taskContextItems).where(eq(taskContextItems.taskId, id)),
+          ),
+        ),
+      );
+    await tx.delete(tasks).where(eq(tasks.id, id));
+  });
 }
 
 export interface StartTaskSessionOptions {
