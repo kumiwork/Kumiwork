@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../client";
 import { events, runs } from "../schema";
 
@@ -19,4 +19,13 @@ export async function createEvent(
   data: Record<string, unknown>,
 ): Promise<void> {
   await db.insert(events).values({ runId, seq, type, data });
+}
+
+export async function appendEvent(runId: number, type: string, data: Record<string, unknown>): Promise<void> {
+  await db.execute(sql`
+    insert into events (run_id, seq, type, data)
+    select ${runId}, coalesce(max(seq) + 1, 0), ${type}, ${JSON.stringify(data)}::jsonb
+    from events
+    where run_id = ${runId}
+  `);
 }

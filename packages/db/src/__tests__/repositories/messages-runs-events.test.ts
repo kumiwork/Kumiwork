@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import "../setup.js";
 import { db } from "../../client.js";
 import { events, messages } from "../../schema.js";
-import { createEvent, listEventsForSession } from "../../repositories/events.js";
+import { createEvent, appendEvent, listEventsForSession } from "../../repositories/events.js";
 import { createMessage, getFinalAssistantMessageForRun, getMessage, listMessages } from "../../repositories/messages.js";
 import {
   addRunUsage,
@@ -431,5 +431,34 @@ describe("events repository", () => {
     const rows = await listEventsForSession(target.id);
     expect(rows).toHaveLength(2);
     expect(rows.map((r) => r.data)).toEqual([{ text: "target 1" }, { text: "target 2" }]);
+  });
+});
+
+describe("appendEvent", () => {
+  async function newRun() {
+    const org = await insertOrg();
+    const agent = await insertAgent(org.id);
+    const session = await insertSession(org.id, agent.id);
+    return { session, run: await createRun(session.id) };
+  }
+
+  it("gives the first event of a run seq 0", async () => {
+    const { session, run } = await newRun();
+
+    await appendEvent(run.id, "error", { message: "boom" });
+
+    const [event] = await listEventsForSession(session.id);
+    expect(event).toMatchObject({ seq: 0, type: "error", data: { message: "boom" } });
+  });
+
+  it("gives the event a seq one past the highest of the run", async () => {
+    const { session, run } = await newRun();
+    await createEvent(run.id, 0, "text_delta", { text: "a" });
+    await createEvent(run.id, 4, "text_delta", { text: "b" });
+
+    await appendEvent(run.id, "error", { message: "boom" });
+
+    const seqs = (await listEventsForSession(session.id)).map((e) => e.seq);
+    expect(seqs).toEqual([0, 4, 5]);
   });
 });

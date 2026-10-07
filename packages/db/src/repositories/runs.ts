@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import type { ModelSpec, PromptSegment, Run, RunCommitRange, RunPrompt, RunStatus } from "@kumiwork/core";
 import { db } from "../client";
-import { runs } from "../schema";
+import { events, runs } from "../schema";
 
 // Shared with listIdleSandboxSessions (repositories/sessions.ts) — a session is only safe to
 // tear down a sandbox for when none of its runs are in one of these statuses. Kept as one list
@@ -61,6 +61,27 @@ export async function hasNonTerminalRun(sessionId: number): Promise<boolean> {
     .where(and(eq(runs.sessionId, sessionId), inArray(runs.status, NON_TERMINAL_RUN_STATUSES)))
     .limit(1);
   return row !== undefined;
+}
+
+const IN_FLIGHT_RUN_STATUSES: RunStatus[] = ["provisioning", "running", "finalizing"];
+
+function inFlightWithoutActivitySince(cutoff: Date) {
+  const lastActivity = sql`coalesce((select max(${events.createdAt}) from ${events} where ${events.runId} = ${runs.id}), ${runs.createdAt})`;
+  return and(inArray(runs.status, IN_FLIGHT_RUN_STATUSES), sql`${lastActivity} < ${cutoff.toISOString()}::timestamptz`);
+}
+
+export async function listStuckRuns(inactiveSince: Date): Promise<Run[]> {
+  const rows = await db.select(RUN_COLUMNS).from(runs).where(inFlightWithoutActivitySince(inactiveSince));
+  return rows.map(toRun);
+}
+
+export async function failRunIfStuck(id: number, inactiveSince: Date): Promise<Run | undefined> {
+  const [row] = await db
+    .update(runs)
+    .set({ status: "failed", finishedAt: new Date() })
+    .where(and(eq(runs.id, id), inFlightWithoutActivitySince(inactiveSince)))
+    .returning();
+  return row ? toRun(row) : undefined;
 }
 
 // The Stop button (task-scoped — that's all its call sites have) needs to know which run a
