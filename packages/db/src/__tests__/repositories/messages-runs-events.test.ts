@@ -154,6 +154,16 @@ describe("runs repository", () => {
     await expect(getRun(run.id)).resolves.toMatchObject({ status: "done" });
   });
 
+  it("records that a run failed by exceeding its budget", async () => {
+    const session = await setupSession();
+    const run = await createRun(session.id);
+    expect((await getRun(run.id))?.budgetExceeded).toBeUndefined();
+
+    await updateRunStatus(run.id, "failed", { finishedAt: new Date(), budgetExceeded: true });
+
+    await expect(getRun(run.id)).resolves.toMatchObject({ status: "failed", budgetExceeded: true });
+  });
+
   // Backs the Stop button: it only has a task/session in scope, not a runId, so it needs to look
   // up which run a stop request should actually cancel.
   it("finds the session's latest non-terminal run", async () => {

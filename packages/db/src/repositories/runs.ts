@@ -145,9 +145,11 @@ export async function updateRunStatus(
     model?: ModelSpec;
     promptHash?: string;
     promptSegments?: PromptSegment[];
+    budgetExceeded?: boolean;
   },
 ): Promise<Run | undefined> {
   const values: Partial<typeof runs.$inferInsert> = { status };
+  if (patch?.budgetExceeded !== undefined) values.budgetExceeded = patch.budgetExceeded;
   if (patch?.finishedAt !== undefined) values.finishedAt = patch.finishedAt;
   if (patch?.providerSessionRef !== undefined) values.providerSessionRef = patch.providerSessionRef;
   if (patch?.sandboxId !== undefined) values.sandboxId = patch.sandboxId;
