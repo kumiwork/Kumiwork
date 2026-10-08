@@ -568,7 +568,7 @@ const en = {
     usageMeterLabel: "Shared context usage",
     agentsSection: "Agents",
     noAgents: "No agents yet",
-    noAgentsSub: "Assign an agent and it will start every run with this team's shared context.",
+    noAgentsSub: "Select + to create the first agent. Every agent on this team starts each run with its shared context.",
     newAgentTitle: "New agent",
     newAgentSubtitle: "Add an agent to this team",
     agentNameLabel: "Name",
