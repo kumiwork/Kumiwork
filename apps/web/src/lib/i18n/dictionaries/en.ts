@@ -34,7 +34,7 @@ const en = {
     confirmPasswordLabel: "Confirm Password",
     passwordPlaceholder: "••••••••",
     passwordMismatch: "Passwords don't match",
-    genericError: "Something went wrong. Please try again.",
+    genericError: "That didn't go through — nothing was changed. Try again.",
     login: {
       title: "Welcome back",
       subtitle: "Log in to your account",
@@ -46,7 +46,7 @@ const en = {
     },
     register: {
       title: "Create your account",
-      subtitle: "Sign up to get started",
+      subtitle: "Create your account and set up your team's workspace",
       submit: "Create account",
       submitting: "Creating account…",
       haveAccount: "Already have an account?",
@@ -76,7 +76,7 @@ const en = {
     newSessionDefaultTitle: "New conversation",
     skills: {
       title: "Skills",
-      emptyState: "No skills exist yet.",
+      emptyState: "No skills yet",
       versionLabel: "Version",
     },
   },
@@ -147,9 +147,9 @@ const en = {
     agentAssignedOther: "{count} agents assigned",
     sharedContext: "Shared context",
     sharedContextDescription:
-      "Team-wide skills, knowledge, and instructions injected into every assigned agent's responses.",
+      "Team knowledge and instructions injected into every run of every assigned agent.",
     sharedContextPlaceholder:
-      "Describe the team's tech stack, conventions, coding standards, domain knowledge, and any shared skills the agents should know about...",
+      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — every assigned agent gets this in every run…",
     kbOfKb: "{used} KB / {max} KB",
     assignedAgents: "Assigned agents",
     noAgentsAssigned: "No agents assigned to this team yet.",
@@ -171,9 +171,9 @@ const en = {
   },
   session: {
     startConversationWith: "Start a conversation with {name}",
-    messagePlaceholder: "Send a message... (Enter to send, Shift+Enter for new line)",
+    messagePlaceholder: "Message the agent… Enter to send, Shift+Enter for a new line",
     send: "Send",
-    replyFailed: "The agent couldn't reply — please try again.",
+    replyFailed: "The agent couldn't finish its reply — the run stopped partway. Check the run before you try again.",
     replyFailedInsufficientCredit:
       "The agent couldn't reply because the connected Claude API account is out of usage credits. Ask a workspace admin to add credits, then try again.",
   },
@@ -552,7 +552,7 @@ const en = {
     reviewDiscardButton: "Discard",
     reviewApproving: "Posting…",
     reviewDiscarding: "Discarding…",
-    reviewActionError: "That didn't go through — try again.",
+    reviewActionError: "Couldn't complete that review action — nothing was sent to GitHub. Try again.",
     reviewDiscardedNotice: "Discarded — never posted to GitHub.",
   },
   teamsV2: {
@@ -563,12 +563,12 @@ const en = {
     membersSection: "Members",
     sharedContextSection: "Shared context",
     sharedContextPlaceholder:
-      "Describe the team's tech stack, conventions, coding standards, domain knowledge, and any shared skills the agents should know about...",
+      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — every assigned agent gets this in every run…",
     sharedContextOverLimit: "Content exceeds the 64 KB limit. Reduce the text before saving.",
     usageMeterLabel: "Shared context usage",
     agentsSection: "Agents",
     noAgents: "No agents yet",
-    noAgentsSub: "Click + to create the first agent for this team.",
+    noAgentsSub: "Select + to create the first agent. Every agent on this team starts each run with its shared context.",
     newAgentTitle: "New agent",
     newAgentSubtitle: "Add an agent to this team",
     agentNameLabel: "Name",
@@ -612,7 +612,7 @@ const en = {
     noTeamsSub: "Create a team to get started.",
     createFirstTeam: "Create team",
     newTeamTitle: "New team",
-    newTeamSubtitle: "Organise agents into a focused group",
+    newTeamSubtitle: "Create a team to share context and instructions across its agents",
     teamNameLabel: "Name",
     teamNamePlaceholder: "e.g. Platform",
     teamDescriptionLabel: "Description",
@@ -682,7 +682,7 @@ const en = {
     agentUpdated: "Agent updated",
     agentDeleted: "Agent deleted",
     agentDuplicated: "Agent duplicated",
-    error: "Something went wrong",
+    error: "That didn't go through — nothing was changed. Try again.",
     connectionDeleted: "Connection removed",
     taskDeleted: "Task deleted",
     taskMarkedDone: "Task marked as done",

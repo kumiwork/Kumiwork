@@ -19,7 +19,7 @@ export function groupErrorsByRun(events: RunEventLike[]): Map<number, string[]> 
   const byRun = new Map<number, string[]>();
   for (const event of events) {
     if (event.type !== "error") continue;
-    const message = typeof event.data.message === "string" ? event.data.message : "Something went wrong.";
+    const message = typeof event.data.message === "string" ? event.data.message : "This run failed — no further detail was recorded.";
     const messages = byRun.get(event.runId) ?? [];
     messages.push(message);
     byRun.set(event.runId, messages);
