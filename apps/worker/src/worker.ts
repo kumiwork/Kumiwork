@@ -877,9 +877,12 @@ const runWorker = new Worker<RunJobData>(
             task.title,
             buildPullRequestBody({
               taskRef: task.ref,
+              taskTitle: task.title,
+              agentName: agent.name,
               taskDescription: task.description,
               summary: text,
               changedFiles,
+              draft,
             }),
             draft,
           );

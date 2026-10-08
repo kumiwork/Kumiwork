@@ -558,11 +558,21 @@ function stripSandboxPaths(text: string): string {
 // and the agent's own account of what it did to judge a draft PR without reading every diff line.
 export function buildPullRequestBody(params: {
   taskRef: string;
+  taskTitle: string;
+  agentName: string;
   taskDescription: string;
   summary: string;
   changedFiles: string[];
+  draft: boolean;
 }): string {
-  const sections = [`Opened automatically by Kumiwork for task ${params.taskRef}.`];
+  const openerLines = [
+    `Opened by Kumiwork · ${params.agentName} for ${params.taskRef}: ${params.taskTitle}.`,
+    "This agent can't merge — review and merge stay with you.",
+  ];
+  if (params.draft) {
+    openerLines.push("Opened as a draft: the branch's local checks didn't pass. The run transcript has details.");
+  }
+  const sections = [openerLines.join("\n")];
   if (params.summary.trim()) sections.push(`## What changed\n${stripSandboxPaths(params.summary.trim())}`);
   if (params.taskDescription.trim()) sections.push(`## Task\n${params.taskDescription.trim()}`);
   if (params.changedFiles.length > 0) {
