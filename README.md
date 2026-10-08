@@ -2,10 +2,14 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-Kumiwork is a platform for running coding agents against your team's repos. It's a pnpm
-workspace monorepo: `apps/web` (Next.js UI + API), `apps/worker` (the process that actually runs
-agent turns in a sandboxed Docker container), and shared `packages/*` (domain types, DB access via
-Drizzle, a BullMQ-backed queue, and shared UI components).
+Kumiwork is a workspace where the whole team works with dedicated AI agents that share the
+team's context, run on any model, improve continuously, and operate under the team's governance.
+Agents pick up tasks in isolated sandboxes and hand back work the team reviews — documents
+committed to a repo, pull requests they can never merge. Apache 2.0, self-hostable.
+
+Technically it's a pnpm workspace monorepo: `apps/web` (Next.js UI + API), `apps/worker` (the
+process that actually runs agent turns in a sandboxed Docker container), and shared `packages/*`
+(domain types, DB access via Drizzle, a BullMQ-backed queue, and shared UI components).
 
 See `ARCHITECTURE.md` for the full system design and `CLAUDE.md` for repo-specific conventions.
 
@@ -139,7 +143,7 @@ Log in with the demo credentials above.
 ## 6. Run the worker (optional)
 
 The worker is what actually executes an agent turn, inside a sandboxed Docker container. It's not
-required to click around the UI mock, but is needed for real runs.
+required to click around the web app, but is needed for real runs.
 
 Build the sandbox images it uses, one per language (`node`, `python`, `java`), tagged
 `kumiwork-sandbox-<lang>:local`. The build script stamps each image with a hash of
