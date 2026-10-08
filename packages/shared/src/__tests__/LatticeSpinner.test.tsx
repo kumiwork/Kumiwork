@@ -19,7 +19,7 @@ describe("LatticeSpinner", () => {
       </>,
     );
     expect(screen.getAllByRole("status")).toHaveLength(3);
-    const spinnerStyles = [...document.querySelectorAll("style")].filter((style) =>
+    const spinnerStyles = Array.from(document.querySelectorAll("style")).filter((style) =>
       style.textContent?.includes("@keyframes kwLatticeFrame"),
     );
     expect(spinnerStyles).toHaveLength(1);
