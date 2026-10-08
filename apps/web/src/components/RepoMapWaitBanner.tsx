@@ -77,7 +77,7 @@ export function RepoMapWaitBanner({ gate }: RepoMapWaitBannerProps) {
       {!gate.fallbackMessage && (
         <div className={styles.progress}>
           <span className={styles.spinner}>
-            <LatticeSpinner size={16} />
+            <LatticeSpinner size={16} label={t("common.loading")} />
           </span>
           <span className={styles.progressLabel}>{t(progressLabelKey(elapsed))}</span>
         </div>

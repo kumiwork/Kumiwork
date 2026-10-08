@@ -44,7 +44,7 @@ export function LatticeSpinner({ size = 24, label = "Loading" }: { size?: number
       <svg width={size} height={size} viewBox="0 0 48 48" fill="none" aria-hidden="true">
         <polygon
           className="kw-lattice-frame"
-          points="24,4 41.32,14 41.32,34 24,44 6.68,34 6.68,14"
+          points="32.66,9 41.32,14 41.32,34 24,44 6.68,34 6.68,14 24,4"
           stroke="currentColor"
           strokeWidth={4}
           strokeLinejoin="miter"
@@ -59,7 +59,7 @@ export function LatticeSpinner({ size = 24, label = "Loading" }: { size?: number
             strokeLinecap="round"
           />
         ))}
-        <circle className="kw-lattice-center" cx={24} cy={24} r={2.6} fill="var(--color-accent)" />
+        <circle className="kw-lattice-center" cx={24} cy={24} r={3.6} fill="var(--color-accent-300)" />
       </svg>
       <style>{SPINNER_CSS}</style>
     </span>

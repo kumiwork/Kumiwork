@@ -1111,7 +1111,7 @@ export default function TaskDetailPage() {
                           </svg>
                         ) : (
                           <span style={{ flexShrink: 0, display: "inline-flex", color: "var(--color-accent)" }}>
-                            <LatticeSpinner size={10} />
+                            <LatticeSpinner size={10} label={t("common.loading")} />
                           </span>
                         )}
                         {/* Tool name */}
@@ -1230,7 +1230,9 @@ export default function TaskDetailPage() {
                   {/* Agent working indicator — last item in the list */}
                   {isRunning && (
                     <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--color-neutral-400)", fontSize: 13 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--color-accent)", animation: "pulse 1.2s ease-in-out infinite" }} />
+                      <span style={{ display: "inline-flex", color: "var(--color-accent)" }}>
+                        <LatticeSpinner size={20} label={t("common.loading")} />
+                      </span>
                       {runStatusLabel(runStatus)}
                       {elapsedSec >= 10 && (
                         <span style={{ color: "var(--color-neutral-600)" }}>· {elapsedSec}s</span>
