@@ -61,7 +61,9 @@ export function LatticeSpinner({ size = 24, label = "Loading" }: { size?: number
         ))}
         <circle className="kw-lattice-center" cx={24} cy={24} r={3.6} fill="var(--color-accent-300)" />
       </svg>
-      <style>{SPINNER_CSS}</style>
+      <style href="kw-lattice-spinner" precedence="default">
+        {SPINNER_CSS}
+      </style>
     </span>
   );
 }
