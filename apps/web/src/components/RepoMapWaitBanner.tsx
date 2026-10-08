@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@kumiwork/shared";
+import { Button, LatticeSpinner } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import type { RepoMapWaitGate } from "@/lib/use-repo-map-wait-gate";
 import type { TranslationKey } from "@/lib/i18n/paths";
@@ -76,7 +76,9 @@ export function RepoMapWaitBanner({ gate }: RepoMapWaitBannerProps) {
       </p>
       {!gate.fallbackMessage && (
         <div className={styles.progress}>
-          <span className={styles.spinner} />
+          <span className={styles.spinner}>
+            <LatticeSpinner size={16} />
+          </span>
           <span className={styles.progressLabel}>{t(progressLabelKey(elapsed))}</span>
         </div>
       )}

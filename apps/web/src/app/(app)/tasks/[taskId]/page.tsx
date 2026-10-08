@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Badge, TooltipBubble } from "@kumiwork/shared";
+import { Badge, LatticeSpinner, TooltipBubble } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
 import { StatusMenu } from "@/components/StatusMenu";
@@ -1110,17 +1110,9 @@ export default function TaskDetailPage() {
                             <path d="M1.5 5l2.5 2.5 4.5-5" stroke="#4eca8b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         ) : (
-                          <span
-                            style={{
-                              flexShrink: 0,
-                              width: 10,
-                              height: 10,
-                              borderRadius: "50%",
-                              border: "1.5px solid var(--color-accent)",
-                              borderTopColor: "transparent",
-                              animation: "spin 0.8s linear infinite",
-                            }}
-                          />
+                          <span style={{ flexShrink: 0, display: "inline-flex", color: "var(--color-accent)" }}>
+                            <LatticeSpinner size={10} />
+                          </span>
                         )}
                         {/* Tool name */}
                         <span style={{ fontSize: 11, fontWeight: 600, color: "var(--color-neutral-500)", letterSpacing: "0.03em", flexShrink: 0 }}>
@@ -1306,9 +1298,6 @@ export default function TaskDetailPage() {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.3; }
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
         }
         @keyframes fadein {
           from { opacity: 0; transform: translateY(4px); }
