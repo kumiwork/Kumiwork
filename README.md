@@ -143,7 +143,7 @@ Log in with the demo credentials above.
 ## 6. Run the worker (optional)
 
 The worker is what actually executes an agent turn, inside a sandboxed Docker container. It's not
-required to click around the UI mock, but is needed for real runs.
+required to click around the web app, but is needed for real runs.
 
 Build the sandbox images it uses, one per language (`node`, `python`, `java`), tagged
 `kumiwork-sandbox-<lang>:local`. The build script stamps each image with a hash of
