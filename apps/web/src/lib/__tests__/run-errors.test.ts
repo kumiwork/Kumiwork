@@ -27,7 +27,7 @@ describe("groupErrorsByRun", () => {
   it("falls back to a generic message when data.message isn't a string", () => {
     const events = [{ runId: 1, type: "error", data: {} }];
 
-    expect(groupErrorsByRun(events).get(1)).toEqual(["Something went wrong."]);
+    expect(groupErrorsByRun(events).get(1)).toEqual(["This run failed — no further detail was recorded."]);
   });
 });
 
