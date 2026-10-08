@@ -173,7 +173,7 @@ const en = {
     startConversationWith: "Start a conversation with {name}",
     messagePlaceholder: "Message the agent… Enter to send, Shift+Enter for a new line",
     send: "Send",
-    replyFailed: "The agent couldn't reply — your message wasn't delivered. Try again.",
+    replyFailed: "The agent couldn't finish its reply — the run stopped partway. Check the run before you try again.",
     replyFailedInsufficientCredit:
       "The agent couldn't reply because the connected Claude API account is out of usage credits. Ask a workspace admin to add credits, then try again.",
   },
