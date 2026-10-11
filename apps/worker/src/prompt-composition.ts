@@ -181,6 +181,13 @@ export function formatEnvironmentForPrompt(env: SandboxEnvironment): string {
           "pushes the branch and opens the pull request for you once your turn ends, so you never " +
           "need to push or open a PR yourself.",
       );
+      if (!env.pullRequest) {
+        lines.push(
+          "- If this turn opens the pull request, your final message becomes its 'What changed' section, " +
+            "read by reviewers who may not use Kumiwork: state what you changed, what you deliberately " +
+            "did not change, and what to check first — plainly, without enthusiasm or apology.",
+        );
+      }
     }
   } else {
     lines.push(
