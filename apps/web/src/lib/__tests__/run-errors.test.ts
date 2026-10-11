@@ -9,7 +9,7 @@ describe("groupErrorsByRun", () => {
       { runId: 2, type: "error", data: { message: "kaboom" } },
     ];
 
-    const byRun = groupErrorsByRun(events);
+    const byRun = groupErrorsByRun(events, "no detail");
 
     expect(byRun.get(1)).toEqual(["boom"]);
     expect(byRun.get(2)).toEqual(["kaboom"]);
@@ -21,13 +21,13 @@ describe("groupErrorsByRun", () => {
       { runId: 1, type: "error", data: { message: "second" } },
     ];
 
-    expect(groupErrorsByRun(events).get(1)).toEqual(["first", "second"]);
+    expect(groupErrorsByRun(events, "no detail").get(1)).toEqual(["first", "second"]);
   });
 
-  it("falls back to a generic message when data.message isn't a string", () => {
+  it("falls back to the given message when data.message isn't a string", () => {
     const events = [{ runId: 1, type: "error", data: {} }];
 
-    expect(groupErrorsByRun(events).get(1)).toEqual(["Something went wrong."]);
+    expect(groupErrorsByRun(events, "no detail").get(1)).toEqual(["no detail"]);
   });
 });
 

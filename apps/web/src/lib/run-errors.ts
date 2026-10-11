@@ -13,13 +13,13 @@ export function findErrorCodeForRun(events: RunEventLike[], runId: number): stri
   return event ? (event.data.code as string) : undefined;
 }
 
-// Groups "error" RunEvents by runId, defaulting to a generic message when the event
+// Groups "error" RunEvents by runId, defaulting to fallbackMessage when the event
 // carries no usable text.
-export function groupErrorsByRun(events: RunEventLike[]): Map<number, string[]> {
+export function groupErrorsByRun(events: RunEventLike[], fallbackMessage: string): Map<number, string[]> {
   const byRun = new Map<number, string[]>();
   for (const event of events) {
     if (event.type !== "error") continue;
-    const message = typeof event.data.message === "string" ? event.data.message : "Something went wrong.";
+    const message = typeof event.data.message === "string" ? event.data.message : fallbackMessage;
     const messages = byRun.get(event.runId) ?? [];
     messages.push(message);
     byRun.set(event.runId, messages);

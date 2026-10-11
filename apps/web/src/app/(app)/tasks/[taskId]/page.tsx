@@ -389,7 +389,7 @@ export default function TaskDetailPage() {
   // Errors recorded on a run — including a top-level failure that never reached
   // createMessage, so this is the only record of it. Keyed by runId, same shape as
   // thinkingByRun, so both can drive rendering next to (or in place of) that run's reply.
-  const errorsByRun = useMemo(() => groupErrorsByRun(rawEvents), [rawEvents]);
+  const errorsByRun = useMemo(() => groupErrorsByRun(rawEvents, t("taskDetail.runErrorNoDetail")), [rawEvents, t]);
 
   const applyStatusChange = async (status: TaskStatus) => {
     if (!task || savingStatus) return;
