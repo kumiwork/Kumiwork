@@ -34,7 +34,7 @@ const en = {
     confirmPasswordLabel: "Confirm Password",
     passwordPlaceholder: "••••••••",
     passwordMismatch: "Passwords don't match",
-    genericError: "That didn't go through — nothing was changed. Try again.",
+    genericError: "That didn't go through. Try again.",
     login: {
       title: "Welcome back",
       subtitle: "Log in to your account",
@@ -147,9 +147,9 @@ const en = {
     agentAssignedOther: "{count} agents assigned",
     sharedContext: "Shared context",
     sharedContextDescription:
-      "Team knowledge and instructions injected into every run of every assigned agent.",
+      "Team knowledge and instructions injected into the task runs of every assigned agent.",
     sharedContextPlaceholder:
-      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — every assigned agent gets this in every run…",
+      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — assigned agents get this in their task runs…",
     kbOfKb: "{used} KB / {max} KB",
     assignedAgents: "Assigned agents",
     noAgentsAssigned: "No agents assigned to this team yet.",
@@ -171,9 +171,9 @@ const en = {
   },
   session: {
     startConversationWith: "Start a conversation with {name}",
-    messagePlaceholder: "Message the agent… Enter to send, Shift+Enter for a new line",
+    messagePlaceholder: "Message the agent… (↵ send · ⇧↵ new line)",
     send: "Send",
-    replyFailed: "The agent couldn't finish its reply — the run stopped partway. Check the run before you try again.",
+    replyFailed: "The agent couldn't finish its reply. It may have stopped partway. Try again.",
     replyFailedInsufficientCredit:
       "The agent couldn't reply because the connected Claude API account is out of usage credits. Ask a workspace admin to add credits, then try again.",
   },
@@ -398,6 +398,7 @@ const en = {
     },
   },
   taskDetail: {
+    runErrorNoDetail: "An error occurred, but no detail was recorded.",
     criteria: "Acceptance criteria",
     description: "What needs to be done",
     assignee: "Assignee",
@@ -552,7 +553,7 @@ const en = {
     reviewDiscardButton: "Discard",
     reviewApproving: "Posting…",
     reviewDiscarding: "Discarding…",
-    reviewActionError: "Couldn't complete that review action — nothing was sent to GitHub. Try again.",
+    reviewActionError: "Couldn't complete that review action. Check the pull request on GitHub before you try again.",
     reviewDiscardedNotice: "Discarded — never posted to GitHub.",
   },
   teamsV2: {
@@ -563,12 +564,12 @@ const en = {
     membersSection: "Members",
     sharedContextSection: "Shared context",
     sharedContextPlaceholder:
-      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — every assigned agent gets this in every run…",
+      "Describe the team's tech stack, conventions, coding standards, and domain knowledge — assigned agents get this in their task runs…",
     sharedContextOverLimit: "Content exceeds the 64 KB limit. Reduce the text before saving.",
     usageMeterLabel: "Shared context usage",
     agentsSection: "Agents",
     noAgents: "No agents yet",
-    noAgentsSub: "Select + to create the first agent. Every agent on this team starts each run with its shared context.",
+    noAgentsSub: "Select + to create the first agent for this team.",
     newAgentTitle: "New agent",
     newAgentSubtitle: "Add an agent to this team",
     agentNameLabel: "Name",
@@ -682,7 +683,7 @@ const en = {
     agentUpdated: "Agent updated",
     agentDeleted: "Agent deleted",
     agentDuplicated: "Agent duplicated",
-    error: "That didn't go through — nothing was changed. Try again.",
+    error: "That didn't go through. Try again.",
     connectionDeleted: "Connection removed",
     taskDeleted: "Task deleted",
     taskMarkedDone: "Task marked as done",
