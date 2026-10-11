@@ -9,6 +9,7 @@ export * from "./Textarea";
 export * from "./TooltipBubble";
 export * from "./Truncate";
 export * from "./EmptyState";
+export * from "./LatticeSpinner";
 export * from "./Tabs";
 export * from "./UsageMeter";
 export * from "./MultiSelectCheckboxList";

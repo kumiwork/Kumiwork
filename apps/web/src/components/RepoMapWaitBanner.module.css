@@ -7,21 +7,11 @@
 
 .spinner {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-accent);
-  border-top-color: transparent;
-  animation: repoMapWaitSpin 0.8s linear infinite;
+  display: inline-flex;
+  color: var(--color-accent);
 }
 
 .progressLabel {
   font-size: 12px;
   color: var(--color-neutral-500);
-}
-
-@keyframes repoMapWaitSpin {
-  to {
-    transform: rotate(360deg);
-  }
 }
