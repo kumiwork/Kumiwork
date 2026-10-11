@@ -29,7 +29,9 @@ export function checkKindsOf(command: string): CheckKind[] {
   return CHECK_PATTERNS.filter(([, pattern]) => pattern.test(command)).map(([kind]) => kind);
 }
 
-export function localChecksPassed(events: readonly CheckEvent[]): boolean {
+export type LocalChecksOutcome = "passed" | "failed" | "not_run";
+
+export function localChecksOutcome(events: readonly CheckEvent[]): LocalChecksOutcome {
   const latestPassed = new Map<CheckKind, boolean>();
   const ordered = [...events].sort((a, b) => a.runId - b.runId || a.seq - b.seq);
   for (const event of ordered) {
@@ -39,5 +41,6 @@ export function localChecksPassed(events: readonly CheckEvent[]): boolean {
       latestPassed.set(kind, event.data.isError !== true);
     }
   }
-  return latestPassed.size > 0 && [...latestPassed.values()].every(Boolean);
+  if (latestPassed.size === 0) return "not_run";
+  return [...latestPassed.values()].every(Boolean) ? "passed" : "failed";
 }

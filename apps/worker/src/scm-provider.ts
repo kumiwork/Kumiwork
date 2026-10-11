@@ -14,6 +14,7 @@ import {
   AGENT_GIT_EMAIL,
 } from "./platform-git";
 import { keepTail, maskSecrets } from "./secret-masking";
+import type { LocalChecksOutcome } from "./local-checks";
 
 const MAX_CLONE_ERROR_DETAIL_CHARS = 2_000;
 
@@ -553,6 +554,15 @@ function stripSandboxPaths(text: string): string {
   return text.replace(/\/workspace\//g, "").replace(/\/workspace\b/g, "the repo root");
 }
 
+function withoutMentions(text: string): string {
+  return text.replace(/@(?=[A-Za-z0-9])/g, "@\u200B");
+}
+
+const DRAFT_REASONS: Record<Exclude<LocalChecksOutcome, "passed">, string> = {
+  failed: "Opened as a draft: the branch's local checks didn't pass. The run transcript has details.",
+  not_run: "Opened as a draft: the agent didn't run tests, lint, or typecheck on this branch.",
+};
+
 // Composes an informative PR body from what the run actually produced, rather than the one-line
 // "opened automatically for task T-xxx" placeholder — reviewers need the task's own description
 // and the agent's own account of what it did to judge a draft PR without reading every diff line.
@@ -563,15 +573,13 @@ export function buildPullRequestBody(params: {
   taskDescription: string;
   summary: string;
   changedFiles: string[];
-  draft: boolean;
+  checks: LocalChecksOutcome;
 }): string {
   const openerLines = [
-    `Opened by Kumiwork · ${params.agentName} for ${params.taskRef}: ${params.taskTitle}.`,
+    `Opened by Kumiwork · ${withoutMentions(params.agentName)} for ${params.taskRef}: ${withoutMentions(params.taskTitle)}.`,
     "This agent can't merge — review and merge stay with you.",
   ];
-  if (params.draft) {
-    openerLines.push("Opened as a draft: the branch's local checks didn't pass. The run transcript has details.");
-  }
+  if (params.checks !== "passed") openerLines.push(DRAFT_REASONS[params.checks]);
   const sections = [openerLines.join("\n")];
   if (params.summary.trim()) sections.push(`## What changed\n${stripSandboxPaths(params.summary.trim())}`);
   if (params.taskDescription.trim()) sections.push(`## Task\n${params.taskDescription.trim()}`);

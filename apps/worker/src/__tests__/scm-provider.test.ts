@@ -828,7 +828,7 @@ describe("buildPullRequestBody", () => {
       taskDescription: "Add a retry button to the failed-run banner.",
       summary: "Added a Retry button that re-enqueues the run.",
       changedFiles: ["src/RunBanner.tsx", "src/api.ts"],
-      draft: false,
+      checks: "passed",
     });
 
     expect(body).toContain("Opened by Kumiwork · Code reviewer for T-042: Retry failed runs.");
@@ -848,7 +848,7 @@ describe("buildPullRequestBody", () => {
       taskDescription: "",
       summary: "",
       changedFiles: [],
-      draft: false,
+      checks: "passed",
     });
     expect(body).toBe(
       "Opened by Kumiwork · Builder for T-1: Fix the banner.\n" +
@@ -864,13 +864,41 @@ describe("buildPullRequestBody", () => {
       taskDescription: "",
       summary: "",
       changedFiles: [],
-      draft: true,
+      checks: "failed",
     });
     expect(body).toBe(
       "Opened by Kumiwork · Builder for T-2: Fix the banner.\n" +
         "This agent can't merge — review and merge stay with you.\n" +
         "Opened as a draft: the branch's local checks didn't pass. The run transcript has details.",
     );
+  });
+
+  it("explains a draft PR whose agent never ran a check", () => {
+    const body = buildPullRequestBody({
+      taskRef: "T-3",
+      taskTitle: "Fix the banner",
+      agentName: "Builder",
+      taskDescription: "",
+      summary: "",
+      changedFiles: [],
+      checks: "not_run",
+    });
+    expect(body).toContain("Opened as a draft: the agent didn't run tests, lint, or typecheck on this branch.");
+    expect(body).not.toContain("didn't pass");
+  });
+
+  it("keeps @handles in the task title and agent name from becoming GitHub mentions", () => {
+    const body = buildPullRequestBody({
+      taskRef: "T-4",
+      taskTitle: "Fix the bug @dana found",
+      agentName: "@ops-bot",
+      taskDescription: "",
+      summary: "",
+      changedFiles: [],
+      checks: "passed",
+    });
+    expect(body).not.toMatch(/@[A-Za-z0-9]/);
+    expect(body.replaceAll("\u200B", "")).toContain("Opened by Kumiwork · @ops-bot for T-4: Fix the bug @dana found.");
   });
 
   it("strips the sandbox's /workspace mount path out of the agent's summary", () => {
@@ -881,7 +909,7 @@ describe("buildPullRequestBody", () => {
       taskDescription: "",
       summary: "Created `/workspace/README.md` with a full local-setup guide. Files live under /workspace.",
       changedFiles: [],
-      draft: false,
+      checks: "passed",
     });
 
     expect(body).toContain("Created `README.md` with a full local-setup guide.");

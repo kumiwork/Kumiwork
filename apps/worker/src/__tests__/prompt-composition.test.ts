@@ -442,6 +442,24 @@ describe("formatEnvironmentForPrompt", () => {
     expect(result).toContain("Do not search the filesystem for it.");
   });
 
+  it("tells the agent its final message becomes the PR description only while the task has no PR yet", () => {
+    const firstPush = formatEnvironmentForPrompt({ workspacePath: "/workspace", branch: "agent/session-32" });
+    const prAlreadyOpen = formatEnvironmentForPrompt({
+      workspacePath: "/workspace",
+      branch: "agent/session-32",
+      pullRequest: { number: 7, feedback: "none" },
+    });
+    const chatOnly = formatEnvironmentForPrompt({});
+
+    expect(firstPush).toContain("'What changed' section");
+    expect(prAlreadyOpen).not.toContain("'What changed' section");
+    expect(chatOnly).not.toContain("'What changed' section");
+  });
+
+  it("keeps the PR description instruction out of the preamble every run shares", () => {
+    expect(PLATFORM_PREAMBLE).not.toContain("What changed");
+  });
+
   it("rules out every remote-access route the sandbox actually lacks", () => {
     const result = formatEnvironmentForPrompt({ workspacePath: "/workspace", branch: "agent/session-32" });
 

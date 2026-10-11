@@ -127,7 +127,7 @@ import { notifySessionOfPendingReview, notifySessionOfReply, startTypingIndicato
 import { createRunEventHandler } from "./run-event-handler";
 import { maskSecrets } from "./secret-masking";
 import { RunTurnTimeoutError, runTurnTimeoutMs, withRunTurnTimeout } from "./run-timeout";
-import { localChecksPassed } from "./local-checks";
+import { localChecksOutcome } from "./local-checks";
 import { createLogger } from "@kumiwork/logger";
 import { findProblemImages, resolveSandboxImageCheckMode, runSandboxImageCheck } from "./sandbox-image-check";
 
@@ -869,7 +869,8 @@ const runWorker = new Worker<RunJobData>(
         // (same head branch) — opening another PR for a branch that already has one 422s. Only
         // ever open once per task; task.prNumber is the record of whether that's already happened.
         if (result.pushed && !task.prNumber) {
-          const draft = !localChecksPassed(await listEventsForSession(session.id));
+          const checks = localChecksOutcome(await listEventsForSession(session.id));
+          const draft = checks !== "passed";
           const pr = await openPullRequest(
             agent.orgId,
             workspace.repoFullName,
@@ -882,7 +883,7 @@ const runWorker = new Worker<RunJobData>(
               taskDescription: task.description,
               summary: text,
               changedFiles,
-              draft,
+              checks,
             }),
             draft,
           );

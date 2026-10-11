@@ -24,10 +24,7 @@ export const PLATFORM_PREAMBLE =
   "commit it and open a pull request rather than pushing directly to a protected branch. Keep " +
   "your final response concise — it is shown to the team as the run's summary. If the user " +
   "explicitly asks you to remember something for future sessions, call the `mcp__memory__remember` " +
-  "tool with a concise summary of what to remember. Your final message becomes the pull request's " +
-  "'What changed' section, read by reviewers who may not use Kumiwork: state what you changed, what " +
-  "you deliberately did not change, and what to check first — plainly, without enthusiasm or " +
-  "apology.\n\n---\n\n";
+  "tool with a concise summary of what to remember.\n\n---\n\n";
 
 // Sibling to PLATFORM_PREAMBLE for review runs — deliberately does NOT say "commit and open a
 // PR": a review run never commits, pushes, or has push credentials in the sandbox at all. It
@@ -184,6 +181,13 @@ export function formatEnvironmentForPrompt(env: SandboxEnvironment): string {
           "pushes the branch and opens the pull request for you once your turn ends, so you never " +
           "need to push or open a PR yourself.",
       );
+      if (!env.pullRequest) {
+        lines.push(
+          "- If this turn opens the pull request, your final message becomes its 'What changed' section, " +
+            "read by reviewers who may not use Kumiwork: state what you changed, what you deliberately " +
+            "did not change, and what to check first — plainly, without enthusiasm or apology.",
+        );
+      }
     }
   } else {
     lines.push(
