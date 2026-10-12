@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { MAX_MEMORY_CONTENT_CHARS } from "@kumiwork/core";
+import { MAX_MEMORY_CONTENT_CHARS, SMALL_MODEL_ID } from "@kumiwork/core";
 import { escapeTimelineText } from "./session-timeline";
-
-export const ADJUDICATOR_MODEL = "claude-haiku-4-5";
 
 export interface MemoryCandidate {
   id: number;
@@ -84,7 +82,7 @@ export async function adjudicateMemoryWrite(
   create: CreateAdjudicationMessage = defaultCreate,
 ): Promise<Adjudication> {
   const response = await create({
-    model: ADJUDICATOR_MODEL,
+    model: SMALL_MODEL_ID,
     max_tokens: 512,
     system: ADJUDICATOR_SYSTEM_PROMPT,
     tools: [ADJUDICATE_TOOL],

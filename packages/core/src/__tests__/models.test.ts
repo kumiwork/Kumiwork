@@ -7,6 +7,7 @@ import {
   MODEL_CATALOG,
   nextEscalationTier,
   runtimeForModel,
+  SMALL_MODEL_ID,
   totalTokens,
 } from "../models";
 
@@ -87,6 +88,13 @@ describe("buildModelSpec", () => {
 
   it("rejects an id that is not in the catalog", () => {
     expect(() => buildModelSpec("not-a-real-model")).toThrow(/Unknown model id/);
+  });
+});
+
+describe("SMALL_MODEL_ID", () => {
+  it("names an Anthropic catalog entry", () => {
+    expect(isValidModelId(SMALL_MODEL_ID)).toBe(true);
+    expect(buildModelSpec(SMALL_MODEL_ID).family).toBe("anthropic");
   });
 });
 

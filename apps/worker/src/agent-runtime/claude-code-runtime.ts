@@ -2,7 +2,7 @@ import type { SandboxProvider } from "../sandbox/types";
 import { SKILL_DIR } from "../skill-paths";
 import { readAgentTurnOutput } from "./marker-protocol";
 import { AGENT_GIT_EMAIL } from "../platform-git";
-import { buildModelSpec } from "@kumiwork/core";
+import { buildModelSpec, SMALL_MODEL_ID } from "@kumiwork/core";
 import type {
   AgentRuntime,
   AgentTurnResult,
@@ -17,7 +17,7 @@ import type {
 const REPO_MAP_RESULT_MARKER = "__RESULT__";
 
 const claudeRepoMapGenerator: RepoMapGenerator = {
-  model: buildModelSpec("claude-haiku-4-5"),
+  model: buildModelSpec(SMALL_MODEL_ID),
   async generate({ sandboxProvider, sandboxId, modelEndpoint }) {
     let stdout = "";
     for await (const chunk of sandboxProvider.exec(
