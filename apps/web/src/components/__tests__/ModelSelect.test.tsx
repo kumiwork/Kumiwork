@@ -31,7 +31,19 @@ describe("ModelSelect", () => {
       models: [...group.querySelectorAll("option")].map((option) => option.textContent),
     }));
     expect(groups).toEqual([
-      { label: "Anthropic", models: ["Claude Haiku 4.5", "Claude Sonnet 5", "Claude Opus 5", "Claude Fable 5"] },
+      {
+        label: "Anthropic",
+        models: [
+          "Claude Haiku 4.5",
+          "Claude Sonnet 5",
+          "Claude Opus 5",
+          "Claude Fable 5",
+          "Claude Haiku 5.5",
+          "Claude Sonnet 5.5",
+          "Claude Opus 5.5",
+          "Claude Fable 5.1",
+        ],
+      },
       { label: "OpenAI", models: ["GPT-6 Luna", "GPT-6 Sol"] },
     ]);
   });

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   buildModelSpec,
   computeCostUsd,
+  DEFAULT_MODEL_ID,
   findCatalogEntryForResponseModel,
   isValidModelId,
   MODEL_CATALOG,
@@ -25,6 +26,17 @@ describe("cost computation", () => {
     expect(findCatalogEntryForResponseModel("claude-haiku-4-5")?.id).toBe("claude-haiku-4-5");
     expect(findCatalogEntryForResponseModel("claude-haiku-4-50")).toBeUndefined();
     expect(findCatalogEntryForResponseModel("unknown")).toBeUndefined();
+  });
+
+  it.each([
+    ["claude-haiku-5-5-20260601", "claude-haiku-5-5"],
+    ["claude-sonnet-5-5-20260601", "claude-sonnet-5-5"],
+    ["claude-opus-5-5-20260601", "claude-opus-5-5"],
+    ["claude-fable-5-1-20260601", "claude-fable-5-1"],
+    ["claude-sonnet-5-20260601", "claude-sonnet-5"],
+    ["claude-fable-5-20260601", "claude-fable-5"],
+  ])("matches the dated response id %s to %s and never to a shorter id", (responseModel, catalogId) => {
+    expect(findCatalogEntryForResponseModel(responseModel)?.id).toBe(catalogId);
   });
 
   it("totals every token class", () => {
@@ -63,6 +75,13 @@ describe("nextEscalationTier", () => {
 
   it("excludes fable from the ladder", () => {
     expect(nextEscalationTier("claude-fable-5")).toBeUndefined();
+    expect(nextEscalationTier("claude-fable-5-1")).toBeUndefined();
+  });
+
+  it("walks the 5.5 ladder from haiku to sonnet to opus", () => {
+    expect(nextEscalationTier("claude-haiku-5-5")).toBe("claude-sonnet-5-5");
+    expect(nextEscalationTier("claude-sonnet-5-5")).toBe("claude-opus-5-5");
+    expect(nextEscalationTier("claude-opus-5-5")).toBeUndefined();
   });
 
   it("returns undefined for an unknown model id", () => {
@@ -74,6 +93,20 @@ describe("nextEscalationTier", () => {
       const next = nextEscalationTier(entry.id);
       if (next) expect(buildModelSpec(next).family).toBe(entry.provider);
     }
+  });
+});
+
+describe("new Anthropic models", () => {
+  it.each(["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "claude-fable-5-1"])(
+    "accepts %s and runs it on the Claude Code runtime",
+    (id) => {
+      expect(isValidModelId(id)).toBe(true);
+      expect(runtimeForModel(buildModelSpec(id))).toBe("claude-code");
+    },
+  );
+
+  it("keeps the default model unchanged", () => {
+    expect(DEFAULT_MODEL_ID).toBe("claude-sonnet-5");
   });
 });
 
