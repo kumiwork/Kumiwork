@@ -10,6 +10,7 @@ export * from "./TooltipBubble";
 export * from "./Truncate";
 export * from "./EmptyState";
 export * from "./LatticeSpinner";
+export * from "./KumiworkMark";
 export * from "./Tabs";
 export * from "./UsageMeter";
 export * from "./MultiSelectCheckboxList";
