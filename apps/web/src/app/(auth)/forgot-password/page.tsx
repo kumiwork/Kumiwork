@@ -13,7 +13,6 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthCard
-      icon={<MailIcon size={18} />}
       title={t("auth.forgotPassword.title")}
       subtitle={t("auth.forgotPassword.subtitle")}
       footer={

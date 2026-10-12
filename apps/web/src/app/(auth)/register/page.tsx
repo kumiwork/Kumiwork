@@ -9,16 +9,6 @@ import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
 import { LockIcon, MailIcon, UserIcon } from "@/lib/icons";
 
-function UserPlusIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
-      <path d="M19 8v6M22 11h-6" />
-    </svg>
-  );
-}
-
 export default function RegisterPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -51,7 +41,6 @@ export default function RegisterPage() {
 
   return (
     <AuthCard
-      icon={<UserPlusIcon className="h-5 w-5" style={{ color: "var(--color-accent)" }} />}
       title={t("auth.register.title")}
       subtitle={t("auth.register.subtitle")}
       footer={

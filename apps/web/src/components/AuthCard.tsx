@@ -1,15 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { KumiworkMark } from "@kumiwork/shared";
 
 export function AuthCard({
-  icon,
   title,
   subtitle,
   children,
   footer,
 }: {
-  icon: ReactNode;
   title: string;
   subtitle: string;
   children: ReactNode;
@@ -23,7 +22,7 @@ export function AuthCard({
             className="mb-4 flex items-center justify-center bg-[var(--color-accent-800)] border border-[var(--color-accent-600)] text-[var(--color-accent)]"
             style={{ width: 44, height: 44, borderRadius: "var(--radius-md)" }}
           >
-            {icon}
+            <KumiworkMark size={26} />
           </div>
           <h1 className="text-xl font-semibold text-[var(--color-text)]">{title}</h1>
           <p className="mt-1 text-sm text-[var(--color-neutral-500)]">{subtitle}</p>
