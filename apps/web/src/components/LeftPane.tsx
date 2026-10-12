@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { KumiworkMark } from "@kumiwork/shared";
 import { useTranslation } from "@/lib/i18n/context";
 import { ActivityIcon, BotIcon, LogOutIcon, SettingsIcon, SparklesIcon, TasksIcon, UsersIcon } from "@/lib/icons";
 import { useAppData } from "@/lib/app-data/context";
@@ -36,10 +37,10 @@ export function LeftPane({ children }: { children: React.ReactNode }) {
           style={{ padding: "16px 14px 12px" }}
         >
           <div
-            className="flex shrink-0 items-center justify-center bg-[var(--color-accent-800)] border border-[var(--color-accent-600)]"
+            className="flex shrink-0 items-center justify-center bg-[var(--color-accent-800)] border border-[var(--color-accent-600)] text-[var(--color-accent)]"
             style={{ width: 26, height: 26, borderRadius: 7 }}
           >
-            <BotIcon size={13} style={{ color: "var(--color-accent)" }} />
+            <KumiworkMark size={16} />
           </div>
           <span style={{ fontSize: 13, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--color-text)" }}>
             Kumiwork
