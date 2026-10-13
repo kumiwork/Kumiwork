@@ -32,6 +32,8 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
 
 export const DEFAULT_MODEL_ID = "claude-sonnet-5";
 
+export const SMALL_MODEL_ID = "claude-haiku-4-5";
+
 const PROVIDER_RUNTIME: Record<ModelProvider, RuntimeKind> = {
   anthropic: "claude-code",
   openai: "codex",
