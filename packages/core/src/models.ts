@@ -26,6 +26,10 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
   { id: "claude-sonnet-5", label: "Claude Sonnet 5", provider: "anthropic" },
   { id: "claude-opus-5", label: "Claude Opus 5", provider: "anthropic" },
   { id: "claude-fable-5", label: "Claude Fable 5", provider: "anthropic" },
+  { id: "claude-haiku-5-5", label: "Claude Haiku 5.5", provider: "anthropic" },
+  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5", provider: "anthropic" },
+  { id: "claude-opus-5-5", label: "Claude Opus 5.5", provider: "anthropic" },
+  { id: "claude-fable-5-1", label: "Claude Fable 5.1", provider: "anthropic" },
   { id: "gpt-6-luna", label: "GPT-6 Luna", provider: "openai" },
   { id: "gpt-6-sol", label: "GPT-6 Sol", provider: "openai" },
 ];
@@ -41,8 +45,11 @@ const PROVIDER_RUNTIME: Record<ModelProvider, RuntimeKind> = {
 
 // Explicit list, not derived from MODEL_CATALOG order — keeps Fable's exclusion a deliberate
 // fact in the data rather than an accident of catalog ordering.
-const ESCALATION_LADDERS: Record<ModelProvider, readonly string[]> = {
-  anthropic: ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-5"],
+const ESCALATION_LADDERS: Record<ModelProvider, readonly (readonly string[])[]> = {
+  anthropic: [
+    ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-5"],
+    ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"],
+  ],
   openai: [],
 };
 
@@ -85,10 +92,9 @@ export function runtimeForModel(model: ModelSpec): RuntimeKind {
 export function nextEscalationTier(modelId: string): string | undefined {
   const entry = getCatalogEntry(modelId);
   if (!entry) return undefined;
-  const ladder = ESCALATION_LADDERS[entry.provider];
-  const index = ladder.indexOf(modelId);
-  if (index === -1 || index === ladder.length - 1) return undefined;
-  return ladder[index + 1];
+  const ladder = ESCALATION_LADDERS[entry.provider].find((candidate) => candidate.includes(modelId));
+  if (!ladder) return undefined;
+  return ladder[ladder.indexOf(modelId) + 1];
 }
 
 export function isValidOverflowPolicy(value: string): value is OverflowPolicy {
