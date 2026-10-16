@@ -292,4 +292,22 @@ describe("a run whose agent turn finishes within the limit", () => {
 
     await expect(runProcessor({ data: { runId: 1 } })).resolves.not.toThrow();
   });
+
+  it("passes the selected effort to the agent turn", async () => {
+    vi.mocked(getAgent).mockResolvedValue({
+      id: 20,
+      orgId: 5,
+      teamId: null,
+      name: "Builder",
+      systemPrompt: "You build things.",
+      model: { family: "anthropic", id: "claude-x", maxTokens: 8192 },
+      onContextOverflow: "fail",
+      effort: "low",
+    } as never);
+    h.runTurn.mockResolvedValue({ text: "All done.", providerSessionRef: "sdk-1" } as never);
+
+    await runProcessor({ data: { runId: 1 } });
+
+    expect(h.runTurn).toHaveBeenCalledWith(expect.objectContaining({ effort: "low" }), expect.anything());
+  });
 });
