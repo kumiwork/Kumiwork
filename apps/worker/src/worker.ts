@@ -225,7 +225,8 @@ const runWorker = new Worker<RunJobData>(
       if (!session || !agent) throw new Error(`Run ${runId} has no session/agent to work with`);
       const task = await getTaskBySessionId(session.id);
       const triggeringMessage = run.triggeringMessageId ? await getMessage(run.triggeringMessageId) : undefined;
-      const { model: selectedModel } = await explicitModelSelector.select({ agent, task, triggeringMessage });
+      const selection = await explicitModelSelector.select({ agent, task, triggeringMessage });
+      const selectedModel = selection.model;
       const runtime = getAgentRuntime(runtimeForModel(selectedModel));
       const caps = runtime.capabilities();
 
@@ -716,7 +717,7 @@ const runWorker = new Worker<RunJobData>(
                   {
                     systemPrompt,
                     model: attemptModel!,
-                    effort: agent.effort,
+                    effort: selection.effort,
                     userText: (triggeringMessage?.content ?? "") + issueContext + prFeedbackContext,
                     agentName: agent.name,
                     resumeSessionRef,
