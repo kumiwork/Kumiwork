@@ -25,6 +25,7 @@ import type {
   TaskExternalRef,
   ToolPolicy,
 } from "@kumiwork/core";
+import { EFFORT_LEVELS } from "@kumiwork/core";
 
 // `generatedByDefaultAsIdentity` (not `generatedAlways`) so seed.ts can still assign explicit,
 // stable ids for its fixture rows via `.overridingSystemValue()`, while app-created rows omit
@@ -128,6 +129,7 @@ export const agents = pgTable(
     onContextOverflow: text("on_context_overflow", { enum: ["fallback", "fail_fast"] })
       .notNull()
       .default("fallback"),
+    effort: text("effort", { enum: EFFORT_LEVELS }),
     // Intentionally unwired for alpha: editing UI removed, nothing reads this.
     // Column kept to avoid a migration for no gain; do not build UI on top of it without a plan.
     areaMap: jsonb("area_map").$type<Record<string, string>>(),

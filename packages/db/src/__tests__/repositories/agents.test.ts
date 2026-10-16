@@ -164,7 +164,57 @@ describe("agents repository", () => {
     expect(updated?.onContextOverflow).toBe("fail_fast");
   });
 
+  it("leaves effort unset by default", async () => {
+    const org = await insertOrg();
+    const agent = await createAgent(org.id, {
+      name: "Reviewer",
+      description: "",
+      systemPrompt: "Be helpful.",
+      mode: "manual",
+    });
+    expect(agent.effort).toBeUndefined();
+    await expect(getAgent(agent.id)).resolves.toEqual(agent);
+  });
+
+  it("accepts an explicit effort on create", async () => {
+    const org = await insertOrg();
+    const agent = await createAgent(org.id, {
+      name: "Quick fixer",
+      description: "",
+      systemPrompt: "Be helpful.",
+      mode: "manual",
+      effort: "low",
+    });
+    expect(agent.effort).toBe("low");
+    await expect(getAgent(agent.id)).resolves.toMatchObject({ effort: "low" });
+  });
+
+  it("updates effort and clears it when patched to undefined", async () => {
+    const org = await insertOrg();
+    const agent = await insertAgent(org.id);
+
+    const raised = await updateAgent(agent.id, { effort: "xhigh" });
+    expect(raised?.effort).toBe("xhigh");
+
+    const untouched = await updateAgent(agent.id, { name: "Renamed" });
+    expect(untouched?.effort).toBe("xhigh");
+
+    const cleared = await updateAgent(agent.id, { effort: undefined });
+    expect(cleared?.effort).toBeUndefined();
+  });
+
   describe("duplicateAgent", () => {
+    it("copies effort to the duplicate", async () => {
+      const org = await insertOrg();
+      const targetTeam = await insertTeam(org.id, { name: "Target" });
+      const agent = await insertAgent(org.id);
+      await updateAgent(agent.id, { effort: "medium" });
+
+      const duplicate = await duplicateAgent(agent.id, targetTeam.id);
+
+      expect(duplicate?.effort).toBe("medium");
+    });
+
     it("copies everything into the target team, prefixing the name", async () => {
       const org = await insertOrg();
       const sourceTeam = await insertTeam(org.id, { name: "Source" });

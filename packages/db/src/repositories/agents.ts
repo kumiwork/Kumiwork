@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { Agent, AgentMode, OverflowPolicy } from "@kumiwork/core";
+import type { Agent, AgentMode, EffortLevel, OverflowPolicy } from "@kumiwork/core";
 import { buildModelSpec, runtimeForModel } from "@kumiwork/core";
 import { db } from "../client";
 import { agents, agentSkills } from "../schema";
@@ -25,6 +25,7 @@ function toAgent(row: typeof agents.$inferSelect): Agent {
     toolPolicy: row.toolPolicy,
     connectionIds: row.connectionIds,
     onContextOverflow: row.onContextOverflow,
+    effort: row.effort ?? undefined,
     areaMap: row.areaMap ?? undefined,
     defaultCodebase: row.defaultCodebase ?? undefined,
     createdAt: row.createdAt.toISOString(),
@@ -51,6 +52,7 @@ export interface NewAgentInput {
   /** Model catalog id (see @kumiwork/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
   model?: string;
   onContextOverflow?: OverflowPolicy;
+  effort?: EffortLevel;
   defaultCodebase?: string;
 }
 
@@ -71,6 +73,7 @@ export async function createAgent(orgId: number, input: NewAgentInput): Promise<
       toolPolicy: { defaultDecision: "deny", rules: [] },
       connectionIds: [],
       onContextOverflow: input.onContextOverflow ?? "fallback",
+      effort: input.effort ?? null,
       defaultCodebase: input.defaultCodebase || null,
     })
     .returning();
@@ -79,7 +82,7 @@ export async function createAgent(orgId: number, input: NewAgentInput): Promise<
 
 export interface AgentPatch
   extends Partial<
-    Pick<Agent, "name" | "description" | "systemPrompt" | "mode" | "teamId" | "areaMap" | "defaultCodebase" | "onContextOverflow">
+    Pick<Agent, "name" | "description" | "systemPrompt" | "mode" | "teamId" | "areaMap" | "defaultCodebase" | "onContextOverflow" | "effort">
   > {
   /** Model catalog id (see @kumiwork/core MODEL_CATALOG). */
   model?: string;
@@ -99,6 +102,7 @@ export async function updateAgent(agentId: number, patch: AgentPatch): Promise<A
     values.runtimeKind = runtimeForModel(values.model);
   }
   if (patch.onContextOverflow !== undefined) values.onContextOverflow = patch.onContextOverflow;
+  if ("effort" in patch) values.effort = patch.effort ?? null;
 
   const [row] = await db.update(agents).set(values).where(eq(agents.id, agentId)).returning();
   return row ? toAgent(row) : undefined;
@@ -133,6 +137,7 @@ export async function duplicateAgent(agentId: number, targetTeamId: number): Pro
       toolPolicy: source.toolPolicy,
       connectionIds: source.connectionIds,
       onContextOverflow: source.onContextOverflow,
+      effort: source.effort ?? null,
       areaMap: source.areaMap ?? null,
       defaultCodebase: source.defaultCodebase ?? null,
     })
