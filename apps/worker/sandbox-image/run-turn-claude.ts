@@ -1,5 +1,5 @@
 import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk";
-import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition, EffortLevel } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
 import { ERROR_MARKER, EVENT_MARKER, RESULT_MARKER } from "./markers.js";
 import { REMEMBER_ACKNOWLEDGEMENT, REMEMBER_CONTENT_DESCRIPTION, REMEMBER_TOOL_DESCRIPTION } from "./remember-tool.js";
@@ -59,10 +59,17 @@ function isAgentToolResult(value: unknown): value is AgentToolResult {
   return typeof value === "object" && value !== null && "agentId" in value && "content" in value;
 }
 
+const EFFORT_LEVELS: readonly EffortLevel[] = ["low", "medium", "high", "xhigh", "max"];
+
+function effortFromEnv(value: string | undefined): EffortLevel | undefined {
+  return EFFORT_LEVELS.find((level) => level === value);
+}
+
 async function main(): Promise<void> {
   const systemPrompt = process.env.SYSTEM_PROMPT ?? "";
   const userText = process.env.USER_TEXT ?? "";
   const model = process.env.MODEL_ID;
+  const effort = effortFromEnv(process.env.EFFORT);
   const resume = process.env.RESUME_SESSION_REF || undefined;
   const skillNamesEnv = process.env.SKILL_NAMES;
   const skills = skillNamesEnv ? skillNamesEnv.split(",").filter(Boolean) : [];
@@ -158,6 +165,7 @@ async function main(): Promise<void> {
         // answer lands. "summarized" returns a readable summary of the reasoning instead. Thinking
         // is billed identically either way; this only controls whether we can show it.
         thinking: { type: "adaptive", display: "summarized" },
+        ...(effort ? { effort } : {}),
         ...(outputFormat ? { outputFormat } : {}),
       },
     })) {

@@ -1,4 +1,4 @@
-import type { ModelSpec, RuntimeKind } from "@kumiwork/core";
+import type { EffortLevel, ModelSpec, RuntimeKind } from "@kumiwork/core";
 import type { SandboxProvider } from "../sandbox/types";
 
 export interface AgentTurnResult {
@@ -58,6 +58,7 @@ export interface RuntimeCapabilities {
 export interface RunInput {
   systemPrompt: string;
   model: ModelSpec;
+  effort?: EffortLevel;
   userText: string;
   agentName: string;
   resumeSessionRef?: string;

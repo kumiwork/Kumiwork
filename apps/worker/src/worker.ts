@@ -716,6 +716,7 @@ const runWorker = new Worker<RunJobData>(
                   {
                     systemPrompt,
                     model: attemptModel!,
+                    effort: agent.effort,
                     userText: (triggeringMessage?.content ?? "") + issueContext + prFeedbackContext,
                     agentName: agent.name,
                     resumeSessionRef,

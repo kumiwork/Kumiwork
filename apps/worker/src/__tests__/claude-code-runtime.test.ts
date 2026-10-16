@@ -151,6 +151,26 @@ describe("claudeCodeRuntime", () => {
     expect(execCalls[0].env?.AGENT_TURN_KIND).toBeUndefined();
   });
 
+  it("passes effort to the sandbox as EFFORT when set", async () => {
+    const { sandboxProvider, execCalls } = fakeSandbox([
+      { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
+    ]);
+
+    await claudeCodeRuntime.runTurn({ ...baseInput(), effort: "low" }, { sandboxProvider, sandboxId: "sandbox-1" });
+
+    expect(execCalls[0].env?.EFFORT).toBe("low");
+  });
+
+  it("does not set EFFORT when effort is omitted, so the model default applies", async () => {
+    const { sandboxProvider, execCalls } = fakeSandbox([
+      { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
+    ]);
+
+    await claudeCodeRuntime.runTurn(baseInput(), { sandboxProvider, sandboxId: "sandbox-1" });
+
+    expect(execCalls[0].env?.EFFORT).toBeUndefined();
+  });
+
   it("sets a fixed git identity from the agent's name for a normal turn", async () => {
     const { sandboxProvider, execCalls } = fakeSandbox([
       { stream: "stdout", data: `__RESULT__${JSON.stringify({ text: "Hi", providerSessionRef: "ref-1" })}\n` },
