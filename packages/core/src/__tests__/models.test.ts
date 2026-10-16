@@ -168,8 +168,18 @@ describe("catalog pricing", () => {
       cacheReadPerMTok: 0.01,
       cacheWritePerMTok: 0.125,
     });
-    expect(getCatalogEntry("claude-sonnet-5-5")?.pricing?.outputPerMTok).toBe(10);
-    expect(getCatalogEntry("claude-opus-5-5")?.pricing?.outputPerMTok).toBe(20);
+    expect(getCatalogEntry("claude-sonnet-5-5")?.pricing).toEqual({
+      inputPerMTok: 2,
+      outputPerMTok: 10,
+      cacheReadPerMTok: 0.1,
+      cacheWritePerMTok: 2.5,
+    });
+    expect(getCatalogEntry("claude-opus-5-5")?.pricing).toEqual({
+      inputPerMTok: 4,
+      outputPerMTok: 20,
+      cacheReadPerMTok: 0.2,
+      cacheWritePerMTok: 5,
+    });
   });
 });
 
