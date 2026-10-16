@@ -107,6 +107,14 @@ export interface ModelSpec {
 
 export type OverflowPolicy = "fallback" | "fail_fast";
 
+export const EFFORT_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
+
+export type EffortLevel = (typeof EFFORT_LEVELS)[number];
+
+export function isEffortLevel(value: unknown): value is EffortLevel {
+  return typeof value === "string" && (EFFORT_LEVELS as readonly string[]).includes(value);
+}
+
 export type ToolDecision = "allow" | "deny";
 
 export interface ToolPolicy {
@@ -128,6 +136,7 @@ export interface Agent {
   toolPolicy: ToolPolicy;
   connectionIds: ID[];
   onContextOverflow: OverflowPolicy;
+  effort?: EffortLevel;
   // Intentionally unwired for alpha: no editing UI and nothing reads this yet.
   areaMap?: Record<string, string>;
   defaultCodebase?: string;
