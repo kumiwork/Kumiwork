@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAgent, listAgents } from "@kumiwork/db";
-import { isValidModelId, isValidOverflowPolicy } from "@kumiwork/core";
+import { isEffortLevel, isValidModelId, isValidOverflowPolicy } from "@kumiwork/core";
 import { enqueueRepoMapWarmJob } from "@kumiwork/queue";
 import { requireAuthContext } from "@/server/auth";
 import { createLogger } from "@kumiwork/logger";
@@ -22,6 +22,9 @@ export async function POST(request: Request) {
   }
   if (body.onContextOverflow !== undefined && !isValidOverflowPolicy(body.onContextOverflow)) {
     return NextResponse.json({ error: "Invalid onContextOverflow value" }, { status: 400 });
+  }
+  if (body.effort !== undefined && body.effort !== null && !isEffortLevel(body.effort)) {
+    return NextResponse.json({ error: "Invalid effort value" }, { status: 400 });
   }
   const agent = await createAgent(ctx.orgId, body);
   if (agent.defaultCodebase) {
