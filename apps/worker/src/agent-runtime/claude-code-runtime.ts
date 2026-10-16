@@ -72,6 +72,7 @@ class ClaudeCodeRuntime implements AgentRuntime {
       ...agentGitIdentityEnv(input.agentName),
       ...(input.modelEndpoint ? claudeModelEnv(input.modelEndpoint) : {}),
     };
+    if (input.effort) env.EFFORT = input.effort;
     if (input.resumeSessionRef) env.RESUME_SESSION_REF = input.resumeSessionRef;
     if (input.skillNames && input.skillNames.length > 0) env.SKILL_NAMES = input.skillNames.join(",");
     if (input.outputSchema) env.OUTPUT_SCHEMA = JSON.stringify(input.outputSchema);
