@@ -43,4 +43,9 @@ describe("explicitModelSelector", () => {
       explicitModelSelector.select({ agent: lowAgent, task: { model: taskModel } as Task }),
     ).resolves.toEqual({ model: taskModel, effort: "low", reason: "task_override" });
   });
+
+  it("omits the effort key when the agent has no effort", async () => {
+    const result = await explicitModelSelector.select({ agent });
+    expect(result).not.toHaveProperty("effort");
+  });
 });
