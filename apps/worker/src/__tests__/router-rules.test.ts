@@ -37,4 +37,15 @@ describe("rulesGuess", () => {
   ] as const)("keeps the boundary: %s", (_name, overrides, reason) => {
     expect(rulesGuess(features(overrides)).reason).toBe(reason);
   });
+
+  it.each([
+    ["a PR review without a codebase", { isPrReview: true, hasCodebase: false }, "claude-sonnet-5-5", "medium", "pr_review"],
+    ["an issue link without a codebase", { isIssueLink: true, hasCodebase: false }, "claude-haiku-5-5", "medium", "no_codebase"],
+    ["a PR review that also links an issue", { isPrReview: true, isIssueLink: true }, "claude-sonnet-5-5", "medium", "pr_review"],
+    ["a short issue link", { isIssueLink: true, descriptionChars: 100, criteriaCount: 0 }, "claude-sonnet-5-5", "medium", "issue_link"],
+    ["a long issue link", { isIssueLink: true, descriptionChars: 3500 }, "claude-sonnet-5-5", "medium", "issue_link"],
+    ["a short description with many criteria", { descriptionChars: 100, criteriaCount: 8 }, "claude-opus-5-5", "high", "long_task"],
+  ] as const)("keeps the rule order for %s", (_name, overrides, modelId, effort, reason) => {
+    expect(rulesGuess(features(overrides))).toEqual({ modelId, effort, reason });
+  });
 });

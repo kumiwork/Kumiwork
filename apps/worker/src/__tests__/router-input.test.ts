@@ -90,4 +90,52 @@ describe("buildRouterInput", () => {
       hasCodebase: false,
     });
   });
+
+  it("cuts the description to 4000 characters", () => {
+    const input = buildRouterInput({ agent, task: task({ description: "x".repeat(4500) }) });
+    expect(input.description).toHaveLength(4000);
+  });
+
+  it("cuts a long title to 500 characters", () => {
+    const input = buildRouterInput({ agent, task: task({ title: "t".repeat(600) }) });
+    expect(input.title).toHaveLength(500);
+  });
+
+  it("cuts a long chat message to 4000 characters", () => {
+    const message = { content: "m".repeat(4500) } as ChatMessage;
+    const input = buildRouterInput({ agent, triggeringMessage: message });
+    expect(input.message).toHaveLength(4000);
+  });
+
+  it("gives an empty message for a chat session without a triggering message", () => {
+    const input = buildRouterInput({ agent });
+    expect(input.message).toBe("");
+    expect(input.features.kind).toBe("chat");
+  });
+
+  it("cuts the criterion that straddles the 2000 character cap", () => {
+    const criteria = [1500, 1500, 1500].map((length) => ({ text: "c".repeat(length), done: false }));
+    const input = buildRouterInput({ agent, task: task({ acceptanceCriteria: criteria }) });
+    expect(input.criteria.map((text) => text.length)).toEqual([1500, 500]);
+    expect(input.features.criteriaCount).toBe(3);
+  });
+
+  it("drops criteria that start after the 2000 character cap", () => {
+    const criteria = [1000, 1000, 1000, 1000].map((length) => ({ text: "c".repeat(length), done: false }));
+    const input = buildRouterInput({ agent, task: task({ acceptanceCriteria: criteria }) });
+    expect(input.criteria.map((text) => text.length)).toEqual([1000, 1000]);
+    expect(input.features.criteriaCount).toBe(4);
+  });
+
+  it("finds a PR link placed after the sent part of the description", () => {
+    const description = `${"x".repeat(4000)} https://github.com/acme/web/pull/12`;
+    const input = buildRouterInput({ agent, task: task({ description }) });
+    expect(input.description).toHaveLength(4000);
+    expect(input.features).toMatchObject({ isPrReview: true, isIssueLink: false });
+  });
+
+  it("does not mark a PR link as an issue link", () => {
+    const input = buildRouterInput({ agent, task: task({ description: "https://github.com/acme/web/pull/12" }) });
+    expect(input.features).toMatchObject({ isPrReview: true, isIssueLink: false });
+  });
 });
