@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import type { Agent, ChatMessage, Connection, OrgMember, OverflowPolicy, Run, Session, Task, Team, TaskExternalRef } from "@kumiwork/core";
+import type { Agent, ChatMessage, Connection, EffortLevel, OrgMember, OverflowPolicy, Run, Session, Task, Team, TaskExternalRef } from "@kumiwork/core";
 import type { ExternalAttachment, ExternalIssue } from "@kumiwork/integrations";
 import { apiFetch } from "@/lib/api-client";
 import { useTranslation } from "@/lib/i18n/context";
@@ -41,6 +41,7 @@ interface NewAgentInput {
   /** Model catalog id (see @kumiwork/core MODEL_CATALOG). Defaults to DEFAULT_MODEL_ID. */
   model?: string;
   onContextOverflow?: OverflowPolicy;
+  effort?: EffortLevel;
   defaultCodebase?: string;
 }
 
@@ -82,6 +83,7 @@ interface AppDataContextValue extends AppDataState {
     patch: Partial<Pick<Agent, "name" | "description" | "systemPrompt" | "mode" | "areaMap" | "defaultCodebase">> & {
       model?: string;
       onContextOverflow?: OverflowPolicy;
+      effort?: EffortLevel | null;
     },
   ) => Promise<void>;
   deleteAgent: (agentId: number) => Promise<void>;
@@ -244,6 +246,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       patch: Partial<Pick<Agent, "name" | "description" | "systemPrompt" | "mode" | "areaMap" | "defaultCodebase">> & {
         model?: string;
         onContextOverflow?: OverflowPolicy;
+        effort?: EffortLevel | null;
       },
     ) => {
       const agent = await apiFetch<Agent>(`/api/agents/${agentId}`, { method: "PATCH", body: JSON.stringify(patch) });

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Badge, Button, EmptyState, GroupedSelect, PageHeader, Select, Tabs, TextInput } from "@kumiwork/shared";
 import { useAppData } from "@/lib/app-data/context";
 import { useTranslation } from "@/lib/i18n/context";
-import type { Agent, OverflowPolicy, Team } from "@kumiwork/core";
-import { DEFAULT_MODEL_ID } from "@kumiwork/core";
+import type { Agent, EffortLevel, OverflowPolicy, Team } from "@kumiwork/core";
+import { DEFAULT_MODEL_ID, EFFORT_LEVELS } from "@kumiwork/core";
 import type { RepoOption } from "@kumiwork/scm";
 import { parseSharedContext, serializeSharedContext } from "@/lib/shared-context";
 import { SharedContextPanels } from "@/components/SharedContextPanels";
@@ -217,6 +217,7 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
   const [mode, setMode] = useState<"manual" | "automatic">("manual");
   const [model, setModel] = useState(DEFAULT_MODEL_ID);
   const [onContextOverflow, setOnContextOverflow] = useState<OverflowPolicy>("fallback");
+  const [effort, setEffort] = useState<EffortLevel | undefined>(undefined);
   const [saving, setSaving] = useState(false);
 
   async function handleCreate(e: React.FormEvent) {
@@ -224,7 +225,7 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
     if (!name.trim()) return;
     setSaving(true);
     try {
-      const agent = await createAgent({ name: name.trim(), description: description.trim(), systemPrompt: systemPrompt.trim(), mode, teamId, model, onContextOverflow });
+      const agent = await createAgent({ name: name.trim(), description: description.trim(), systemPrompt: systemPrompt.trim(), mode, teamId, model, onContextOverflow, effort });
       onCreated(agent.id);
     } finally {
       setSaving(false);
@@ -321,6 +322,8 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
             ]}
           />
         </div>
+
+        <EffortSelect value={effort} onChange={setEffort} />
       </div>
 
       <div className="flex items-center justify-between px-5 py-3 border-t border-[var(--color-divider)]">
@@ -337,6 +340,29 @@ function NewAgentPanel({ teamId, onCreated, onCancel }: {
 
 // ── Agent detail panel ─────────────────────────────────────────────────────────
 
+function EffortSelect({
+  value,
+  onChange,
+}: {
+  value: EffortLevel | undefined;
+  onChange: (value: EffortLevel | undefined) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">{t("teamsV2.effortLabel")}</label>
+      <Select
+        value={value ?? ""}
+        onChange={(next) => onChange(next ? (next as EffortLevel) : undefined)}
+        className="w-full"
+        placeholder={t("teamsV2.effortDefault")}
+        options={EFFORT_LEVELS.map((level) => ({ key: level, value: level, label: t(`teamsV2.effortLevels.${level}`) }))}
+      />
+      <p className="mt-1.5 text-xs text-[var(--color-neutral-600)]">{t("teamsV2.effortHint")}</p>
+    </div>
+  );
+}
+
 function AgentDetailPanel({ agent }: { agent: Agent }) {
   const { t } = useTranslation();
   const { teams, updateAgent, deleteAgent, duplicateAgent, notify } = useAppData();
@@ -345,6 +371,7 @@ function AgentDetailPanel({ agent }: { agent: Agent }) {
   const [defaultCodebase, setDefaultCodebase] = useState(agent.defaultCodebase ?? "");
   const [model, setModel] = useState(agent.model.id);
   const [onContextOverflow, setOnContextOverflow] = useState(agent.onContextOverflow);
+  const [effort, setEffort] = useState(agent.effort);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -360,12 +387,13 @@ function AgentDetailPanel({ agent }: { agent: Agent }) {
     systemPrompt !== agent.systemPrompt ||
     defaultCodebase !== (agent.defaultCodebase ?? "") ||
     model !== agent.model.id ||
-    onContextOverflow !== agent.onContextOverflow;
+    onContextOverflow !== agent.onContextOverflow ||
+    effort !== agent.effort;
 
   async function handleSave() {
     setSaving(true);
     try {
-      await updateAgent(agent.id, { systemPrompt, defaultCodebase, model, onContextOverflow });
+      await updateAgent(agent.id, { systemPrompt, defaultCodebase, model, onContextOverflow, effort: effort ?? null });
     } finally {
       setSaving(false);
     }
@@ -456,6 +484,8 @@ function AgentDetailPanel({ agent }: { agent: Agent }) {
             ]}
           />
         </div>
+
+        <EffortSelect value={effort} onChange={setEffort} />
 
         <div>
           <span className="mb-1 block text-xs font-medium text-[var(--color-neutral-400)]">
