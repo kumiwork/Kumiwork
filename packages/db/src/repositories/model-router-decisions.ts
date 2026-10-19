@@ -1,4 +1,5 @@
 import { asc, eq } from "drizzle-orm";
+import type { PriceSnapshot, RouterConfidence } from "@kumiwork/core";
 import { db } from "../client";
 import { modelRouterDecisions } from "../schema";
 
@@ -12,7 +13,7 @@ export interface NewModelRouterDecision {
   modelId?: string;
   effort?: string;
   reason?: string;
-  confidence?: string;
+  confidence?: RouterConfidence;
   error?: string;
   latencyMs: number;
   routerVersion: string;
@@ -22,7 +23,7 @@ export interface NewModelRouterDecision {
   actualModelId: string;
   actualEffort?: string;
   actualEffortWasDefault: boolean;
-  prices: Record<string, number>;
+  prices: PriceSnapshot;
 }
 
 export interface ModelRouterDecision extends NewModelRouterDecision {
@@ -63,7 +64,7 @@ function toDecision(row: typeof modelRouterDecisions.$inferSelect): ModelRouterD
     modelId: row.modelId ?? undefined,
     effort: row.effort ?? undefined,
     reason: row.reason ?? undefined,
-    confidence: row.confidence ?? undefined,
+    confidence: (row.confidence as RouterConfidence | null) ?? undefined,
     error: row.error ?? undefined,
     latencyMs: row.latencyMs,
     routerVersion: row.routerVersion,
