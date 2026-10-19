@@ -254,6 +254,7 @@ Real tables today (`packages/db/src/schema.ts`):
 | `sessions` | one conversation: agent_id, title, origin, `sandbox_id`, `provider_session_ref` |
 | `messages` | one turn's user-authored input within a session |
 | `runs` | one turn of execution: status, `provider_session_ref`. A session has many runs |
+| `model_router_decisions` | shadow-mode router guesses (rules and classifier) per session, with the model and effort that really ran; not cost tracking |
 | `run_evals` | retrieval-precision eval judgments for a run (`eval-judge.ts`/`eval-runner.ts`) |
 | `events` | append-only normalized `RunEvent` stream — **the** source of truth for replaying a transcript |
 | `tasks` | a unit of work an agent runs against, with an optional `externalRef` jsonb mirroring an upstream Jira/Monday/… issue (provider-agnostic, no per-provider migration needed) |
@@ -518,8 +519,8 @@ job in order. "Host" means the worker process; "sandbox" means inside the sessio
 - **Teardown.** Task done/deleted (`sandboxTeardownWorker`) or idle past the threshold (`sandbox-reap.ts`) calls
   `destroy` (stop + remove). Dependency cache volumes are reaped separately (`dependency-cache-reap.ts`).
 
-**Model calls that don't go through a sandbox.** The eval judge (`eval-judge.ts`) and the memory retrospective
-(`memory-retrospective.ts`) call the Anthropic API from the host with `@anthropic-ai/sdk` and the platform key from
+**Model calls that don't go through a sandbox.** The eval judge (`eval-judge.ts`), the memory retrospective
+(`memory-retrospective.ts`) and the model router classifier (`router-classifier.ts`) call the Anthropic API from the host with `@anthropic-ai/sdk` and the platform key from
 the worker's environment. They bypass the proxy and its request log. Moving them behind the proxy with a
 provider-neutral call is designed separately.
 

@@ -295,6 +295,17 @@ describe("a run whose agent turn finishes within the limit", () => {
     });
   });
 
+  it("passes the agent's effort to the model router", async () => {
+    h.runTurn.mockResolvedValue({ text: "All done.", providerSessionRef: "sdk-1" } as never);
+    vi.mocked(getAgent).mockResolvedValue({ ...(await getAgent(20)), effort: "high" } as never);
+
+    await runProcessor({ data: { runId: 1 } });
+
+    expect(h.scheduleModelRouter).toHaveBeenCalledWith(
+      expect.objectContaining({ selection: { modelId: "claude-x", effort: "high", reason: "agent_default" } }),
+    );
+  });
+
   it("completes without interrupting anything", async () => {
     h.runTurn.mockResolvedValue({ text: "All done.", providerSessionRef: "sdk-1" } as never);
 
