@@ -520,9 +520,9 @@ job in order. "Host" means the worker process; "sandbox" means inside the sessio
   `destroy` (stop + remove). Dependency cache volumes are reaped separately (`dependency-cache-reap.ts`).
 
 **Model calls that don't go through a sandbox.** The eval judge (`eval-judge.ts`), the memory retrospective
-(`memory-retrospective.ts`) and the model router classifier (`router-classifier.ts`) call the Anthropic API from the host with `@anthropic-ai/sdk` and the platform key from
-the worker's environment. They bypass the proxy and its request log. Moving them behind the proxy with a
-provider-neutral call is designed separately.
+(`memory-retrospective.ts`) and the model router classifier (`router-classifier.ts`) call the Anthropic API from
+the host with `@anthropic-ai/sdk` and the platform key from the worker's environment. They bypass the proxy and its
+request log. Moving them behind the proxy with a provider-neutral call is designed separately.
 
 ### Public API: a separate `apps/api`, deferred until there's a real caller
 
