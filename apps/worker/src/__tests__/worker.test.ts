@@ -12,7 +12,8 @@ const h = vi.hoisted(() => {
     exists: vi.fn(async () => true),
     resetMemory: vi.fn(),
   };
-  return { workers, sandbox };
+  const scheduleModelRouter = vi.fn(async (_context: unknown) => undefined);
+  return { workers, scheduleModelRouter, sandbox };
 });
 
 vi.mock("bullmq", () => ({
@@ -37,6 +38,7 @@ vi.mock("@kumiwork/queue", () => ({
   REPO_MAP_WARM_QUEUE_NAME: "repo-map-warm",
   EVAL_QUEUE_NAME: "evals",
   MEMORY_RETROSPECTIVE_QUEUE_NAME: "memory-retrospective",
+  MODEL_ROUTER_QUEUE_NAME: "model-router",
   TEAM_CONTEXT_INGEST_QUEUE_NAME: "team-context-ingest",
   TASK_CONTEXT_INGEST_QUEUE_NAME: "task-context-ingest",
   queueConnection: {},
@@ -148,6 +150,10 @@ vi.mock("../task-documents", () => ({ materialiseTaskDocuments: vi.fn(async () =
 vi.mock("../skills-materialize", () => ({ materialiseSkills: vi.fn(async () => []) }));
 vi.mock("../eval-runner", () => ({ processEvalJob: vi.fn() }));
 vi.mock("../memory-retrospective", () => ({ processMemoryRetrospectiveJob: vi.fn() }));
+vi.mock("../model-router-job", () => ({
+  scheduleModelRouter: h.scheduleModelRouter,
+  processModelRouterJob: vi.fn(),
+}));
 vi.mock("../context-ingest", () => ({ ingestTaskContextItem: vi.fn(), ingestTeamContextItem: vi.fn() }));
 vi.mock("../task-notify", () => ({ notifyIssueOfPullRequest: vi.fn() }));
 vi.mock("../sandbox-reap", () => ({ SANDBOX_REAP_INTERVAL_MS: 60_000, scanForIdleSandboxes: vi.fn() }));
@@ -165,6 +171,12 @@ function fakeSession(overrides: Partial<Session> = {}): Session {
     ...overrides,
   };
 }
+
+describe("model router worker", () => {
+  it("registers a worker on the model-router queue", () => {
+    expect(h.workers.some((w) => w.name === "model-router")).toBe(true);
+  });
+});
 
 describe("ensureSandbox", () => {
   beforeEach(() => {

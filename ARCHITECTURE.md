@@ -119,6 +119,12 @@ attempted when the previous run used the same sandbox and the same runtime (`res
 ladders are per provider, so a run never switches provider mid-session. What is still missing: `RunInput` has no
 `tools`/`budget` fields and nothing enforces `ToolPolicy` (§6).
 
+The selector also returns the effort (today the agent's `effort`). Only the Claude Code runtime uses it; the Codex
+runtime ignores it. In shadow mode (`MODEL_ROUTER_MODE`, default `shadow`), the first run of each session also enqueues a
+`model-router` job. It records a rules guess and a Claude Haiku 5.5 classifier guess for model and effort in
+`model_router_decisions`, next to the model and effort the run really started with. Nothing reads these rows at run
+time; they exist to pick a router method from data before any automatic choice is switched on.
+
 ---
 
 ## 2. Data model
