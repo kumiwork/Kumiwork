@@ -880,6 +880,42 @@ export const workerJobOutcomes = pgTable(
   (table) => [index("worker_job_outcomes_org_type_created").on(table.orgId, table.jobType, table.createdAt)],
 );
 
+export const modelRouterDecisions = pgTable(
+  "model_router_decisions",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    orgId: integer("org_id")
+      .notNull()
+      .references(() => orgs.id, { onDelete: "cascade" }),
+    sessionId: integer("session_id")
+      .notNull()
+      .references(() => sessions.id, { onDelete: "cascade" }),
+    runId: integer("run_id")
+      .notNull()
+      .references(() => runs.id, { onDelete: "cascade" }),
+    method: text("method").notNull(),
+    modelId: text("model_id"),
+    effort: text("effort"),
+    reason: text("reason"),
+    confidence: text("confidence"),
+    error: text("error"),
+    latencyMs: integer("latency_ms").notNull(),
+    routerVersion: text("router_version").notNull(),
+    promptHash: text("prompt_hash"),
+    classifierModel: text("classifier_model"),
+    features: jsonb("features").$type<Record<string, unknown>>().notNull(),
+    actualModelId: text("actual_model_id").notNull(),
+    actualEffort: text("actual_effort"),
+    actualEffortWasDefault: boolean("actual_effort_was_default").notNull(),
+    prices: jsonb("prices").$type<Record<string, number>>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("model_router_decisions_session_method").on(table.sessionId, table.method),
+    index("model_router_decisions_org_created").on(table.orgId, table.createdAt),
+  ],
+);
+
 export const CODEBASE_SETUP_COMMAND_MAX_CHARS = 4096;
 
 export const codebaseSettings = pgTable(
