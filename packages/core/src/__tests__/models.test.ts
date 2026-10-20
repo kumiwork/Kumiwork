@@ -4,6 +4,7 @@ import {
   computeCostUsd,
   DEFAULT_MODEL_ID,
   findCatalogEntryForResponseModel,
+  getCatalogEntry,
   isValidModelId,
   MODEL_CATALOG,
   nextEscalationTier,
@@ -150,5 +151,47 @@ describe("runtimeForModel", () => {
 
   it("resolves a stored spec whose id has since left the catalog by its provider", () => {
     expect(runtimeForModel({ family: "anthropic", id: "claude-retired-1", maxTokens: 8192 })).toBe("claude-code");
+  });
+});
+
+describe("catalog pricing", () => {
+  it.each(MODEL_CATALOG.map((entry) => [entry.id]))("prices %s", (id) => {
+    const pricing = getCatalogEntry(id)?.pricing;
+    expect(pricing?.inputPerMTok).toBeGreaterThan(0);
+    expect(pricing?.outputPerMTok).toBeGreaterThan(0);
+  });
+
+  it("uses the published Claude 5.5 prices", () => {
+    expect(getCatalogEntry("claude-haiku-5-5")?.pricing).toEqual({
+      inputPerMTok: 0.1,
+      outputPerMTok: 0.5,
+      cacheReadPerMTok: 0.01,
+      cacheWritePerMTok: 0.125,
+    });
+    expect(getCatalogEntry("claude-sonnet-5-5")?.pricing).toEqual({
+      inputPerMTok: 2,
+      outputPerMTok: 10,
+      cacheReadPerMTok: 0.1,
+      cacheWritePerMTok: 2.5,
+    });
+    expect(getCatalogEntry("claude-opus-5-5")?.pricing).toEqual({
+      inputPerMTok: 4,
+      outputPerMTok: 20,
+      cacheReadPerMTok: 0.2,
+      cacheWritePerMTok: 5,
+    });
+  });
+});
+
+describe("default effort", () => {
+  it("records the API default effort for the router candidates", () => {
+    expect(getCatalogEntry("claude-haiku-5-5")?.defaultEffort).toBe("medium");
+    expect(getCatalogEntry("claude-sonnet-5-5")?.defaultEffort).toBe("high");
+    expect(getCatalogEntry("claude-opus-5-5")?.defaultEffort).toBe("medium");
+  });
+
+  it("leaves models without an effort parameter unset", () => {
+    expect(getCatalogEntry("claude-haiku-4-5")?.defaultEffort).toBeUndefined();
+    expect(getCatalogEntry("gpt-6-luna")?.defaultEffort).toBeUndefined();
   });
 });

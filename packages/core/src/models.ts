@@ -1,4 +1,4 @@
-import type { ModelProvider, ModelSpec, OverflowPolicy, RuntimeKind } from "./domain";
+import type { EffortLevel, ModelProvider, ModelSpec, OverflowPolicy, RuntimeKind } from "./domain";
 
 export interface ModelPricing {
   inputPerMTok: number;
@@ -12,6 +12,7 @@ export interface ModelCatalogEntry {
   label: string;
   provider: ModelProvider;
   pricing?: ModelPricing;
+  defaultEffort?: EffortLevel;
 }
 
 export interface TokenUsage {
@@ -22,16 +23,69 @@ export interface TokenUsage {
 }
 
 export const MODEL_CATALOG: ModelCatalogEntry[] = [
-  { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", provider: "anthropic" },
-  { id: "claude-sonnet-5", label: "Claude Sonnet 5", provider: "anthropic" },
-  { id: "claude-opus-5", label: "Claude Opus 5", provider: "anthropic" },
-  { id: "claude-fable-5", label: "Claude Fable 5", provider: "anthropic" },
-  { id: "claude-haiku-5-5", label: "Claude Haiku 5.5", provider: "anthropic" },
-  { id: "claude-sonnet-5-5", label: "Claude Sonnet 5.5", provider: "anthropic" },
-  { id: "claude-opus-5-5", label: "Claude Opus 5.5", provider: "anthropic" },
-  { id: "claude-fable-5-1", label: "Claude Fable 5.1", provider: "anthropic" },
-  { id: "gpt-6-luna", label: "GPT-6 Luna", provider: "openai" },
-  { id: "gpt-6-sol", label: "GPT-6 Sol", provider: "openai" },
+  {
+    id: "claude-haiku-4-5",
+    label: "Claude Haiku 4.5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 1, outputPerMTok: 5, cacheReadPerMTok: 0.1, cacheWritePerMTok: 1.25 },
+  },
+  {
+    id: "claude-sonnet-5",
+    label: "Claude Sonnet 5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 2, outputPerMTok: 10, cacheReadPerMTok: 0.2, cacheWritePerMTok: 2.5 },
+  },
+  {
+    id: "claude-opus-5",
+    label: "Claude Opus 5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 5, outputPerMTok: 25, cacheReadPerMTok: 0.5, cacheWritePerMTok: 6.25 },
+  },
+  {
+    id: "claude-fable-5",
+    label: "Claude Fable 5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 10, outputPerMTok: 50, cacheReadPerMTok: 1, cacheWritePerMTok: 12.5 },
+  },
+  {
+    id: "claude-haiku-5-5",
+    label: "Claude Haiku 5.5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 0.1, outputPerMTok: 0.5, cacheReadPerMTok: 0.01, cacheWritePerMTok: 0.125 },
+    defaultEffort: "medium",
+  },
+  {
+    id: "claude-sonnet-5-5",
+    label: "Claude Sonnet 5.5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 2, outputPerMTok: 10, cacheReadPerMTok: 0.1, cacheWritePerMTok: 2.5 },
+    defaultEffort: "high",
+  },
+  {
+    id: "claude-opus-5-5",
+    label: "Claude Opus 5.5",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 4, outputPerMTok: 20, cacheReadPerMTok: 0.2, cacheWritePerMTok: 5 },
+    defaultEffort: "medium",
+  },
+  {
+    id: "claude-fable-5-1",
+    label: "Claude Fable 5.1",
+    provider: "anthropic",
+    pricing: { inputPerMTok: 10, outputPerMTok: 50, cacheReadPerMTok: 0.25, cacheWritePerMTok: 12.5 },
+  },
+  {
+    id: "gpt-6-luna",
+    label: "GPT-6 Luna",
+    provider: "openai",
+    pricing: { inputPerMTok: 0.1, outputPerMTok: 0.5, cacheReadPerMTok: 0.01 },
+  },
+  {
+    id: "gpt-6-sol",
+    label: "GPT-6 Sol",
+    provider: "openai",
+    pricing: { inputPerMTok: 2, outputPerMTok: 10, cacheReadPerMTok: 0.2 },
+  },
 ];
 
 export const DEFAULT_MODEL_ID = "claude-sonnet-5";
