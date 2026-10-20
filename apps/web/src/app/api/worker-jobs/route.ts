@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { listWorkerJobOutcomes, type WorkerJobStatus, type WorkerJobType } from "@kumiwork/db";
 import { requireAuthContext } from "@/server/auth";
 
-const JOB_TYPES: readonly WorkerJobType[] = ["repo_map_warm", "memory_retrospective"];
+const JOB_TYPES: readonly WorkerJobType[] = ["repo_map_warm", "memory_retrospective", "model_router"];
 const STATUSES: readonly WorkerJobStatus[] = ["completed", "skipped", "failed"];
 
 export async function GET(request: Request) {

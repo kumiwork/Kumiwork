@@ -2,7 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "../client";
 import { workerJobOutcomes } from "../schema";
 
-export type WorkerJobType = "repo_map_warm" | "memory_retrospective";
+export type WorkerJobType = "repo_map_warm" | "memory_retrospective" | "model_router";
 export type WorkerJobStatus = "completed" | "skipped" | "failed";
 
 export interface WorkerJobOutcome {

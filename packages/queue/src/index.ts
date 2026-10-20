@@ -27,6 +27,7 @@ export const MEMORY_RETROSPECTIVE_QUEUE_NAME = "memory-retrospective";
 // opposite of what Stop needs, which is to interrupt the running turn while leaving the
 // container (and the session's warm checkout) alone. See RunCancelJobData below.
 export const RUN_CANCEL_QUEUE_NAME = "run-cancel";
+export const MODEL_ROUTER_QUEUE_NAME = "model-router";
 
 export interface RunJobData {
   runId: number;
@@ -68,6 +69,13 @@ export interface MemoryRetrospectiveJobData {
   sessionId: number;
 }
 
+export interface ModelRouterJobData {
+  orgId: number;
+  sessionId: number;
+  runId: number;
+  actual: { modelId: string; effort?: string; effortWasDefault: boolean; selectionReason: string };
+}
+
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) {
   throw new Error("REDIS_URL is not set");
@@ -75,6 +83,7 @@ if (!redisUrl) {
 
 export const queueConnection = new IORedis(redisUrl, { maxRetriesPerRequest: null });
 
+const modelRouterQueue = new Queue<ModelRouterJobData>(MODEL_ROUTER_QUEUE_NAME, { connection: queueConnection });
 const runQueue = new Queue<RunJobData>(RUN_QUEUE_NAME, { connection: queueConnection });
 const sandboxTeardownQueue = new Queue<SandboxTeardownJobData>(SANDBOX_TEARDOWN_QUEUE_NAME, {
   connection: queueConnection,
@@ -182,4 +191,14 @@ export async function enqueueMemoryRetrospectiveJob(
       removeOnFail: { count: 100 },
     },
   );
+}
+
+export async function enqueueModelRouterJob(data: ModelRouterJobData): Promise<void> {
+  await modelRouterQueue.add("route-session", data, {
+    jobId: `router-${data.sessionId}`,
+    attempts: 3,
+    backoff: { type: "exponential", delay: 5000 },
+    removeOnComplete: { age: 7 * 24 * 3600 },
+    removeOnFail: { count: 100 },
+  });
 }
