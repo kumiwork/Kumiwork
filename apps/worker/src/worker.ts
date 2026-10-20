@@ -7,6 +7,7 @@ import {
   MEMORY_RETROSPECTIVE_QUEUE_NAME,
   RUN_CANCEL_QUEUE_NAME,
   RUN_QUEUE_NAME,
+  MODEL_ROUTER_QUEUE_NAME,
   REPO_MAP_WARM_QUEUE_NAME,
   SANDBOX_REAP_QUEUE_NAME,
   SANDBOX_TEARDOWN_QUEUE_NAME,
@@ -14,6 +15,7 @@ import {
   type ContextIngestJobData,
   type EvalJobData,
   type MemoryRetrospectiveJobData,
+  type ModelRouterJobData,
   type RepoMapWarmJobData,
   type RunCancelJobData,
   type RunJobData,
@@ -63,6 +65,7 @@ import { DockerCacheVolumeStore } from "./sandbox/docker-cache-volumes";
 import { DockerSandboxProvider } from "./sandbox/docker-sandbox-provider";
 import { InsufficientCreditError, PromptTooLongError } from "./agent-runtime/errors";
 import { getAgentRuntime } from "./agent-runtime/registry";
+import { processModelRouterJob, scheduleModelRouter } from "./model-router-job";
 import { explicitModelSelector } from "./model-selection";
 import { resumableSessionRef } from "./resume-candidate";
 import type { AgentTurnResult } from "./agent-runtime/types";
@@ -227,6 +230,12 @@ const runWorker = new Worker<RunJobData>(
       const triggeringMessage = run.triggeringMessageId ? await getMessage(run.triggeringMessageId) : undefined;
       const selection = await explicitModelSelector.select({ agent, task, triggeringMessage });
       const selectedModel = selection.model;
+      await scheduleModelRouter({
+        orgId: agent.orgId,
+        sessionId: session.id,
+        runId,
+        selection: { modelId: selectedModel.id, effort: selection.effort, reason: selection.reason },
+      });
       const runtime = getAgentRuntime(runtimeForModel(selectedModel));
       const caps = runtime.capabilities();
 
@@ -1141,6 +1150,18 @@ memoryRetrospectiveWorker.on("failed", (job, err) => {
   log.error("Memory retrospective job failed", { jobId: job?.id, err });
 });
 
+const modelRouterWorker = new Worker<ModelRouterJobData>(
+  MODEL_ROUTER_QUEUE_NAME,
+  async (job) => {
+    await processModelRouterJob(job.data);
+  },
+  { connection: queueConnection },
+);
+
+modelRouterWorker.on("failed", (job, err) => {
+  log.error("Model router job failed", { jobId: job?.id, err });
+});
+
 // Triggered by a document upload (apps/web's /api/teams/[teamId]/context-items route) —
 // extracts, chunks and embeds the file so PR 5's retrieval can reach it. Own queue for the
 // same reason the eval queue is its own: an upload's feedback loop is a status badge the
@@ -1192,5 +1213,6 @@ log.info("apps/worker listening", {
     TEAM_CONTEXT_INGEST_QUEUE_NAME,
     TASK_CONTEXT_INGEST_QUEUE_NAME,
     MEMORY_RETROSPECTIVE_QUEUE_NAME,
+    MODEL_ROUTER_QUEUE_NAME,
   ],
 });

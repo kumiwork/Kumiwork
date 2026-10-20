@@ -26,7 +26,8 @@ const h = vi.hoisted(() => {
     endpoint: { baseUrl: "http://host.docker.internal:8787/anthropic", token: "kumiwork-run-test" },
     revoke: revokeModelCredential,
   }));
-  return { workers, sandbox, runTurn, revokeModelCredential, issueModelCredential };
+  const scheduleModelRouter = vi.fn(async (_context: unknown) => undefined);
+  return { workers, scheduleModelRouter, sandbox, runTurn, revokeModelCredential, issueModelCredential };
 });
 
 vi.mock("bullmq", () => ({
@@ -52,6 +53,7 @@ vi.mock("@kumiwork/queue", () => ({
   REPO_MAP_WARM_QUEUE_NAME: "repo-map-warm",
   EVAL_QUEUE_NAME: "evals",
   MEMORY_RETROSPECTIVE_QUEUE_NAME: "memory-retrospective",
+  MODEL_ROUTER_QUEUE_NAME: "model-router",
   TEAM_CONTEXT_INGEST_QUEUE_NAME: "team-context-ingest",
   TASK_CONTEXT_INGEST_QUEUE_NAME: "task-context-ingest",
   queueConnection: {},
@@ -152,6 +154,10 @@ vi.mock("../task-documents", () => ({ materialiseTaskDocuments: vi.fn(async () =
 vi.mock("../skills-materialize", () => ({ materialiseSkills: vi.fn(async () => []) }));
 vi.mock("../eval-runner", () => ({ processEvalJob: vi.fn() }));
 vi.mock("../memory-retrospective", () => ({ processMemoryRetrospectiveJob: vi.fn() }));
+vi.mock("../model-router-job", () => ({
+  scheduleModelRouter: h.scheduleModelRouter,
+  processModelRouterJob: vi.fn(),
+}));
 vi.mock("../context-ingest", () => ({ ingestTaskContextItem: vi.fn(), ingestTeamContextItem: vi.fn() }));
 vi.mock("../task-notify", () => ({ notifyIssueOfPullRequest: vi.fn() }));
 vi.mock("../sandbox-reap", () => ({ SANDBOX_REAP_INTERVAL_MS: 60_000, scanForIdleSandboxes: vi.fn() }));
