@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, lt, ne, sql } from "drizzle-orm";
 import type { ModelSpec, PromptSegment, Run, RunCommitRange, RunPrompt, RunStatus } from "@kumiwork/core";
 import { db } from "../client";
 import { events, runs } from "../schema";
@@ -120,6 +120,15 @@ export async function getRunsForSession(sessionId: number): Promise<Run[]> {
     .where(eq(runs.sessionId, sessionId))
     .orderBy(desc(runs.createdAt));
   return rows.map(toRun);
+}
+
+export async function isFirstRunOfSession(sessionId: number, runId: number): Promise<boolean> {
+  const earlier = await db
+    .select({ id: runs.id })
+    .from(runs)
+    .where(and(eq(runs.sessionId, sessionId), lt(runs.id, runId)))
+    .limit(1);
+  return earlier.length === 0;
 }
 
 export async function updateRunWorkspace(
