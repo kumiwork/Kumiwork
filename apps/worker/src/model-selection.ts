@@ -1,4 +1,4 @@
-import type { Agent, ChatMessage, ModelSpec, Task } from "@kumiwork/core";
+import type { Agent, ChatMessage, EffortLevel, ModelSpec, Task } from "@kumiwork/core";
 
 export interface ModelSelectionContext {
   agent: Agent;
@@ -10,6 +10,7 @@ export type ModelSelectionReason = "task_override" | "agent_default";
 
 export interface ModelSelection {
   model: ModelSpec;
+  effort?: EffortLevel;
   reason: ModelSelectionReason;
 }
 
@@ -19,7 +20,8 @@ export interface ModelSelector {
 
 export const explicitModelSelector: ModelSelector = {
   async select({ agent, task }) {
-    if (task?.model) return { model: task.model, reason: "task_override" };
-    return { model: agent.model, reason: "agent_default" };
+    const effort = agent.effort ? { effort: agent.effort } : {};
+    if (task?.model) return { model: task.model, ...effort, reason: "task_override" };
+    return { model: agent.model, ...effort, reason: "agent_default" };
   },
 };
